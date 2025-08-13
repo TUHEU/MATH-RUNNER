@@ -1,0 +1,1 @@
+random.randint(int(unitx*100),int(x-(unitx*100))),random.randint(int(unity*100),int(y-(unity*100)))

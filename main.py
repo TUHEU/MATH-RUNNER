@@ -14,11 +14,15 @@ unity=y/1000
 #pages booleans
 menu_scrn=True
 #font
-#font1=pygame.font.Font("Fonts/1.ttf")
+# font1=pygame.font.Font("Fonts/1.TTF")
                        
 # class animation:
-#     def __init__(self,):
-        
+#     def __init__(self,eqaution="",num1=0,num2=0,sign="",ans=0):
+#         self.equation=eqaution
+#         self.num1=num1
+#         self.num2=num2
+#         self.sign=sign
+#         self.ans=ans
 
 #button class
 class button:
