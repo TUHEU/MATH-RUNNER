@@ -19,7 +19,24 @@ font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 #animation variables
 signs=['+','-','/','*']
 
-#animation                       
+
+#player
+class character:
+    def __init__(self,size,path,pos_player):
+        self.size=size
+        self.path=path
+        self.frame=pygame.image.load(path).convert_alpha()
+        self.frame=pygame.transform.scale(self.frame,(self.frame.get_width()*size[0],self.frame.get_height()*aqaaasize[1]))
+        self.pos_player=pos_player
+        self.rect=self.frame.get_rect(bottomleft=(0,0))
+
+    # def convertframe(self):
+    #     pygame
+        
+    def createanimation(self):
+        pass
+
+#equation                       
 class equationC:
     def __init__(self,eqaution="",sign="",ans=0,isactive=False,delay=0):
         self.equation=eqaution
@@ -101,12 +118,9 @@ while(True):
     mouse = pygame.mouse.get_pos() 
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
-        if event.type==pygame.QUIT:
+        if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
-    if(kpressed[pygame.K_ESCAPE]):
-        pygame.quit()
-        exit()
     screen.blit(menu,menu_rect)
     if menu:
         i=0

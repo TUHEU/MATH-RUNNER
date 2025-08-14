@@ -2,7 +2,7 @@ import pygame
 import random
 from sys import exit
 
-pygame.display.init()
+pygame.init()
 window=pygame.display.Info()
 x=window.current_w
 y=window.current_h
@@ -14,15 +14,39 @@ unity=y/1000
 #pages booleans
 menu_scrn=True
 #font
-# font1=pygame.font.Font("Fonts/1.TTF")
-                       
-# class animation:
-#     def __init__(self,eqaution="",num1=0,num2=0,sign="",ans=0):
-#         self.equation=eqaution
-#         self.num1=num1
-#         self.num2=num2
-#         self.sign=sign
-#         self.ans=ans
+font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
+
+#animation variables
+signs=['+','-','/','*']
+
+#animation                       
+class equationC:
+    def __init__(self,eqaution="",sign="",ans=0,isactive=False,delay=0):
+        self.equation=eqaution
+        self.isactive=isactive
+        self.sign=sign
+        self.ans=ans
+        self.delay=delay
+    def generate_equation(self,signs):
+        self.equation=str(random.randint(1,50))+signs[random.randint(0,3)]+str(random.randint(1,50))
+        self.ans=str(int(eval(self.equation)))
+        self.delay=0
+        self.equation=self.equation+"="+self.ans
+        return self.equation
+    def active(self,wait,dt,cur_equation,eqn_locx,eqn_locy):
+        if(self.delay<wait):
+                    equationText=font1.render(f"{cur_equation[i]}",True,"Black")
+                    #equationText=pygame.transform.rotate(equationText,random.randint(0,45))
+                    screen.blit(equationText,(eqn_locx[i],eqn_locy[i]))
+                    self.delay+=dt
+                    self.isactive=True
+        else:
+            cur_equation[i]=(equ.generate_equation(signs))
+            eqn_locx[i]=(random.randint(int(unitx*100),int(x-(unitx*200))))
+            eqn_locy[i]=(random.randint(int(unity*100),int(y-(unity*150))))
+            self.isactive=False
+        return self.isactive
+
 
 #button class
 class button:
@@ -54,34 +78,49 @@ buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),
          button("Assets\Buttons\Default\custom level.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity)),"custom level"),
          button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*150)),"exit")]
 
+#equations list
+equations=[equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC()]
 #sounds
 pygame.mixer.init()
 # pygame.mixer.music.load('Assets\Sounds\touch.mp3')
 # pygame.mixer.music.play()
 # pygame.mixer.music.set_volume(0.25)
 
-touch_sound=pygame.mixer.Sound("Assets\Sounds\\touch.mp3")
+touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
 
 #menu
 menu=pygame.image.load("Assets/Menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
+j=0
+cur_equation=["","","","","","","","","","","","","",]
+eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
+eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 while(True):
+    dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
-        if event.type==pygame.QUIT:
+        if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
-    if(kpressed[pygame.K_ESCAPE]):
-        pygame.quit()
-        exit()
     screen.blit(menu,menu_rect)
-    for button in buttons:
-        button.draw(screen)
-        button.handle_event(event,mouse)
-        if(button.handle_event(event,mouse)=="exit"):
-            pygame.quit()
-            exit()
+    if menu:
+        i=0
+        for equ in equations:
+            print(equ.isactive)
+            wait=(random.randint(400,800))
+            if not equ.active(wait,dt,cur_equation,eqn_locx,eqn_locy):
+                if(j<13):
+                    cur_equation[i]=(equ.generate_equation(signs))
+                    eqn_locx[i]=(random.randint(int(unitx*100),int(x-(unitx*100))))
+                    eqn_locy[i]=(random.randint(int(unity*100),int(y-(unity*100))))
+            i+=1
+            j+=1
+        for button in buttons:
+            button.draw(screen)
+            button.handle_event(event,mouse)
+            if(button.handle_event(event,mouse)=="exit"):
+                pygame.quit()
+                exit()
     pygame.display.update()
-    clock.tick(60)
