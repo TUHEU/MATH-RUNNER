@@ -21,9 +21,14 @@ font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 #animation variables
 signs=['+','-','/','*']
 
-#backgrounds iterator
+#backgrounds variables
+sizebk=(7000*unitx,y)
+speedbk=5*unitx
 k=0
-
+#floor variables
+l=0
+sizefl=(21000*unitx,200*unity)
+speedfl=15*unitx
 
 
 #player
@@ -36,24 +41,24 @@ k=0
 #         self.pos_player=pos_player
 #         self.rect=self.frame.get_rect(bottomleft=(0,0))
 
-#     # def convertframe(self):
-#     #     pygame
+#      def convertframe(self):
+#          pygame
         
 #     def createanimation(self):
 #         pass
 
 #class background
 class background:
-    def __init__(self,path):
+    def __init__(self,path,speed,size):
+        self.size=size
+        self.speed=speed
         self.path=path
         self.img=pygame.image.load(path).convert_alpha()
-        self.img=pygame.transform.scale(self.img,(self.img.get_width(),y))
-        self.rect=self.img.get_rect(topleft=(0,0))
+        self.img=pygame.transform.scale(self.img,(size[0],size[1]))
+        self.rect=self.img.get_rect(bottomleft=(0,y))
     def move(self):
         if(self.rect.right>=x):
-            self.rect.left-=30
-        else:
-            self.rect.left=0
+            self.rect.left-=self.speed
     def display(self):
         screen.blit(self.img,self.rect)
 
@@ -120,8 +125,11 @@ buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),
 equations=[equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC()]
 
 #background list
-backgrounds=[background("Assets/Backgrounds/1.png"),background("Assets/Backgrounds/2.png"),background("Assets/Backgrounds/3.png"),background("Assets/Backgrounds/4.png")]
-
+backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
+             background("Assets/Backgrounds/2.png",speedbk,sizebk),
+             background("Assets/Backgrounds/3.png",speedbk,sizebk),
+             background("Assets/Backgrounds/4.png",speedbk,sizebk),]
+floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
 #sounds
 pygame.mixer.init()
 # pygame.mixer.music.load('Assets\Sounds\touch.mp3')
@@ -177,12 +185,16 @@ while(True):
     if start_scrn:
           if backgrounds[k].rect.right>=x:
             backgrounds[k].move()
+            floors[l].move()
             backgrounds[k].display()
+            floors[l].display()
           else:
-              backgrounds[k].rect.topleft=(0,0)
+              backgrounds[k].rect.bottomleft=(0,y)
+              floors[l].rect.bottomleft=(0,y)
               k+=1
+              l+=1
               k%=4
-
+              l%=2
     screen.blit(testtext,(10,10))
 
     pygame.display.update()
