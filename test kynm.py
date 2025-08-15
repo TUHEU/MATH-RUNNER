@@ -137,7 +137,7 @@ backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
 floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
 
 #player animations lists
-player_runF=[Frame(framesize,"Assets/Player/run/1.png"),
+player_run=[Frame(framesize,"Assets/Player/run/1.png"),
             Frame(framesize,"Assets/Player/run/2.png"),
             Frame(framesize,"Assets/Player/run/3.png"),
             Frame(framesize,"Assets/Player/run/4.png"),
@@ -146,7 +146,7 @@ player_runF=[Frame(framesize,"Assets/Player/run/1.png"),
             Frame(framesize,"Assets/Player/run/7.png"),
             Frame(framesize,"Assets/Player/run/8.png")]    
 
-player_jumpF=[Frame(framesize,"Assets/Player/jump/1.png"),
+player_jump=[Frame(framesize,"Assets/Player/jump/1.png"),
              Frame(framesize,"Assets/Player/jump/2.png"),
              Frame(framesize,"Assets/Player/jump/3.png"),
              Frame(framesize,"Assets/Player/jump/4.png"),
@@ -156,7 +156,7 @@ player_jumpF=[Frame(framesize,"Assets/Player/jump/1.png"),
              Frame(framesize,"Assets/Player/jump/8.png"),
              Frame(framesize,"Assets/Player/jump/9.png"),]
 
-player_idleF=[Frame(framesize,"Assets/Player/idle/1.png"),
+player_idle=[Frame(framesize,"Assets/Player/idle/1.png"),
              Frame(framesize,"Assets/Player/idle/2.png"),
              Frame(framesize,"Assets/Player/idle/3.png"),
              Frame(framesize,"Assets/Player/idle/4.png"),
@@ -166,7 +166,7 @@ player_idleF=[Frame(framesize,"Assets/Player/idle/1.png"),
              Frame(framesize,"Assets/Player/idle/8.png"),
              Frame(framesize,"Assets/Player/idle/8.png")]
 
-player_shotF=[Frame(framesize,"Assets/Player/shot/1.png"),
+player_shot=[Frame(framesize,"Assets/Player/shot/1.png"),
              Frame(framesize,"Assets/Player/shot/2.png"),
              Frame(framesize,"Assets/Player/shot/3.png"),
              Frame(framesize,"Assets/Player/shot/4.png"),
@@ -180,11 +180,11 @@ player_shotF=[Frame(framesize,"Assets/Player/shot/1.png"),
              Frame(framesize,"Assets/Player/shot/12.png"),
              Frame(framesize,"Assets/Player/shot/13.png")]
 
-player_hurtF=[Frame(framesize,"Assets/Player/hurt/1.png"),
+player_hurt=[Frame(framesize,"Assets/Player/hurt/1.png"),
              Frame(framesize,"Assets/Player/hurt/2.png"),
              Frame(framesize,"Assets/Player/hurt/3.png")]
 
-player_deathF=[Frame(framesize,"Assets/Player/death/1.png"),
+player_death=[Frame(framesize,"Assets/Player/death/1.png"),
               Frame(framesize,"Assets/Player/death/2.png"),
               Frame(framesize,"Assets/Player/death/3.png"),
               Frame(framesize,"Assets/Player/death/4.png"),
@@ -192,7 +192,7 @@ player_deathF=[Frame(framesize,"Assets/Player/death/1.png"),
              
 #animation class
 class Animation:
-    def __init__(self,index=0,front=True,playersuf=player_idleF[0].frameF,playerrect=player_idleF[0].rect):
+    def __init__(self,index=0,front=True,playersuf=player_idle[0].frameF,playerrect=player_idle[0].rect):
         self.index=index
         self.front=front
         self.playersuf=playersuf
@@ -200,14 +200,23 @@ class Animation:
     def createanimaion(self):
         if(kpressed[pygame.K_d]):
             self.front=True
-            self.playerrect=player_runF[int(self.index)].rect
-            self.playersuf=player_runF[int(self.index)].frameF
+            self.playerrect=player_run[int(self.index)].rect
+            self.playersuf=player_run[int(self.index)].frameF
+            backgrounds[k].move()
+            floors[l].move()
         elif(kpressed[pygame.K_a]):
             self.front= False
-            self.playerrect=player_runF[int(self.index)].rect
-            self.playersuf=player_runF[int(self.index)].frameB
+            self.playerrect=player_run[int(self.index)].rect
+            self.playersuf=player_run[int(self.index)].frameB
+        else:
+            if(self.front):
+                self.playerrect=player_idle[int(self.index)].rect
+                self.playersuf=player_idle[int(self.index)].frameF
+            else:
+                self.playerrect=player_idle[int(self.index)].rect
+                self.playersuf=player_idle[int(self.index)].frameB
         self.index+=0.1
-        self.index%= len(player_runF)
+        self.index%= len(player_run)
 
 
 
@@ -266,8 +275,6 @@ while(True):
 #start true
     if start_scrn:
           if backgrounds[k].rect.right>=x:
-            backgrounds[k].move()
-            floors[l].move()
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
             player.createanimaion()
@@ -286,5 +293,8 @@ while(True):
               l%=2
               alpha=0
     screen.blit(testtext,(10,10))
+
+
+
 
     pygame.display.update()
