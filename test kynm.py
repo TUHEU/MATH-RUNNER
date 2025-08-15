@@ -120,6 +120,7 @@ class button:
         if self.touched and event.type == pygame.MOUSEBUTTONDOWN: 
             return self.key    
         return None
+
 #button list
 buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"start"),
          button("Assets\Buttons\Default\options.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*150)),"options"),
@@ -134,7 +135,65 @@ backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
              background("Assets/Backgrounds/2.png",speedbk,sizebk),
              background("Assets/Backgrounds/3.png",speedbk,sizebk),
              background("Assets/Backgrounds/4.png",speedbk,sizebk),]
+
+#floor list
 floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
+
+#player animations lists
+player_run=[character((0.5,0.5),"Assets/Player/run/1.png",(0,0)),
+            character((0.5,0.5),"Assets/Player/run/2.png",(0,0)),
+            character((0.5,0.5),"Assets/Player/run/3.png",(0,0)),
+            character((0.5,0.5),"Assets/Player/run/4.png",(0,0)),
+            character((0.5,0.5),"Assets/Player/run/5.png",(0,0)),
+            character((0.5,0.5),"Assets/Player/run/6.png",(0,0)),
+            character((0.5,0.5),"Assets/Player/run/7.png",(0,0)),
+            character((0.5,0.5),"Assets/Player/run/8.png",(0,0))]    
+
+player_jump=[character((0.5,0.5),"Assets/Player/jump/1.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/jump/2.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/jump/3.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/jump/4.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/jump/5.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/jump/6.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/jump/7.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/jump/8.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/jump/9.png",(0,0)),]
+
+player_idle=[character((0.5,0.5),"Assets/Player/idle/1.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/idle/2.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/idle/3.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/idle/4.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/idle/5.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/idle/6.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/idle/7.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/idle/8.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/idle/8.png",(0,0))]
+
+player_shot=[character((0.5,0.5),"Assets/Player/shot/1.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/shot/2.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/shot/3.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/shot/4.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/shot/5.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/shot/6.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/shot/7.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/shot/8.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/shot/9.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/shot/10.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/shot/11.png"(0,0)),
+             character((0.5,0.5),"Assets/Player/shot/12.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/shot/13.png",(0,0))]
+
+player_hurt=[character((0.5,0.5),"Assets/Player/hurt/1.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/hurt/2.png",(0,0)),
+             character((0.5,0.5),"Assets/Player/hurt/3.png",(0,0))]
+
+player_death=[character((0.5,0.5),"Assets/Player/death/1.png",(0,0)),
+              character((0.5,0.5),"Assets/Player/death/2.png",(0,0)),
+              character((0.5,0.5),"Assets/Player/death/3.png",(0,0)),
+              character((0.5,0.5),"Assets/Player/death/4.png",(0,0)),
+              character((0.5,0.5),"Assets/Player/death/5.png",(0,0))]
+                       
+
 #sounds
 pygame.mixer.init()
 # pygame.mixer.music.load('Assets\Sounds\touch.mp3')
