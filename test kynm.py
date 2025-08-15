@@ -23,6 +23,9 @@ fade_surface.fill((0, 0, 0))
 fade_surface.set_alpha(0)
 alpha=0
 
+#player variables
+framesize=(1.7*unitx,2.6*unity)
+
 
 #animation variables
 signs=['+','-','/','*']
@@ -40,15 +43,13 @@ speedfl=12*unitx
 
 # player animations Frame class
 class Frame:
-    def __init__(self,size,path,pos_player):
+    def __init__(self,size,path):
         self.size=size
         self.path=path
-        self.frame=pygame.image.load(path).convert_alpha()
-        self.frame=pygame.transform.scale(self.frame,(self.frame.get_width()*size[0],self.frame.get_height()*size[1]))
-        self.pos_player=pos_player
-        self.rect=self.frame.get_rect(bottomleft=(0,y-100*unity))
-    def flip(self):
-        self.frame=pygame.transform.flip(self.frame,1,0)
+        self.frameF=pygame.image.load(path).convert_alpha()
+        self.frameF=pygame.transform.scale(self.frameF,(self.frameF.get_width()*size[0],self.frameF.get_height()*size[1]))
+        self.frameB=pygame.transform.flip(self.frameF,1,0)
+        self.rect=self.frameF.get_rect(bottomleft=(0,y-200*unity))
 
 #class background
 class background:
@@ -136,96 +137,77 @@ backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
 floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
 
 #player animations lists
-player_runF=[Frame((0.5,0.5),"Assets/Player/run/1.png",(0,0)),
-            Frame((0.5,0.5),"Assets/Player/run/2.png",(0,0)),
-            Frame((0.5,0.5),"Assets/Player/run/3.png",(0,0)),
-            Frame((0.5,0.5),"Assets/Player/run/4.png",(0,0)),
-            Frame((0.5,0.5),"Assets/Player/run/5.png",(0,0)),
-            Frame((0.5,0.5),"Assets/Player/run/6.png",(0,0)),
-            Frame((0.5,0.5),"Assets/Player/run/7.png",(0,0)),
-            Frame((0.5,0.5),"Assets/Player/run/8.png",(0,0))]    
-player_runB=[]
-for fram in player_runF:
-    player_runB.append(fram)
+player_runF=[Frame(framesize,"Assets/Player/run/1.png"),
+            Frame(framesize,"Assets/Player/run/2.png"),
+            Frame(framesize,"Assets/Player/run/3.png"),
+            Frame(framesize,"Assets/Player/run/4.png"),
+            Frame(framesize,"Assets/Player/run/5.png"),
+            Frame(framesize,"Assets/Player/run/6.png"),
+            Frame(framesize,"Assets/Player/run/7.png"),
+            Frame(framesize,"Assets/Player/run/8.png")]    
 
-player_jumpF=[Frame((0.5,0.5),"Assets/Player/jump/1.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/jump/2.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/jump/3.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/jump/4.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/jump/5.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/jump/6.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/jump/7.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/jump/8.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/jump/9.png",(0,0)),]
-player_jumpB=[]
-for fram in player_jumpF:
-    player_jumpB.append(fram)
+player_jumpF=[Frame(framesize,"Assets/Player/jump/1.png"),
+             Frame(framesize,"Assets/Player/jump/2.png"),
+             Frame(framesize,"Assets/Player/jump/3.png"),
+             Frame(framesize,"Assets/Player/jump/4.png"),
+             Frame(framesize,"Assets/Player/jump/5.png"),
+             Frame(framesize,"Assets/Player/jump/6.png"),
+             Frame(framesize,"Assets/Player/jump/7.png"),
+             Frame(framesize,"Assets/Player/jump/8.png"),
+             Frame(framesize,"Assets/Player/jump/9.png"),]
 
+player_idleF=[Frame(framesize,"Assets/Player/idle/1.png"),
+             Frame(framesize,"Assets/Player/idle/2.png"),
+             Frame(framesize,"Assets/Player/idle/3.png"),
+             Frame(framesize,"Assets/Player/idle/4.png"),
+             Frame(framesize,"Assets/Player/idle/5.png"),
+             Frame(framesize,"Assets/Player/idle/6.png"),
+             Frame(framesize,"Assets/Player/idle/7.png"),
+             Frame(framesize,"Assets/Player/idle/8.png"),
+             Frame(framesize,"Assets/Player/idle/8.png")]
 
-player_idleF=[Frame((0.5,0.5),"Assets/Player/idle/1.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/idle/2.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/idle/3.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/idle/4.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/idle/5.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/idle/6.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/idle/7.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/idle/8.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/idle/8.png",(0,0))]
-player_idleB=[]
-for fram in player_idleF:
-    player_idleB.append(fram)
+player_shotF=[Frame(framesize,"Assets/Player/shot/1.png"),
+             Frame(framesize,"Assets/Player/shot/2.png"),
+             Frame(framesize,"Assets/Player/shot/3.png"),
+             Frame(framesize,"Assets/Player/shot/4.png"),
+             Frame(framesize,"Assets/Player/shot/5.png"),
+             Frame(framesize,"Assets/Player/shot/6.png"),
+             Frame(framesize,"Assets/Player/shot/7.png"),
+             Frame(framesize,"Assets/Player/shot/8.png"),
+             Frame(framesize,"Assets/Player/shot/9.png"),
+             Frame(framesize,"Assets/Player/shot/10.png"),
+             Frame(framesize,"Assets/Player/shot/11.png"),
+             Frame(framesize,"Assets/Player/shot/12.png"),
+             Frame(framesize,"Assets/Player/shot/13.png")]
 
+player_hurtF=[Frame(framesize,"Assets/Player/hurt/1.png"),
+             Frame(framesize,"Assets/Player/hurt/2.png"),
+             Frame(framesize,"Assets/Player/hurt/3.png")]
 
-
-player_shotF=[Frame((0.5,0.5),"Assets/Player/shot/1.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/shot/2.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/shot/3.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/shot/4.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/shot/5.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/shot/6.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/shot/7.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/shot/8.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/shot/9.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/shot/10.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/shot/11.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/shot/12.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/shot/13.png",(0,0))]
-player_shotB=[]
-for fram in player_runF:
-    player_shotB.append(fram)
-
-
-player_hurtF=[Frame((0.5,0.5),"Assets/Player/hurt/1.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/hurt/2.png",(0,0)),
-             Frame((0.5,0.5),"Assets/Player/hurt/3.png",(0,0))]
-player_hurtB=[]
-for fram in player_hurtF:
-    player_hurtB.append(fram)
-
-
-player_deathF=[Frame((0.5,0.5),"Assets/Player/death/1.png",(0,0)),
-              Frame((0.5,0.5),"Assets/Player/death/2.png",(0,0)),
-              Frame((0.5,0.5),"Assets/Player/death/3.png",(0,0)),
-              Frame((0.5,0.5),"Assets/Player/death/4.png",(0,0)),
-              Frame((0.5,0.5),"Assets/Player/death/5.png",(0,0))]
-player_deathB=[]
-for fram in player_deathF:
-    player_deathB.append(fram)
-
-                       
+player_deathF=[Frame(framesize,"Assets/Player/death/1.png"),
+              Frame(framesize,"Assets/Player/death/2.png"),
+              Frame(framesize,"Assets/Player/death/3.png"),
+              Frame(framesize,"Assets/Player/death/4.png"),
+              Frame(framesize,"Assets/Player/death/5.png")]
+             
 #animation class
 class Animation:
-    def __init__(self,index=0,front=True,playersuf=player_idleF[0]):
+    def __init__(self,index=0,front=True,playersuf=player_idleF[0].frameF,playerrect=player_idleF[0].rect):
         self.index=index
         self.front=front
         self.playersuf=playersuf
+        self.playerrect=playerrect
     def createanimaion(self):
         if(kpressed[pygame.K_d]):
             self.front=True
-            self.playersuf=player_runF[int(self.index)]
+            self.playerrect=player_runF[int(self.index)].rect
+            self.playersuf=player_runF[int(self.index)].frameF
         elif(kpressed[pygame.K_a]):
             self.front= False
-            self.playersuf=player_runB[int(self.index)]
+            self.playerrect=player_runF[int(self.index)].rect
+            self.playersuf=player_runF[int(self.index)].frameB
+        self.index+=0.1
+        self.index%= len(player_runF)
 
 
 
@@ -247,7 +229,7 @@ cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 
-
+player=Animation() 
 while(True):
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
@@ -288,6 +270,8 @@ while(True):
             floors[l].move()
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
+            player.createanimaion()
+            screen.blit(player.playersuf,player.playerrect)
             if (backgrounds[k].rect.right <= x + 250 * unitx):
                 fade_surface.set_alpha(alpha)
                 alpha += 5
