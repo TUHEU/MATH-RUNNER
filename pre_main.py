@@ -17,42 +17,34 @@ start_scrn=False
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 
-#Creating background swap animation (Fadeout)
-fade_surface = pygame.Surface((x,y))
-fade_surface.fill((0, 0, 0)) 
-fade_surface.set_alpha(0)
-
-alpha=0
-
 
 #animation variables
 signs=['+','-','/','*']
 
 #backgrounds variables
 sizebk=(7000*unitx,y)
-speedbk=4*unitx
+speedbk=5*unitx
 k=0
 #floor variables
 l=0
 sizefl=(21000*unitx,200*unity)
-speedfl=12*unitx
+speedfl=15*unitx
 
+#player
+# class character:
+#     def __init__(self,size,path,pos_player):
+#         self.size=size
+#         self.path=path
+#         self.frame=pygame.image.load(path).convert_alpha()
+#         self.frame=pygame.transform.scale(self.frame,(self.frame.get_width()*size[0],self.frame.get_height()*aqaaasize[1]))
+#         self.pos_player=pos_player
+#         self.rect=self.frame.get_rect(bottomleft=(0,0))
 
-# player
-class character:
-    def __init__(self,size,path,pos_player):
-        self.size=size
-        self.path=path
-        self.frame=pygame.image.load(path).convert_alpha()
-        self.frame=pygame.transform.scale(self.frame,(self.frame.get_width()*size[0],self.frame.get_height()*size[1]))
-        self.pos_player=pos_player
-        self.rect=self.frame.get_rect(bottomleft=(0,0))
-
-    def convertframe(self):
-       pass  
+#      def convertframe(self):
+#          pygame
         
-    def createanimation(self):
-        pass
+#     def createanimation(self):
+#         pass
 
 #class background
 class background:
@@ -65,7 +57,9 @@ class background:
         self.rect=self.img.get_rect(bottomleft=(0,y))
     def move(self):
         if(self.rect.right>=x):
-            self.rect.left-=self.speed   
+            self.rect.left-=self.speed
+    def display(self):
+        screen.blit(self.img,self.rect)
 
 #equation                       
 class equationC:
@@ -156,7 +150,7 @@ eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 while(True):
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"alpha= {alpha}  b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
+    testtext=font1.render(f"x= {x}  y= {y}  b {backgrounds[0].rect.right}   mou{mouse}",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
@@ -191,13 +185,8 @@ while(True):
           if backgrounds[k].rect.right>=x:
             backgrounds[k].move()
             floors[l].move()
-            screen.blit(backgrounds[k].img,backgrounds[k].rect)
-            screen.blit(floors[l].img,floors[l].rect)
-            if (backgrounds[k].rect.right <= x + 250 * unitx):
-                fade_surface.set_alpha(alpha)
-                alpha += 5
-                screen.blit(fade_surface, (0, 0))
-            
+            backgrounds[k].display()
+            floors[l].display()
           else:
               backgrounds[k].rect.bottomleft=(0,y)
               floors[l].rect.bottomleft=(0,y)
@@ -205,7 +194,6 @@ while(True):
               l+=1
               k%=4
               l%=2
-              alpha=0
     screen.blit(testtext,(10,10))
 
     pygame.display.update()
