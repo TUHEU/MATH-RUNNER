@@ -1,1 +1,1 @@
-print(|gffg )
+print("Boom Booooooooom VIRUS!!!" )
