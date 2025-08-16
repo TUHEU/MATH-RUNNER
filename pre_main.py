@@ -17,39 +17,34 @@ start_scrn=False
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 
-#Creating background swap animation (Fadeout) variables
-fade_surface = pygame.Surface((x,y))
-fade_surface.fill((0, 0, 0)) 
-fade_surface.set_alpha(0)
-alpha=0
-
-#player variables
-framesize=(1.7*unitx,2.6*unity)
-
 
 #animation variables
 signs=['+','-','/','*']
 
 #backgrounds variables
 sizebk=(7000*unitx,y)
-speedbk=4*unitx
+speedbk=5*unitx
 k=0
-
 #floor variables
 l=0
 sizefl=(21000*unitx,200*unity)
-speedfl=12*unitx
+speedfl=15*unitx
 
+#player
+# class character:
+#     def __init__(self,size,path,pos_player):
+#         self.size=size
+#         self.path=path
+#         self.frame=pygame.image.load(path).convert_alpha()
+#         self.frame=pygame.transform.scale(self.frame,(self.frame.get_width()*size[0],self.frame.get_height()*aqaaasize[1]))
+#         self.pos_player=pos_player
+#         self.rect=self.frame.get_rect(bottomleft=(0,0))
 
-# player animations Frame class
-class Frame:
-    def __init__(self,size,path):
-        self.size=size
-        self.path=path
-        self.frameF=pygame.image.load(path).convert_alpha()
-        self.frameF=pygame.transform.scale(self.frameF,(self.frameF.get_width()*size[0],self.frameF.get_height()*size[1]))
-        self.frameB=pygame.transform.flip(self.frameF,1,0)
-        self.rect=self.frameF.get_rect(bottomleft=(0,y-(200*unity)))
+#      def convertframe(self):
+#          pygame
+        
+#     def createanimation(self):
+#         pass
 
 #class background
 class background:
@@ -62,7 +57,9 @@ class background:
         self.rect=self.img.get_rect(bottomleft=(0,y))
     def move(self):
         if(self.rect.right>=x):
-            self.rect.left-=self.speed   
+            self.rect.left-=self.speed
+    def display(self):
+        screen.blit(self.img,self.rect)
 
 #equation                       
 class equationC:
@@ -117,7 +114,6 @@ class button:
         if self.touched and event.type == pygame.MOUSEBUTTONDOWN: 
             return self.key    
         return None
-
 #button list
 buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"start"),
          button("Assets\Buttons\Default\options.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*150)),"options"),
@@ -132,100 +128,7 @@ backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
              background("Assets/Backgrounds/2.png",speedbk,sizebk),
              background("Assets/Backgrounds/3.png",speedbk,sizebk),
              background("Assets/Backgrounds/4.png",speedbk,sizebk),]
-
-#floor list
 floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
-
-#player animations lists
-player_run=[Frame(framesize,"Assets/Player/run/1.png"),
-            Frame(framesize,"Assets/Player/run/2.png"),
-            Frame(framesize,"Assets/Player/run/3.png"),
-            Frame(framesize,"Assets/Player/run/4.png"),
-            Frame(framesize,"Assets/Player/run/5.png"),
-            Frame(framesize,"Assets/Player/run/6.png"),
-            Frame(framesize,"Assets/Player/run/7.png"),
-            Frame(framesize,"Assets/Player/run/8.png")]    
-
-player_jump=[Frame(framesize,"Assets/Player/jump/1.png"),
-             Frame(framesize,"Assets/Player/jump/2.png"),
-             Frame(framesize,"Assets/Player/jump/3.png"),
-             Frame(framesize,"Assets/Player/jump/4.png"),
-             Frame(framesize,"Assets/Player/jump/5.png"),
-             Frame(framesize,"Assets/Player/jump/6.png"),
-             Frame(framesize,"Assets/Player/jump/7.png"),
-             Frame(framesize,"Assets/Player/jump/8.png"),
-             Frame(framesize,"Assets/Player/jump/9.png"),]
-
-player_idle=[Frame(framesize,"Assets/Player/idle/1.png"),
-             Frame(framesize,"Assets/Player/idle/2.png"),
-             Frame(framesize,"Assets/Player/idle/3.png"),
-             Frame(framesize,"Assets/Player/idle/4.png"),
-             Frame(framesize,"Assets/Player/idle/5.png"),
-             Frame(framesize,"Assets/Player/idle/6.png"),
-             Frame(framesize,"Assets/Player/idle/7.png"),
-             Frame(framesize,"Assets/Player/idle/8.png"),
-             Frame(framesize,"Assets/Player/idle/8.png")]
-
-player_shot=[Frame(framesize,"Assets/Player/shot/1.png"),
-             Frame(framesize,"Assets/Player/shot/2.png"),
-             Frame(framesize,"Assets/Player/shot/3.png"),
-             Frame(framesize,"Assets/Player/shot/4.png"),
-             Frame(framesize,"Assets/Player/shot/5.png"),
-             Frame(framesize,"Assets/Player/shot/6.png"),
-             Frame(framesize,"Assets/Player/shot/7.png"),
-             Frame(framesize,"Assets/Player/shot/8.png"),
-             Frame(framesize,"Assets/Player/shot/9.png"),
-             Frame(framesize,"Assets/Player/shot/10.png"),
-             Frame(framesize,"Assets/Player/shot/11.png"),
-             Frame(framesize,"Assets/Player/shot/12.png"),
-             Frame(framesize,"Assets/Player/shot/13.png")]
-
-player_hurt=[Frame(framesize,"Assets/Player/hurt/1.png"),
-             Frame(framesize,"Assets/Player/hurt/2.png"),
-             Frame(framesize,"Assets/Player/hurt/3.png")]
-
-player_death=[Frame(framesize,"Assets/Player/death/1.png"),
-              Frame(framesize,"Assets/Player/death/2.png"),
-              Frame(framesize,"Assets/Player/death/3.png"),
-              Frame(framesize,"Assets/Player/death/4.png"),
-              Frame(framesize,"Assets/Player/death/5.png")]
-             
-#animation class
-class Animation:
-    def __init__(self,index=0,front=True,playersuf=player_idle[0].frameF,playerrect=player_idle[0].rect):
-        self.index=index
-        self.front=front
-        self.playersuf=playersuf
-        self.playerrect=playerrect
-    def createanimaion(self, rect):
-        if(kpressed[pygame.K_d]):
-            self.front=True
-            self.playersuf=player_run[int(self.index)].frameF
-            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
-            backgrounds[k].move()
-            floors[l].move()
-            self.playerrect.left+=4
-            self.playerrect.left%=x
-        elif(kpressed[pygame.K_a]):
-            self.front= False
-            self.playersuf=player_run[int(self.index)].frameB
-            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
-            #backgrounds[k].move()
-            #floors[l].move()
-            self.playerrect.left-=4
-            if self.playerrect.left<10*unitx:self.playerrect.left=10*unitx
-        else:
-            if(self.front):self.playersuf=player_idle[int(self.index)].frameF
-            else: self.playersuf=player_idle[int(self.index)].frameB
-            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
-        #if(kpressed[pygame.K_w]):
-
-        self.index+=0.1
-        self.index%= len(player_run)
-
-
-
-
 #sounds
 pygame.mixer.init()
 # pygame.mixer.music.load('Assets\Sounds\touch.mp3')
@@ -243,12 +146,11 @@ cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 
-player=Animation() 
+
 while(True):
-    rect=player.playerrect.bottomleft
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"player  {player.playerrect.left}  b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
+    testtext=font1.render(f"x= {x}  y= {y}  b {backgrounds[0].rect.right}   mou{mouse}",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
@@ -281,15 +183,10 @@ while(True):
 #start true
     if start_scrn:
           if backgrounds[k].rect.right>=x:
-            screen.blit(backgrounds[k].img,backgrounds[k].rect)
-            screen.blit(floors[l].img,floors[l].rect)
-            player.createanimaion(rect)
-            screen.blit(player.playersuf,player.playerrect)
-            if (backgrounds[k].rect.right <= x + 250 * unitx):
-                fade_surface.set_alpha(alpha)
-                alpha += 5
-                screen.blit(fade_surface, (0, 0))
-            
+            backgrounds[k].move()
+            floors[l].move()
+            backgrounds[k].display()
+            floors[l].display()
           else:
               backgrounds[k].rect.bottomleft=(0,y)
               floors[l].rect.bottomleft=(0,y)
@@ -297,10 +194,6 @@ while(True):
               l+=1
               k%=4
               l%=2
-              alpha=0
     screen.blit(testtext,(10,10))
-
-
-
 
     pygame.display.update()
