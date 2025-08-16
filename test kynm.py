@@ -13,28 +13,49 @@ unity=y/1000
 
 #pages booleans
 menu_scrn=True
+start_scrn=False
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
+
 
 #animation variables
 signs=['+','-','/','*']
 
+#backgrounds iterator
+k=0
+
+
 
 #player
-class character:
-    def __init__(self,size,path,pos_player):
-        self.size=size
-        self.path=path
-        self.frame=pygame.image.load(path).convert_alpha()
-        self.frame=pygame.transform.scale(self.frame,(self.frame.get_width()*size[0],self.frame.get_height()*aqaaasize[1]))
-        self.pos_player=pos_player
-        self.rect=self.frame.get_rect(bottomleft=(0,0))
+# class character:
+#     def __init__(self,size,path,pos_player):
+#         self.size=size
+#         self.path=path
+#         self.frame=pygame.image.load(path).convert_alpha()
+#         self.frame=pygame.transform.scale(self.frame,(self.frame.get_width()*size[0],self.frame.get_height()*aqaaasize[1]))
+#         self.pos_player=pos_player
+#         self.rect=self.frame.get_rect(bottomleft=(0,0))
 
-    # def convertframe(self):
-    #     pygame
+#     # def convertframe(self):
+#     #     pygame
         
-    def createanimation(self):
-        pass
+#     def createanimation(self):
+#         pass
+
+#class background
+class background:
+    def __init__(self,path):
+        self.path=path
+        self.img=pygame.image.load(path).convert_alpha()
+        self.img=pygame.transform.scale(self.img,(self.img.get_width(),y))
+        self.rect=self.img.get_rect(topleft=(0,0))
+    def move(self):
+        if(self.rect.right>=x):
+            self.rect.left-=30
+        else:
+            self.rect.left=0
+    def display(self):
+        screen.blit(self.img,self.rect)
 
 #equation                       
 class equationC:
@@ -97,6 +118,10 @@ buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),
 
 #equations list
 equations=[equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC()]
+
+#background list
+backgrounds=[background("Assets/Backgrounds/1.png"),background("Assets/Backgrounds/2.png"),background("Assets/Backgrounds/3.png"),background("Assets/Backgrounds/4.png")]
+
 #sounds
 pygame.mixer.init()
 # pygame.mixer.music.load('Assets\Sounds\touch.mp3')
@@ -113,16 +138,20 @@ j=0
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+
 while(True):
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
+    testtext=font1.render(f"x= {x}  y= {y}  b {backgrounds[0].rect.right}   mou{mouse}",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
     screen.blit(menu,menu_rect)
-    if menu:
+#menu true  
+    if menu_scrn:
         i=0
         for equ in equations:
             print(equ.isactive)
@@ -140,4 +169,20 @@ while(True):
             if(button.handle_event(event,mouse)=="exit"):
                 pygame.quit()
                 exit()
+            if(button.handle_event(event,mouse)=="start"):
+                menu_scrn=False
+                start_scrn=True
+
+#start true
+    if start_scrn:
+          if backgrounds[k].rect.right>=x:
+            backgrounds[k].move()
+            backgrounds[k].display()
+          else:
+              backgrounds[k].rect.topleft=(0,0)
+              k+=1
+              k%=4
+
+    screen.blit(testtext,(10,10))
+
     pygame.display.update()
