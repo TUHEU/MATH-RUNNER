@@ -19,6 +19,10 @@ font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 #animation variables
 signs=['+','-','/','*']
 
+# iterator
+k=0
+
+
 
 #player
 class character:
