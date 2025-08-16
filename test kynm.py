@@ -60,7 +60,7 @@ class background:
         self.img=pygame.image.load(path).convert_alpha()
         self.img=pygame.transform.scale(self.img,(size[0],size[1]))
         self.rect=self.img.get_rect(bottomleft=(0,y))
-    def move(self):
+    def move(self,front):
         if(self.rect.right>=x):
             self.rect.left-=self.speed   
 
@@ -211,7 +211,7 @@ class Animation:
             self.playersuf=player_run[int(self.index)].frameB
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
             #backgrounds[k].move()
-            #floors[l].move()
+            floors[l].move()
             self.playerrect.left-=4
             if self.playerrect.left<10*unitx:self.playerrect.left=10*unitx
         else:
@@ -235,7 +235,7 @@ pygame.mixer.init()
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
 
 #menu
-menu=pygame.image.load("Assets/Menu/menu.jpg")
+menu=pygame.image.load("Assets/Menu/t.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
 j=0
