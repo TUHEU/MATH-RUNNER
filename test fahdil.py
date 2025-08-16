@@ -277,6 +277,7 @@ while(True):
             if(button.handle_event(event,mouse)=="start"):
                 menu_scrn=False
                 start_scrn=True
+<<<<<<< HEAD
 
 #start true
     if start_scrn:
@@ -299,6 +300,32 @@ while(True):
               l%=2
               alpha=0
     screen.blit(testtext,(10,10))
+=======
+
+#start true
+    if start_scrn:
+          if backgrounds[k].rect.right>=x:
+            screen.blit(backgrounds[k].img,backgrounds[k].rect)
+            screen.blit(floors[l].img,floors[l].rect)
+            player.createanimaion(rect)
+            screen.blit(player.playersuf,player.playerrect)
+            if (backgrounds[k].rect.right <= x + 250 * unitx):
+                fade_surface.set_alpha(alpha)
+                alpha += 5
+                screen.blit(fade_surface, (0, 0))
+            
+          else:
+              backgrounds[k].rect.bottomleft=(0,y)
+              floors[l].rect.bottomleft=(0,y)
+              k+=1
+              l+=1
+              k%=4
+              l%=2
+              alpha=0
+    screen.blit(testtext,(10,10))
+
+
+>>>>>>> db47ace3ba99be6ca74ef082456bce68f04bfb7e
 
 
 
