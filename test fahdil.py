@@ -106,10 +106,10 @@ eqn_locy = [0 for _ in range(13)]
 
 # slideshow images
 slideshow_images = [
-    pygame.image.load("forest.jpg"),  # replace with actual filename
-    pygame.image.load("ocean.jpg"),   # replace with actual filename
-    pygame.image.load("lava.jpg"),    # replace with actual filename
-    pygame.image.load("forest.jpg")   # repeat first
+    pygame.image.load("Assets/Backgrounds/1.png"),  # replace with actual filename
+    pygame.image.load("Assets/Backgrounds/2.png"),   # replace with actual filename
+    pygame.image.load("Assets/Backgrounds/3.png"),    # replace with actual filename
+    pygame.image.load("Assets/Backgrounds/4.png")   # repeat first
 ]
 slideshow_images = [pygame.transform.scale(img, (x, y)) for img in slideshow_images]
 current_slide = 0

@@ -49,7 +49,7 @@ class Frame:
         self.frameF=pygame.image.load(path).convert_alpha()
         self.frameF=pygame.transform.scale(self.frameF,(self.frameF.get_width()*size[0],self.frameF.get_height()*size[1]))
         self.frameB=pygame.transform.flip(self.frameF,1,0)
-        self.rect=self.frameF.get_rect(bottomleft=(0,y-200*unity))
+        self.rect=self.frameF.get_rect(bottomleft=(0,y-(200*unity)))
 
 #class background
 class background:
@@ -197,24 +197,29 @@ class Animation:
         self.front=front
         self.playersuf=playersuf
         self.playerrect=playerrect
-    def createanimaion(self):
+    def createanimaion(self, rect):
         if(kpressed[pygame.K_d]):
             self.front=True
-            self.playerrect=player_run[int(self.index)].rect
             self.playersuf=player_run[int(self.index)].frameF
+            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
             backgrounds[k].move()
             floors[l].move()
+            self.playerrect.left+=4
+            self.playerrect.left%=x
         elif(kpressed[pygame.K_a]):
             self.front= False
-            self.playerrect=player_run[int(self.index)].rect
             self.playersuf=player_run[int(self.index)].frameB
+            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+            #backgrounds[k].move()
+            #floors[l].move()
+            self.playerrect.left-=4
+            if self.playerrect.left<10*unitx:self.playerrect.left=10*unitx
         else:
-            if(self.front):
-                self.playerrect=player_idle[int(self.index)].rect
-                self.playersuf=player_idle[int(self.index)].frameF
-            else:
-                self.playerrect=player_idle[int(self.index)].rect
-                self.playersuf=player_idle[int(self.index)].frameB
+            if(self.front):self.playersuf=player_idle[int(self.index)].frameF
+            else: self.playersuf=player_idle[int(self.index)].frameB
+            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+        #if(kpressed[pygame.K_w]):
+
         self.index+=0.1
         self.index%= len(player_run)
 
@@ -240,9 +245,10 @@ eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 player=Animation() 
 while(True):
+    rect=player.playerrect.bottomleft
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"alpha= {alpha}  b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
+    testtext=font1.render(f"player  {player.playerrect.left}  b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
@@ -277,7 +283,7 @@ while(True):
           if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
-            player.createanimaion()
+            player.createanimaion(rect)
             screen.blit(player.playersuf,player.playerrect)
             if (backgrounds[k].rect.right <= x + 250 * unitx):
                 fade_surface.set_alpha(alpha)
