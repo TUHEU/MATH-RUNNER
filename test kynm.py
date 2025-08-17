@@ -157,9 +157,10 @@ player_jump=[Frame(framesize,"Assets/Player/jump/1.png"),
              Frame(framesize,"Assets/Player/jump/4.png"),
              Frame(framesize,"Assets/Player/jump/5.png"),
              Frame(framesize,"Assets/Player/jump/6.png"),
-             Frame(framesize,"Assets/Player/jump/7.png"),
-             Frame(framesize,"Assets/Player/jump/8.png"),
-             Frame(framesize,"Assets/Player/jump/9.png"),]
+            #  Frame(framesize,"Assets/Player/jump/7.png"),
+            #  Frame(framesize,"Assets/Player/jump/8.png"),
+            #  Frame(framesize,"Assets/Player/jump/9.png"),
+            ]
 
 player_idle=[Frame(framesize,"Assets/Player/idle/1.png"),
              Frame(framesize,"Assets/Player/idle/2.png"),
@@ -223,16 +224,20 @@ class Animation:
             else: self.playersuf=player_idle[int(self.index)].frameB
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
         if(kpressed[pygame.K_w] and onground):
-            if self.front:self.playersuf=player_jump[int(self.index)].frameF
-            else:self.playersuf=player_jump[int(self.index)].frameB
-            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+            # if self.front:self.playersuf=player_jump[int(self.index)].frameF
+            # else:self.playersuf=player_jump[int(self.index)].frameB
+            #self.playerrect=self.playersuf.get_rect(bottomleft=rect)
             gravity=-400*unity
+            self.index=0
+            onground=False
         if(not onground):
-            if self.front:
-                self.playersuf=player_jump[int(self.index)].frameF
-            else:
-                self.playersuf=player_jump[int(self.index)].frameB
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+            if self.front:
+                if self.index>=4:self.playersuf=player_jump[2].frameF
+                else:self.playersuf=player_jump[int(self.index)].frameF
+            else:
+                if self.index>=4:self.playersuf=player_jump[2].frameB
+                else:self.playersuf=player_jump[int(self.index)].frameB
         if(self.playerrect.bottom>ground):self.playerrect.bottom=ground
         #if(self.playerrect.bottom):
         self.index+=0.1
