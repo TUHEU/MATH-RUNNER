@@ -40,6 +40,10 @@ l=0
 sizefl=(21000*unitx,200*unity)
 speedfl=12*unitx
 
+#animation variables
+gravity=0
+ground=y-(200*unity)
+onground=True
 
 # player animations Frame class
 class Frame:
@@ -49,7 +53,7 @@ class Frame:
         self.frameF=pygame.image.load(path).convert_alpha()
         self.frameF=pygame.transform.scale(self.frameF,(self.frameF.get_width()*size[0],self.frameF.get_height()*size[1]))
         self.frameB=pygame.transform.flip(self.frameF,1,0)
-        self.rect=self.frameF.get_rect(bottomleft=(0,y-(200*unity)))
+        self.rect=self.frameF.get_rect(bottomleft=(0,ground))
 
 #class background
 class background:
@@ -61,8 +65,9 @@ class background:
         self.img=pygame.transform.scale(self.img,(size[0],size[1]))
         self.rect=self.img.get_rect(bottomleft=(0,y))
     def move(self,front):
-        if(self.rect.right>=x):
-            self.rect.left-=self.speed   
+        #if(self.rect.right>=x):
+        if front :self.rect.left-=self.speed   
+        else: self.rect.left+=self.speed
 
 #equation                       
 class equationC:
@@ -197,32 +202,43 @@ class Animation:
         self.front=front
         self.playersuf=playersuf
         self.playerrect=playerrect
-    def createanimaion(self, rect):
-        if(kpressed[pygame.K_d]):
+    def createanimaion(self, rect,gravity,onground):
+        if(kpressed[pygame.K_d] ):
             self.front=True
             self.playersuf=player_run[int(self.index)].frameF
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
-            backgrounds[k].move()
-            floors[l].move()
-            self.playerrect.left+=4
-            self.playerrect.left%=x
+            backgrounds[k].move(True)
+            floors[l].move(True)
+            if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=4
         elif(kpressed[pygame.K_a]):
             self.front= False
             self.playersuf=player_run[int(self.index)].frameB
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
-            #backgrounds[k].move()
-            floors[l].move()
-            self.playerrect.left-=4
-            if self.playerrect.left<10*unitx:self.playerrect.left=10*unitx
+            if self.playerrect.left>x-980*unitx:
+                backgrounds[k].move(False)
+                floors[l].move(False)
+                self.playerrect.left-=4
         else:
             if(self.front):self.playersuf=player_idle[int(self.index)].frameF
             else: self.playersuf=player_idle[int(self.index)].frameB
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
-        #if(kpressed[pygame.K_w]):
-
+        if(kpressed[pygame.K_w] and onground):
+            if self.front:self.playersuf=player_jump[int(self.index)].frameF
+            else:self.playersuf=player_jump[int(self.index)].frameB
+            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+            gravity=-400*unity
+        if(not onground):
+            if self.front:
+                self.playersuf=player_jump[int(self.index)].frameF
+            else:
+                self.playersuf=player_jump[int(self.index)].frameB
+            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+        if(self.playerrect.bottom>ground):self.playerrect.bottom=ground
+        #if(self.playerrect.bottom):
         self.index+=0.1
         self.index%= len(player_run)
-
+        gravity+=10*unity
+        self.playerrect.bottom+=gravity
 
 
 
@@ -235,20 +251,19 @@ pygame.mixer.init()
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
 
 #menu
-menu=pygame.image.load("Assets/Menu/t.jpg")
+menu=pygame.image.load("Assets/Menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
 j=0
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
-
 player=Animation() 
 while(True):
     rect=player.playerrect.bottomleft
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"player  {player.playerrect.left}  b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
+    testtext=font1.render(f"ply  {gravity}  b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
@@ -277,13 +292,14 @@ while(True):
             if(button.handle_event(event,mouse)=="start"):
                 menu_scrn=False
                 start_scrn=True
-
+    if(player.playerrect.bottom<ground):onground=False
+    else:onground=True
 #start true
     if start_scrn:
           if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
-            player.createanimaion(rect)
+            player.createanimaion(rect,gravity,onground)
             screen.blit(player.playersuf,player.playerrect)
             if (backgrounds[k].rect.right <= x + 250 * unitx):
                 fade_surface.set_alpha(alpha)
@@ -298,6 +314,7 @@ while(True):
               k%=4
               l%=2
               alpha=0
+              player.playerrect.left=10*unitx
     screen.blit(testtext,(10,10))
 
 
