@@ -197,7 +197,11 @@ player_death=[Frame(framesize,"Assets/Player/death/1.png"),
               Frame(framesize,"Assets/Player/death/3.png"),
               Frame(framesize,"Assets/Player/death/4.png"),
               Frame(framesize,"Assets/Player/death/5.png")]
-             
+
+player_knee=[Frame(framesize,"Assets/Player/knee/1.png"),
+             Frame(framesize,"Assets/Player/knee/2.png")]        
+
+
 #animation class
 class Animation:
     def __init__(self,index=0,front=True,playersuf=player_idle[0].frameF,playerrect=player_idle[0].rect):
@@ -207,6 +211,7 @@ class Animation:
         self.playerrect=playerrect
         self.vel_y = 0
     def createanimaion(self, rect,onground,kpressed):
+
         if(kpressed[pygame.K_d] ):
             self.front=True
             self.playersuf=player_run[int(self.index)].frameF
@@ -214,6 +219,7 @@ class Animation:
             backgrounds[k].move(True)
             floors[l].move(True)
             if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5
+
         elif(kpressed[pygame.K_a]):
             self.front= False
             self.playersuf=player_run[int(self.index)].frameB
@@ -222,16 +228,25 @@ class Animation:
                 backgrounds[k].move(False)
                 floors[l].move(False)
                 self.playerrect.left-=5
+
+        elif(kpressed[pygame.K_s]):
+            self.index-=.02
+            self.index%=len(player_knee)
+            if(self.front):self.playersuf=player_knee[int(self.index)].frameF
+            else:self.playersuf=player_knee[int(self.index)].frameB
+            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+
         elif(onground):
             if(self.front):self.playersuf=player_idle[int(self.index)].frameF
             else: self.playersuf=player_idle[int(self.index)].frameB
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+            
         if(kpressed[pygame.K_w] and onground):
             self.vel_y=jump_strength
             self.index=0
             onground=False
             self.playerrect=player_jump[1].frameF.get_rect(bottomleft=rect)
-        
+
         self.vel_y+=gravity
         self.playerrect.bottom+=self.vel_y
 
