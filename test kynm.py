@@ -17,6 +17,10 @@ start_scrn=False
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 
+player_vel_y = 0  
+gravity = 1 * unity  
+jump_strength = -20 * unity
+
 #Creating background swap animation (Fadeout) variables
 fade_surface = pygame.Surface((x,y))
 fade_surface.fill((0, 0, 0)) 
@@ -41,7 +45,6 @@ sizefl=(21000*unitx,200*unity)
 speedfl=12*unitx
 
 #animation variables
-gravity=0
 ground=y-(200*unity)
 onground=True
 
@@ -157,9 +160,9 @@ player_jump=[Frame(framesize,"Assets/Player/jump/1.png"),
              Frame(framesize,"Assets/Player/jump/4.png"),
              Frame(framesize,"Assets/Player/jump/5.png"),
              Frame(framesize,"Assets/Player/jump/6.png"),
-            #  Frame(framesize,"Assets/Player/jump/7.png"),
-            #  Frame(framesize,"Assets/Player/jump/8.png"),
-            #  Frame(framesize,"Assets/Player/jump/9.png"),
+             Frame(framesize,"Assets/Player/jump/7.png"),
+             Frame(framesize,"Assets/Player/jump/8.png"),
+             Frame(framesize,"Assets/Player/jump/9.png"),
             ]
 
 player_idle=[Frame(framesize,"Assets/Player/idle/1.png"),
@@ -203,14 +206,15 @@ class Animation:
         self.front=front
         self.playersuf=playersuf
         self.playerrect=playerrect
-    def createanimaion(self, rect,gravity,onground):
+        self.vel_y = 0
+    def createanimaion(self, rect,onground,kpressed):
         if(kpressed[pygame.K_d] ):
             self.front=True
             self.playersuf=player_run[int(self.index)].frameF
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
             backgrounds[k].move(True)
             floors[l].move(True)
-            if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=4
+            if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=6
         elif(kpressed[pygame.K_a]):
             self.front= False
             self.playersuf=player_run[int(self.index)].frameB
@@ -218,33 +222,42 @@ class Animation:
             if self.playerrect.left>x-980*unitx:
                 backgrounds[k].move(False)
                 floors[l].move(False)
-                self.playerrect.left-=4
+                self.playerrect.left-=6
         else:
             if(self.front):self.playersuf=player_idle[int(self.index)].frameF
             else: self.playersuf=player_idle[int(self.index)].frameB
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
         if(kpressed[pygame.K_w] and onground):
-            # if self.front:self.playersuf=player_jump[int(self.index)].frameF
-            # else:self.playersuf=player_jump[int(self.index)].frameB
-            #self.playerrect=self.playersuf.get_rect(bottomleft=rect)
-            gravity=-400*unity
+            self.vel_y=jump_strength
             self.index=0
             onground=False
-        if(not onground):
-            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+        # if(not onground):
+        #     self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+        #     if self.front:
+        #         if self.index>=4:self.playersuf=player_jump[2].frameF
+        #         else:self.playersuf=player_jump[int(self.index)].frameF
+        #     else:
+        #         if self.index>=4:self.playersuf=player_jump[2].frameB
+        #         else:self.playersuf=player_jump[int(self.index)].frameB
+
+        self.vel_y+=gravity
+        self.playerrect.bottom+=self.vel_y
+
+        if(self.playerrect.bottom>=ground):
+            self.playerrect.bottom=ground
+            self.vel_y = 0
+            onground = True
+
+        if not onground:
+            self.index = min(int(abs(self.vel_y) / 5), len(player_jump)-1)
             if self.front:
-                if self.index>=4:self.playersuf=player_jump[2].frameF
-                else:self.playersuf=player_jump[int(self.index)].frameF
+                self.playersuf = player_jump[self.index].frameF
             else:
-                if self.index>=4:self.playersuf=player_jump[2].frameB
-                else:self.playersuf=player_jump[int(self.index)].frameB
-        if(self.playerrect.bottom>ground):self.playerrect.bottom=ground
-        #if(self.playerrect.bottom):
+                self.playersuf = player_jump[self.index].frameB
+        
         self.index+=0.1
         self.index%= len(player_run)
-        gravity+=10*unity
-        self.playerrect.bottom+=gravity
-
+        return onground
 
 
 #sounds
@@ -304,7 +317,7 @@ while(True):
           if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
-            player.createanimaion(rect,gravity,onground)
+            onground=player.createanimaion(rect,onground,kpressed)
             screen.blit(player.playersuf,player.playerrect)
             if (backgrounds[k].rect.right <= x + 250 * unitx):
                 fade_surface.set_alpha(alpha)
@@ -321,7 +334,10 @@ while(True):
               alpha=0
               player.playerrect.left=10*unitx
     screen.blit(testtext,(10,10))
-
+    # if(player.playerrect.bottom>=ground):
+    #     player.playerrect.bottom=ground
+    #     gravity = 0
+    #     onground = True
 
 
 
