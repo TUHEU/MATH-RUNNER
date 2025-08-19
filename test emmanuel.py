@@ -82,6 +82,7 @@ class Background:
     def draw(self , screen): 
          screen.blit(self.image, self.rect) 
          
+         
 backgrounds = Background("Assets/background/1.png")         
               
 #button list
