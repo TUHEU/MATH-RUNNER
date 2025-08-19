@@ -106,7 +106,6 @@ threading.Thread(target=emotion_loop, daemon=True).start()
 
 
 
-
 pygame.init()
 window=pygame.display.Info()
 x=window.current_w
