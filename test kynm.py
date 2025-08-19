@@ -426,13 +426,6 @@ while(True):
                 start_scrn=True
     if(player.playerrect.bottom<ground):onground=False
    
-    # testtext = font1.render(
-    # f"Emotion: {current_emotion}", 
-    # True, 
-    # "Black"
-    # )
-    # screen.blit(testtext, (10, 50))
-
 
     if start_scrn:
           if backgrounds[k].rect.right>=x:
