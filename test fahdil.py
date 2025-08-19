@@ -149,6 +149,16 @@ class button:
             return self.key
         return None
 
+
+# Player animations
+player_run = [Frame(framesize, f"Assets/Player/run/{i}.png") for i in range(1, 9)]
+player_jump = [Frame(framesize, f"Assets/Player/jump/{i}.png") for i in range(1, 9)]
+player_idle = [Frame(framesize, f"Assets/Player/idle/{i}.png") for i in range(1, 9)]
+player_shot = [Frame(framesize, f"Assets/Player/shot/{i}.png") for i in range(1, 14)]
+player_hurt = [Frame(framesize, f"Assets/Player/hurt/{i}.png") for i in range(1, 4)]
+player_death = [Frame(framesize, f"Assets/Player/death/{i}.png") for i in range(1, 6)]
+player_knee = [Frame(framesize, f"Assets/Player/knee/{i}.png") for i in range(1, 3)]
+
 # Animation class
 class Animation:
     def __init__(self, index=0, front=True, playersuf=player_idle[0].frameF, playerrect=player_idle[0].rect):
@@ -279,14 +289,6 @@ floors = [
     background("Assets/Floor/2.png", speedfl, sizefl)
 ]
 
-# Player animations
-player_run = [Frame(framesize, f"Assets/Player/run/{i}.png") for i in range(1, 9)]
-player_jump = [Frame(framesize, f"Assets/Player/jump/{i}.png") for i in range(1, 9)]
-player_idle = [Frame(framesize, f"Assets/Player/idle/{i}.png") for i in range(1, 9)]
-player_shot = [Frame(framesize, f"Assets/Player/shot/{i}.png") for i in range(1, 14)]
-player_hurt = [Frame(framesize, f"Assets/Player/hurt/{i}.png") for i in range(1, 4)]
-player_death = [Frame(framesize, f"Assets/Player/death/{i}.png") for i in range(1, 6)]
-player_knee = [Frame(framesize, f"Assets/Player/knee/{i}.png") for i in range(1, 3)]
 
 # Sounds
 pygame.mixer.init()
