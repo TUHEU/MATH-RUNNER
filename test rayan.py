@@ -141,6 +141,7 @@ backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
 #floor list
 floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
 
+
 #player animations lists
 player_run=[Frame(framesize,"Assets/Player/run/1.png"),
             Frame(framesize,"Assets/Player/run/2.png"),
