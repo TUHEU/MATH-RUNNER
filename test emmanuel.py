@@ -82,7 +82,8 @@ class Background:
     def draw(self , screen): 
          screen.blit(self.image, self.rect) 
          
-backgrounds = Background("Assets\background\1.png")         
+         
+backgrounds = Background("Assets/background/1.png")         
               
 #button list
 buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"start"),

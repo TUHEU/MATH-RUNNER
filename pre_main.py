@@ -17,6 +17,11 @@ start_scrn=False
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 
+#physics variables
+player_vel_y = 0  
+gravity = 1 * unity  
+jump_strength = -25 * unity
+
 #Creating background swap animation (Fadeout) variables
 fade_surface = pygame.Surface((x,y))
 fade_surface.fill((0, 0, 0)) 
@@ -40,7 +45,9 @@ l=0
 sizefl=(21000*unitx,200*unity)
 speedfl=12*unitx
 
-
+#animation variables
+ground=y-(200*unity)
+onground=True
 # player animations Frame class
 class Frame:
     def __init__(self,size,path):
@@ -49,7 +56,7 @@ class Frame:
         self.frameF=pygame.image.load(path).convert_alpha()
         self.frameF=pygame.transform.scale(self.frameF,(self.frameF.get_width()*size[0],self.frameF.get_height()*size[1]))
         self.frameB=pygame.transform.flip(self.frameF,1,0)
-        self.rect=self.frameF.get_rect(bottomleft=(0,y-(200*unity)))
+        self.rect=self.frameF.get_rect(bottomleft=(0,ground))
 
 #class background
 class background:
@@ -155,7 +162,7 @@ player_jump=[Frame(framesize,"Assets/Player/jump/1.png"),
              Frame(framesize,"Assets/Player/jump/6.png"),
              Frame(framesize,"Assets/Player/jump/7.png"),
              Frame(framesize,"Assets/Player/jump/8.png"),
-             Frame(framesize,"Assets/Player/jump/9.png"),]
+            ]
 
 player_idle=[Frame(framesize,"Assets/Player/idle/1.png"),
              Frame(framesize,"Assets/Player/idle/2.png"),
@@ -190,7 +197,11 @@ player_death=[Frame(framesize,"Assets/Player/death/1.png"),
               Frame(framesize,"Assets/Player/death/3.png"),
               Frame(framesize,"Assets/Player/death/4.png"),
               Frame(framesize,"Assets/Player/death/5.png")]
-             
+
+player_knee=[Frame(framesize,"Assets/Player/knee/1.png"),
+             Frame(framesize,"Assets/Player/knee/2.png")]        
+
+
 #animation class
 class Animation:
     def __init__(self,index=0,front=True,playersuf=player_idle[0].frameF,playerrect=player_idle[0].rect):
@@ -198,14 +209,17 @@ class Animation:
         self.front=front
         self.playersuf=playersuf
         self.playerrect=playerrect
-    def createanimaion(self, rect):
+        self.vel_y = 0
+    def createanimaion(self, rect,onground,kpressed):
+
         if(kpressed[pygame.K_d] ):
             self.front=True
             self.playersuf=player_run[int(self.index)].frameF
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
             backgrounds[k].move(True)
             floors[l].move(True)
-            if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=4
+            if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5
+
         elif(kpressed[pygame.K_a]):
             self.front= False
             self.playersuf=player_run[int(self.index)].frameB
@@ -213,22 +227,45 @@ class Animation:
             if self.playerrect.left>x-980*unitx:
                 backgrounds[k].move(False)
                 floors[l].move(False)
-                self.playerrect.left-=4
-        else:
+                self.playerrect.left-=5
+
+        elif(kpressed[pygame.K_s]):
+            self.index-=.02
+            self.index%=len(player_knee)
+            if(self.front):self.playersuf=player_knee[int(self.index)].frameF
+            else:self.playersuf=player_knee[int(self.index)].frameB
+            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+
+        elif(onground):
             if(self.front):self.playersuf=player_idle[int(self.index)].frameF
             else: self.playersuf=player_idle[int(self.index)].frameB
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
-        # if(kpressed[pygame.K_w]):
-        #     self.index=0
-        #     for jump in player_jump:
-        #         if self.front:self.playersuf=player_jump[int(self.index)].frameF
-        #         else:self.playersuf=player_jump[int(self.index)].frameB
-        #         self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+            
+        if(kpressed[pygame.K_w] and onground):
+            self.vel_y=jump_strength
+            self.index=0
+            onground=False
+            self.playerrect=player_jump[1].frameF.get_rect(bottomleft=rect)
 
+        self.vel_y+=gravity
+        self.playerrect.bottom+=self.vel_y
+
+        if(self.playerrect.bottom>=ground):
+            self.playerrect.bottom=ground
+            self.vel_y = 0
+            onground = True
+
+        if not onground:
+            self.index+=.07
+            if(self.index >=len(player_jump)):self.index=7
+            if self.front:
+                self.playersuf = player_jump[int(self.index)].frameF
+            else:
+                self.playersuf = player_jump[int(self.index)].frameB
+        
         self.index+=0.1
         self.index%= len(player_run)
-
-
+        return onground
 
 
 #sounds
@@ -247,13 +284,14 @@ j=0
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
-
 player=Animation() 
+q=600
 while(True):
     rect=player.playerrect.bottomleft
+    if(player.playerrect.bottom<q):q=player.playerrect.bottom
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"player  {player.playerrect.left}  b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
+    testtext=font1.render(f"ply {q}  {unity}  {gravity} groun {ground} vbot {player.playerrect.bottom} ong {onground} b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
@@ -282,13 +320,14 @@ while(True):
             if(button.handle_event(event,mouse)=="start"):
                 menu_scrn=False
                 start_scrn=True
-
+    if(player.playerrect.bottom<ground):onground=False
+    #else:onground=True
 #start true
     if start_scrn:
           if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
-            player.createanimaion(rect)
+            onground=player.createanimaion(rect,onground,kpressed)
             screen.blit(player.playersuf,player.playerrect)
             if (backgrounds[k].rect.right <= x + 250 * unitx):
                 fade_surface.set_alpha(alpha)
@@ -305,8 +344,6 @@ while(True):
               alpha=0
               player.playerrect.left=10*unitx
     screen.blit(testtext,(10,10))
-
-
 
 
     pygame.display.update()

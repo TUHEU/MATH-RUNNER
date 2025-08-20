@@ -2,6 +2,110 @@ import pygame
 import random
 from sys import exit
 
+import cv2 # OpenCV for computer vision tasks
+import numpy as np #to handle arrays and matrices
+from tensorflow.keras.models import load_model # Keras for loading the pre-trained model
+import threading # For running emotion detection in a separate thread (simultaneous execution)
+
+
+#EMOTION DETECTOR SETUP
+# Load the pre-trained emotion recognition model
+model = load_model("Assets/Emotion detection models/fer2013_mini_XCEPTION.102-0.66.hdf5", compile=False)
+
+# List of emotions in the same order as the model's output neurons
+Emotions_list = ['Angry','Disgust','Fear','Happy','Suprise','Sad','Neutral']
+
+# Initialize webcam
+cap = cv2.VideoCapture(0)
+
+# Load face detection model (Caffe-based DNN)
+net = cv2.dnn.readNetFromCaffe("Assets/Emotion detection models/dat.prototxt",
+                               "Assets/Emotion detection models/caffe.caffemodel")
+
+# Input size expected by the emotion model
+input_height, input_width = 64, 64
+
+# Contrast Limited Adaptive Histogram Equalization (CLAHE) for enhancing faces
+clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+
+# Shared variable for storing detected emotion (default = Neutral)
+current_emotion = "Neutral"
+
+
+def emotion_loop():
+        #Continuously reads frames from webcam,
+        #detects faces using Caffe DNN,
+        #preprocesses the face,
+    #and updates the global variable 'current_emotion'
+    #with the detected emotion.
+   
+    global current_emotion
+    
+    while True:
+        # Capture a frame from webcam
+        ret, frame = cap.read()
+        if not ret: 
+            continue  # If frame not captured, skip this loop
+
+        # Flip horizontally (like a mirror/selfie view)
+        frame = cv2.flip(frame, 1)
+        (h, w) = frame.shape[:2]
+
+        # Prepare input blob for face detection
+        blob = cv2.dnn.blobFromImage(
+            cv2.resize(frame, (300, 300)),  # Resize frame for face detection model
+            1.0,                            # Scale factor
+            (300, 300),                     # Target size
+            (104.0, 177.0, 123.0)           # Mean subtraction values
+        )
+        net.setInput(blob)
+        detections = net.forward()  # Run face detection
+
+        # Loop through detected faces
+        for i in range(0, detections.shape[2]):
+            confidence = detections[0, 0, i, 2]
+
+            # Only process strong detections
+            if confidence > 0.3:
+                # Get bounding box coordinates
+                box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+                (startX, startY, endX, endY) = box.astype("int")
+                
+                # Extract face region of interest (ROI)
+                face_roi = frame[startY:endY, startX:endX]
+
+                # Skip if ROI is empty
+                if face_roi.size == 0: 
+                    continue
+
+                # Convert to grayscale for emotion model
+                gray_face = cv2.cvtColor(face_roi, cv2.COLOR_BGR2GRAY)
+
+                # Apply CLAHE to improve contrast
+                enhanced_face = clahe.apply(gray_face)
+
+                # Resize to match model input size
+                resized = cv2.resize(enhanced_face, (input_width, input_height))
+
+                # Normalize pixel values (0-1) and reshape for model
+                normalized = resized.astype('float32') / 255.0
+                input_tensor = normalized.reshape(1, input_height, input_width, 1)
+
+                # Run emotion prediction
+                predictions = model.predict(input_tensor, verbose=0)
+                emotion_idx = np.argmax(predictions)   # Get emotion index
+                current_emotion = Emotions_list[emotion_idx]  # Map index to label
+
+                # Only process first detected face (break after detection)
+                break
+
+# Start emotion detection in background thread
+#Normal (non-daemon) thread → the program will wait for it to finish before exiting.
+#Daemon thread → the program will not wait for it. When the main program ends, daemon threads are killed automatically.
+threading.Thread(target=emotion_loop, daemon=True).start()
+
+
+
 pygame.init()
 window=pygame.display.Info()
 x=window.current_w
@@ -16,6 +120,11 @@ menu_scrn=True
 start_scrn=False
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
+
+#physics variables
+player_vel_y = 0  
+gravity = 1 * unity  
+jump_strength = -25 * unity
 
 #Creating background swap animation (Fadeout) variables
 fade_surface = pygame.Surface((x,y))
@@ -41,10 +150,8 @@ sizefl=(21000*unitx,200*unity)
 speedfl=12*unitx
 
 #animation variables
-gravity=0
 ground=y-(200*unity)
 onground=True
-
 # player animations Frame class
 class Frame:
     def __init__(self,size,path):
@@ -157,9 +264,8 @@ player_jump=[Frame(framesize,"Assets/Player/jump/1.png"),
              Frame(framesize,"Assets/Player/jump/4.png"),
              Frame(framesize,"Assets/Player/jump/5.png"),
              Frame(framesize,"Assets/Player/jump/6.png"),
-            #  Frame(framesize,"Assets/Player/jump/7.png"),
-            #  Frame(framesize,"Assets/Player/jump/8.png"),
-            #  Frame(framesize,"Assets/Player/jump/9.png"),
+             Frame(framesize,"Assets/Player/jump/7.png"),
+             Frame(framesize,"Assets/Player/jump/8.png"),
             ]
 
 player_idle=[Frame(framesize,"Assets/Player/idle/1.png"),
@@ -195,7 +301,11 @@ player_death=[Frame(framesize,"Assets/Player/death/1.png"),
               Frame(framesize,"Assets/Player/death/3.png"),
               Frame(framesize,"Assets/Player/death/4.png"),
               Frame(framesize,"Assets/Player/death/5.png")]
-             
+
+player_knee=[Frame(framesize,"Assets/Player/knee/1.png"),
+             Frame(framesize,"Assets/Player/knee/2.png")]        
+
+
 #animation class
 class Animation:
     def __init__(self,index=0,front=True,playersuf=player_idle[0].frameF,playerrect=player_idle[0].rect):
@@ -203,14 +313,17 @@ class Animation:
         self.front=front
         self.playersuf=playersuf
         self.playerrect=playerrect
-    def createanimaion(self, rect,gravity,onground):
+        self.vel_y = 0
+    def createanimaion(self, rect,onground,kpressed):
+
         if(kpressed[pygame.K_d] ):
             self.front=True
             self.playersuf=player_run[int(self.index)].frameF
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
             backgrounds[k].move(True)
             floors[l].move(True)
-            if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=4
+            if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5
+
         elif(kpressed[pygame.K_a]):
             self.front= False
             self.playersuf=player_run[int(self.index)].frameB
@@ -218,33 +331,45 @@ class Animation:
             if self.playerrect.left>x-980*unitx:
                 backgrounds[k].move(False)
                 floors[l].move(False)
-                self.playerrect.left-=4
-        else:
+                self.playerrect.left-=5
+
+        elif(kpressed[pygame.K_s]):
+            self.index-=.02
+            self.index%=len(player_knee)
+            if(self.front):self.playersuf=player_knee[int(self.index)].frameF
+            else:self.playersuf=player_knee[int(self.index)].frameB
+            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+
+        elif(onground):
             if(self.front):self.playersuf=player_idle[int(self.index)].frameF
             else: self.playersuf=player_idle[int(self.index)].frameB
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+            
         if(kpressed[pygame.K_w] and onground):
-            # if self.front:self.playersuf=player_jump[int(self.index)].frameF
-            # else:self.playersuf=player_jump[int(self.index)].frameB
-            #self.playerrect=self.playersuf.get_rect(bottomleft=rect)
-            gravity=-400*unity
+            self.vel_y=jump_strength
             self.index=0
             onground=False
-        if(not onground):
-            self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+            self.playerrect=player_jump[1].frameF.get_rect(bottomleft=rect)
+
+        self.vel_y+=gravity
+        self.playerrect.bottom+=self.vel_y
+
+        if(self.playerrect.bottom>=ground):
+            self.playerrect.bottom=ground
+            self.vel_y = 0
+            onground = True
+
+        if not onground:
+            self.index+=.07
+            if(self.index >=len(player_jump)):self.index=7
             if self.front:
-                if self.index>=4:self.playersuf=player_jump[2].frameF
-                else:self.playersuf=player_jump[int(self.index)].frameF
+                self.playersuf = player_jump[int(self.index)].frameF
             else:
-                if self.index>=4:self.playersuf=player_jump[2].frameB
-                else:self.playersuf=player_jump[int(self.index)].frameB
-        if(self.playerrect.bottom>ground):self.playerrect.bottom=ground
-        #if(self.playerrect.bottom):
+                self.playersuf = player_jump[int(self.index)].frameB
+        
         self.index+=0.1
         self.index%= len(player_run)
-        gravity+=10*unity
-        self.playerrect.bottom+=gravity
-
+        return onground
 
 
 #sounds
@@ -264,11 +389,13 @@ cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 player=Animation() 
+q=600
 while(True):
     rect=player.playerrect.bottomleft
+    if(player.playerrect.bottom<q):q=player.playerrect.bottom
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"ply  {gravity}  b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion}  {unity}  {gravity} groun {ground} vbot {player.playerrect.bottom} ong {onground} b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
@@ -298,13 +425,13 @@ while(True):
                 menu_scrn=False
                 start_scrn=True
     if(player.playerrect.bottom<ground):onground=False
-    else:onground=True
-#start true
+   
+
     if start_scrn:
           if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
-            player.createanimaion(rect,gravity,onground)
+            onground=player.createanimaion(rect,onground,kpressed)
             screen.blit(player.playersuf,player.playerrect)
             if (backgrounds[k].rect.right <= x + 250 * unitx):
                 fade_surface.set_alpha(alpha)
@@ -321,8 +448,6 @@ while(True):
               alpha=0
               player.playerrect.left=10*unitx
     screen.blit(testtext,(10,10))
-
-
 
 
     pygame.display.update()
