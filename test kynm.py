@@ -424,7 +424,7 @@ while(True):
             if(button.handle_event(event,mouse)=="start"):
                 menu_scrn=False
                 start_scrn=True
-    if(player.playerrect.bottom<ground):onground=False
+    if(player.playerrect.bottom<ground+unity):onground=False
    
 
     if start_scrn:
