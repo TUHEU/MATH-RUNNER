@@ -367,7 +367,7 @@ class Animation:
             else:
                 self.playersuf = player_jump[int(self.index)].frameB
         
-        self.index+=0.1
+        self.index+=0.2
         self.index%= len(player_run)
         return onground
 
@@ -396,7 +396,7 @@ while(True):
     if(player.playerrect.bottom<q):q=player.playerrect.bottom
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion}  onground {onground} {ground} vbot {player.playerrect.bottom} ong {onground} b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion}  {clock.get_fps()}  {gravity} groun {ground} vbot {player.playerrect.bottom} ong {onground} b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
@@ -425,7 +425,7 @@ while(True):
             if(button.handle_event(event,mouse)=="start"):
                 menu_scrn=False
                 start_scrn=True
-    if(player.playerrect.bottom<ground+unity):onground=False
+    if(player.playerrect.bottom<ground):onground=False
    
 
     if start_scrn:

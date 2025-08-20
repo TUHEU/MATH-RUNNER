@@ -367,7 +367,7 @@ class Animation:
             else:
                 self.playersuf = player_jump[int(self.index)].frameB
         
-        self.index+=0.1
+        self.index+=0.2
         self.index%= len(player_run)
         return onground
 
