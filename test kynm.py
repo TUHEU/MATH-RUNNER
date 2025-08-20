@@ -33,9 +33,9 @@ current_emotion = "Neutral"
 
 
 def emotion_loop():
-    #Continuously reads frames from webcam,
-    #detects faces using Caffe DNN,
-    #preprocesses the face,
+        #Continuously reads frames from webcam,
+        #detects faces using Caffe DNN,
+        #preprocesses the face,
     #and updates the global variable 'current_emotion'
     #with the detected emotion.
    
