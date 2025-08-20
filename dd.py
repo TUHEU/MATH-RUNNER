@@ -33,9 +33,9 @@ current_emotion = "Neutral"
 
 
 def emotion_loop():
-    #Continuously reads frames from webcam,
-    #detects faces using Caffe DNN,
-    #preprocesses the face,
+        #Continuously reads frames from webcam,
+        #detects faces using Caffe DNN,
+        #preprocesses the face,
     #and updates the global variable 'current_emotion'
     #with the detected emotion.
    
@@ -390,12 +390,13 @@ eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 player=Animation() 
 q=600
+ground=player.playerrect.bottom
 while(True):
     rect=player.playerrect.bottomleft
     if(player.playerrect.bottom<q):q=player.playerrect.bottom
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion}  {unity}  {gravity} groun {ground} vbot {player.playerrect.bottom} ong {onground} b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion}  onground {onground} {ground} vbot {player.playerrect.bottom} ong {onground} b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
@@ -424,15 +425,8 @@ while(True):
             if(button.handle_event(event,mouse)=="start"):
                 menu_scrn=False
                 start_scrn=True
-    if(player.playerrect.bottom<ground):onground=False
+    if(player.playerrect.bottom<ground+unity):onground=False
    
-    # testtext = font1.render(
-    # f"Emotion: {current_emotion}", 
-    # True, 
-    # "Black"
-    # )
-    # screen.blit(testtext, (10, 50))
-
 
     if start_scrn:
           if backgrounds[k].rect.right>=x:

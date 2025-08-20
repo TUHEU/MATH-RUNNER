@@ -390,6 +390,7 @@ eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 player=Animation() 
 q=600
+ground=player.playerrect.bottom
 while(True):
     rect=player.playerrect.bottomleft
     if(player.playerrect.bottom<q):q=player.playerrect.bottom
