@@ -455,6 +455,5 @@ while(True):
               alpha=0
               player.playerrect.left=10*unitx
     screen.blit(testtext,(10,10))
-    print("rayan")
 
     pygame.display.update()
