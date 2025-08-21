@@ -249,61 +249,19 @@ backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
 floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
 
 #player animations lists
-player_run=[Frame(framesize,"Assets/Player/run/1.png"),
-            Frame(framesize,"Assets/Player/run/2.png"),
-            Frame(framesize,"Assets/Player/run/3.png"),
-            Frame(framesize,"Assets/Player/run/4.png"),
-            Frame(framesize,"Assets/Player/run/5.png"),
-            Frame(framesize,"Assets/Player/run/6.png"),
-            Frame(framesize,"Assets/Player/run/7.png"),
-            Frame(framesize,"Assets/Player/run/8.png")]    
+player_run=[Frame(framesize,f"Assets/Player/run/{i}.png") for i in range(1,9)]    
 
-player_jump=[Frame(framesize,"Assets/Player/jump/1.png"),
-             Frame(framesize,"Assets/Player/jump/2.png"),
-             Frame(framesize,"Assets/Player/jump/3.png"),
-             Frame(framesize,"Assets/Player/jump/4.png"),
-             Frame(framesize,"Assets/Player/jump/5.png"),
-             Frame(framesize,"Assets/Player/jump/6.png"),
-             Frame(framesize,"Assets/Player/jump/7.png"),
-             Frame(framesize,"Assets/Player/jump/8.png"),
-            ]
+player_jump=[Frame(framesize,f"Assets/Player/jump/{i}.png") for i in range(1,9)]
 
-player_idle=[Frame(framesize,"Assets/Player/idle/1.png"),
-             Frame(framesize,"Assets/Player/idle/2.png"),
-             Frame(framesize,"Assets/Player/idle/3.png"),
-             Frame(framesize,"Assets/Player/idle/4.png"),
-             Frame(framesize,"Assets/Player/idle/5.png"),
-             Frame(framesize,"Assets/Player/idle/6.png"),
-             Frame(framesize,"Assets/Player/idle/7.png"),
-             Frame(framesize,"Assets/Player/idle/8.png"),
-             Frame(framesize,"Assets/Player/idle/8.png")]
+player_idle=[Frame(framesize,f"Assets/Player/idle/{i}.png") for i in range(1,9)]
 
-player_shot=[Frame(framesize,"Assets/Player/shot/1.png"),
-             Frame(framesize,"Assets/Player/shot/2.png"),
-             Frame(framesize,"Assets/Player/shot/3.png"),
-             Frame(framesize,"Assets/Player/shot/4.png"),
-             Frame(framesize,"Assets/Player/shot/5.png"),
-             Frame(framesize,"Assets/Player/shot/6.png"),
-             Frame(framesize,"Assets/Player/shot/7.png"),
-             Frame(framesize,"Assets/Player/shot/8.png"),
-             Frame(framesize,"Assets/Player/shot/9.png"),
-             Frame(framesize,"Assets/Player/shot/10.png"),
-             Frame(framesize,"Assets/Player/shot/11.png"),
-             Frame(framesize,"Assets/Player/shot/12.png"),
-             Frame(framesize,"Assets/Player/shot/13.png")]
+player_shot=[Frame(framesize,f"Assets/Player/shot/{i}.png") for i in range(1,15)]
 
-player_hurt=[Frame(framesize,"Assets/Player/hurt/1.png"),
-             Frame(framesize,"Assets/Player/hurt/2.png"),
-             Frame(framesize,"Assets/Player/hurt/3.png")]
+player_hurt=[Frame(framesize,f"Assets/Player/hurt/{i}.png") for i in range(1,4)]
 
-player_death=[Frame(framesize,"Assets/Player/death/1.png"),
-              Frame(framesize,"Assets/Player/death/2.png"),
-              Frame(framesize,"Assets/Player/death/3.png"),
-              Frame(framesize,"Assets/Player/death/4.png"),
-              Frame(framesize,"Assets/Player/death/5.png")]
+player_death=[Frame(framesize,f"Assets/Player/death/{i}.png") for i in range(1,6)]
 
-player_knee=[Frame(framesize,"Assets/Player/knee/1.png"),
-             Frame(framesize,"Assets/Player/knee/2.png")]        
+player_knee=[Frame(framesize,f"Assets/Player/knee/{i}.png") for i in range(1,3)]      
 
 
 #Enemy1 Lists
