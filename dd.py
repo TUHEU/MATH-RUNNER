@@ -313,9 +313,48 @@ enemy1_hurt=[Frame(framesize,f"Assets/Enemy/Enemy1/Hurt/{i}.png") for i in range
 enemy1_idle=[Frame(framesize,f"Assets/Enemy/Enemy1/Idle/{i}.png") for i in range(0,12)]
 enemy1_idleBlink=[Frame(framesize,f"Assets/Enemy/Enemy1/Idle Blink/{i}.png") for i in range(0,12)]
 enemy1_Walk=[Frame(framesize,f"Assets/Enemy/Enemy1/Walk/{i}.png") for i in range(0,12)]
-            
 
-#animation class
+#animation enemy class
+class Enemy:
+    def __init__(self, index=0, front=True, playersuf=enemy1_idle[0].frameF, playerrect=enemy1_idle[0].rect):
+        self.index = index
+        self.front = front
+        self.playersuf = playersuf
+        self.playerrect = playerrect
+        self.vel_y = 0
+
+    def createanimaion(self, rect, onground, kpressed):
+        if kpressed[pygame.K_d]:
+            self.front = True
+            self.playersuf = enemy1_Walk[int(self.index)].frameF
+            self.playerrect = self.playersuf.get_rect(bottomleft=rect)
+        elif kpressed[pygame.K_a]:
+            self.front = False
+            self.playersuf = enemy1_Walk[int(self.index)].frameB
+            self.playerrect = self.playersuf.get_rect(bottomleft=rect)
+
+        if onground:
+            if self.front:
+                self.playersuf = enemy1_idle[int(self.index)].frameF
+            else:
+                self.playersuf = enemy1_idle[int(self.index)].frameB
+            self.playerrect = self.playersuf.get_rect(bottomleft=rect)
+
+        if kpressed[pygame.K_w] and onground:
+            self.vel_y = jump_strength
+            onground = False
+
+        self.vel_y += gravity
+        self.playerrect.bottom += self.vel_y
+
+        if self.playerrect.bottom >= ground:
+            self.playerrect.bottom = ground
+            self.vel_y = 0
+            onground = True
+
+        return onground        
+
+#animation player class
 class Animation:
     def __init__(self,index=0,front=True,playersuf=player_idle[0].frameF,playerrect=player_idle[0].rect):
         self.index=index
