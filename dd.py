@@ -250,17 +250,11 @@ floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor
 
 #player animations lists
 player_run=[Frame(framesize,f"Assets/Player/run/{i}.png") for i in range(1,9)]    
-
 player_jump=[Frame(framesize,f"Assets/Player/jump/{i}.png") for i in range(1,9)]
-
 player_idle=[Frame(framesize,f"Assets/Player/idle/{i}.png") for i in range(1,9)]
-
 player_shot=[Frame(framesize,f"Assets/Player/shot/{i}.png") for i in range(1,15)]
-
 player_hurt=[Frame(framesize,f"Assets/Player/hurt/{i}.png") for i in range(1,4)]
-
 player_death=[Frame(framesize,f"Assets/Player/death/{i}.png") for i in range(1,6)]
-
 player_knee=[Frame(framesize,f"Assets/Player/knee/{i}.png") for i in range(1,3)]      
 
 
@@ -455,6 +449,5 @@ while(True):
               alpha=0
               player.playerrect.left=10*unitx
     screen.blit(testtext,(10,10))
-
-
+v   
     pygame.display.update()
