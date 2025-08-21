@@ -306,6 +306,15 @@ player_knee=[Frame(framesize,"Assets/Player/knee/1.png"),
              Frame(framesize,"Assets/Player/knee/2.png")]        
 
 
+#Enemy1 Lists
+enemy1_attack=[Frame(framesize,f"Assets/Enemy/Enemy1/attack/{i}.png") for i in range(0,12)]
+enemy1_dying=[Frame(framesize,f"Assets/Enemy/Enemy1/Dying/{i}.png") for i in range(0,15)]
+enemy1_hurt=[Frame(framesize,f"Assets/Enemy/Enemy1/Hurt/{i}.png") for i in range(0,12)]
+enemy1_idle=[Frame(framesize,f"Assets/Enemy/Enemy1/Idle/{i}.png") for i in range(0,12)]
+enemy1_idleBlink=[Frame(framesize,f"Assets/Enemy/Enemy1/Idle Blink/{i}.png") for i in range(0,12)]
+enemy1_Walk=[Frame(framesize,f"Assets/Enemy/Enemy1/Walk/{i}.png") for i in range(0,12)]
+            
+
 #animation class
 class Animation:
     def __init__(self,index=0,front=True,playersuf=player_idle[0].frameF,playerrect=player_idle[0].rect):
