@@ -134,7 +134,7 @@ alpha=0
 
 #player variables
 framesize=(1.7*unitx,2.6*unity)
-
+framesizeE=(.3*unitx,.6*unity)
 
 #animation variables
 signs=['+','-','/','*']
@@ -161,6 +161,7 @@ class Frame:
         self.frameF=pygame.transform.scale(self.frameF,(self.frameF.get_width()*size[0],self.frameF.get_height()*size[1]))
         self.frameB=pygame.transform.flip(self.frameF,1,0)
         self.rect=self.frameF.get_rect(bottomleft=(0,ground))
+        self.rectE1=self.frameF.get_rect(bottomleft=(x,ground))
 
 #class background
 class background:
@@ -265,52 +266,42 @@ player_knee=[Frame(framesize,f"Assets/Player/knee/{i}.png") for i in range(1,3)]
 
 
 #Enemy1 Lists
-enemy1_attack=[Frame(framesize,f"Assets/Enemy/Enemy1/attack/{i}.png") for i in range(0,12)]
-enemy1_dying=[Frame(framesize,f"Assets/Enemy/Enemy1/Dying/{i}.png") for i in range(0,15)]
-enemy1_hurt=[Frame(framesize,f"Assets/Enemy/Enemy1/Hurt/{i}.png") for i in range(0,12)]
-enemy1_idle=[Frame(framesize,f"Assets/Enemy/Enemy1/Idle/{i}.png") for i in range(0,12)]
-enemy1_idleBlink=[Frame(framesize,f"Assets/Enemy/Enemy1/Idle Blink/{i}.png") for i in range(0,12)]
-enemy1_Walk=[Frame(framesize,f"Assets/Enemy/Enemy1/Walk/{i}.png") for i in range(0,12)]
+enemy1_attack=[Frame(framesizeE,f"Assets/Enemy/Enemy1/attack/{i}.png") for i in range(0,12)]
+enemy1_dying=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Dying/{i}.png") for i in range(0,15)]
+enemy1_hurt=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Hurt/{i}.png") for i in range(0,12)]
+enemy1_idle=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Idle/{i}.png") for i in range(0,12)]
+enemy1_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Idle Blink/{i}.png") for i in range(0,12)]
+enemy1_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Walk/{i}.png") for i in range(0,12)]
 
 #animation enemy class
 class Enemy:
-    def __init__(self, index=0, front=True, playersuf=enemy1_idle[0].frameF, playerrect=enemy1_idle[0].rect):
+    def __init__(self, index=0, enemysuf=enemy1_idle[0].frameF, enemyrect=enemy1_idle[0].rectE1):
         self.index = index
-        self.front = front
-        self.playersuf = playersuf
-        self.playerrect = playerrect
-        self.vel_y = 0
-
-    def createanimaion(self, rect, onground, kpressed):
-        if kpressed[pygame.K_d]:
-            self.front = True
-            self.playersuf = enemy1_Walk[int(self.index)].frameF
-            self.playerrect = self.playersuf.get_rect(bottomleft=rect)
-        elif kpressed[pygame.K_a]:
+        self.frontE = False
+        self.enemysuf = enemysuf
+        self.enemyrect = enemyrect
+        self.collide=False
+    def createanimaion(self, rectE1):
+        if self.index >= len(enemy1_Walk):self.index = 0
+        if  not self.frontE and not self.collide:
+            self.enemysuf = enemy1_Walk[int(self.index)].frameB
+            self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
+            self.enemyrect.left-=5
+        elif self.frontE and not self.collide:
             self.front = False
-            self.playersuf = enemy1_Walk[int(self.index)].frameB
-            self.playerrect = self.playersuf.get_rect(bottomleft=rect)
-
-        if onground:
-            if self.front:
-                self.playersuf = enemy1_idle[int(self.index)].frameF
+            self.enemysuf= enemy1_Walk[int(self.index)].frameF
+            self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
+            self.enemyrect.left += 3 * unitx
+        elif self.collide:
+            if self.frontE:
+                self.enemysuf = enemy1_idle[int(self.index)].frameF
             else:
-                self.playersuf = enemy1_idle[int(self.index)].frameB
-            self.playerrect = self.playersuf.get_rect(bottomleft=rect)
-
-        if kpressed[pygame.K_w] and onground:
-            self.vel_y = jump_strength
-            onground = False
-
-        self.vel_y += gravity
-        self.playerrect.bottom += self.vel_y
-
-        if self.playerrect.bottom >= ground:
-            self.playerrect.bottom = ground
-            self.vel_y = 0
-            onground = True
-
-        return onground        
+                self.enemysuf = enemy1_idle[int(self.index)].frameB
+            self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
+        if(self.enemyrect.left<0):self.frontE=True
+        if(self.enemyrect.right>=x):self.frontE=False
+        if(player.playerrect.colliderect(self.enemyrect)):self.collide=True
+        self.index += 0.4
 
 #animation player class
 class Animation:
@@ -394,15 +385,19 @@ j=0
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
-player=Animation() 
+player=Animation()
+enemy1=Enemy()
+# enemy2=Enemy()
+# enemy3=Enemy() 
 q=600
 ground=player.playerrect.bottom
 while(True):
     rect=player.playerrect.bottomleft
+    rectE1=enemy1.enemyrect.bottomleft
     if(player.playerrect.bottom<q):q=player.playerrect.bottom
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion}  {clock.get_fps()}  {gravity} groun {ground} vbot {player.playerrect.bottom} ong {onground} b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion}  {x}  {enemy1.enemyrect.left} groun {ground} S {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
@@ -439,6 +434,8 @@ while(True):
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
             onground=player.createanimaion(rect,onground,kpressed)
+            enemy1.createanimaion((rectE1))
+            screen.blit(enemy1.enemysuf,enemy1.enemyrect)
             screen.blit(player.playersuf,player.playerrect)
             if (backgrounds[k].rect.right <= x + 250 * unitx):
                 fade_surface.set_alpha(alpha)
