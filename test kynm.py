@@ -286,7 +286,7 @@ class Enemy:
         if  not self.frontE and not self.collide:
             self.enemysuf = enemy1_Walk[int(self.index)].frameB
             self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
-            self.enemyrect.left-=5
+            self.enemyrect.left-=3 * unitx
         elif self.frontE and not self.collide:
             self.front = False
             self.enemysuf= enemy1_Walk[int(self.index)].frameF
@@ -301,6 +301,7 @@ class Enemy:
         if(self.enemyrect.left<0):self.frontE=True
         if(self.enemyrect.right>=x):self.frontE=False
         if(player.playerrect.colliderect(self.enemyrect)):self.collide=True
+        else:self.collide=False
         self.index += 0.4
 
 #animation player class
@@ -319,7 +320,7 @@ class Animation:
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
             backgrounds[k].move(True)
             floors[l].move(True)
-            if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5
+            if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5*unitx
 
         elif(kpressed[pygame.K_a]):
             self.front= False
@@ -328,7 +329,7 @@ class Animation:
             if self.playerrect.left>x-980*unitx:
                 backgrounds[k].move(False)
                 floors[l].move(False)
-                self.playerrect.left-=5
+                self.playerrect.left-=5*unitx
 
         elif(kpressed[pygame.K_s]):
             self.index-=.02
@@ -355,7 +356,7 @@ class Animation:
             self.playerrect.bottom=ground
             self.vel_y = 0
             onground = True
-
+        #if(kpressed[pygame.K_k]):
         if not onground:
             self.index+=.07
             if(self.index >=len(player_jump)):self.index=7
