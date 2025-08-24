@@ -137,9 +137,11 @@ alpha=0
 framesize=(1.7*unitx,2.6*unity)
 immortal=False
 immortaltime=0
+playerattack=False
 
 #Enemies variables
 framesizeE=(.3*unitx,.6*unity)
+enemyattack=False
 
 #animation variables
 signs=['+','-','/','*']
@@ -308,7 +310,7 @@ class Enemy:
         elif(key=="enemy3"):
             self.enemyrect=enemy1_idle[0].frameF.get_rect(bottomleft=(x+(random.randint(500,750)*unitx),ground))
     def createanimaion(self, rectE1):
-        if not question_scrn:
+        if not question_scrn and not playerattack :
             if self.index >= len(enemy1_Walk):self.index = 0
             if  not self.frontE and not self.attack:
                 if(self.key=="enemy1"):
@@ -342,12 +344,14 @@ class Animation:
         self.playersuf=playersuf
         self.playerrect=playerrect
         self.vel_y = 0
-    def createanimaion(self, rect,onground,kpressed):
-        if not question_scrn:
+    def createanimaion(self, rect,onground,kpressed,playerattack):
+        if not question_scrn and not enemyattack and not  playerattack:
             if(kpressed[pygame.K_d] ):
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
-                #self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+                self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+                self.playerrect.width=self.playerrect.width-(91*unitx)
+                self.playerrect.bottomleft=rect
                 backgrounds[k].move(True)
                 floors[l].move(True)
                 if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5*unitx
@@ -355,7 +359,8 @@ class Animation:
             elif(kpressed[pygame.K_a]):
                 self.front= False
                 self.playersuf=player_run[int(self.index)].frameB
-                #self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+                self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+                self.playerrect.width=self.playerrect.width-(91*unitx)
                 if self.playerrect.left>x-980*unitx:
                     backgrounds[k].move(False)
                     floors[l].move(False)
@@ -366,18 +371,20 @@ class Animation:
                 self.index%=len(player_knee)
                 if(self.front):self.playersuf=player_knee[int(self.index)].frameF
                 else:self.playersuf=player_knee[int(self.index)].frameB
-                #self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+                self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+                self.playerrect.width=self.playerrect.width-(91*unitx)
 
             elif(onground):
                 if(self.front):self.playersuf=player_idle[int(self.index)].frameF
                 else: self.playersuf=player_idle[int(self.index)].frameB
-                #self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+                self.playerrect=self.playersuf.get_rect(bottomleft=rect)
                 
             if(kpressed[pygame.K_w] and onground):
                 self.vel_y=jump_strength
                 self.index=0
                 onground=False
-                #self.playerrect=player_jump[1].frameF.get_rect(bottomleft=rect)
+                self.playerrect=player_jump[1].frameF.get_rect(bottomleft=rect)
+                self.playerrect.width=self.playerrect.width-(91*unitx)
 
             self.vel_y+=gravity
             self.playerrect.bottom+=self.vel_y
@@ -394,10 +401,30 @@ class Animation:
                     self.playersuf = player_jump[int(self.index)].frameF
                 else:
                     self.playersuf = player_jump[int(self.index)].frameB
-            
             self.index+=0.2
             self.index%= len(player_run)
             return onground
+        elif playerattack:
+            self.index+=.3
+            if self.index >= len(player_shot):
+                playerattack = False
+                return 
+            if self.playerrect.colliderect (enemy1.enemyrect):
+                if enemy1.enemyrect.right>=self.playerrect.right:
+                    self.playersuf=player_shot[int(self.index)].frameF
+                else:
+                    self.playersuf=player_shot[int(self.index)].frameB
+            if self.playerrect.colliderect (enemy2.enemyrect):
+                if enemy2.enemyrect.right>=self.playerrect.right:
+                    self.playersuf=player_shot[int(self.index)].frameF
+                else:
+                    self.playersuf=player_shot[int(self.index)].frameB
+            if self.playerrect.colliderect (enemy3.enemyrect):
+                if enemy3.enemyrect.right>=self.playerrect.right:
+                    self.playersuf=player_shot[int(self.index)].frameF
+                else:
+                    self.playersuf=player_shot[int(self.index)].frameB
+            self.playerrect=player_shot[1].frameF.get_rect(bottomleft=rect)
 
 
 #sounds
@@ -429,7 +456,7 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} ply {player.playerrect.bottom} immt {immortaltime} ques {question_scrn} {enemy1.frontE} ",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} ply {player.playerrect.width} immt {immortaltime} ques {question_scrn} {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
@@ -459,12 +486,12 @@ while(True):
                 menu_scrn=False
                 start_scrn=True
     if(player.playerrect.bottom<ground):onground=False
-    if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal):question_scrn=True
+    if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):question_scrn=True
     if start_scrn:
           if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
-            onground=player.createanimaion(rect,onground,kpressed)
+            onground=player.createanimaion(rect,onground,kpressed,playerattack)
             enemy1.createanimaion(rectE1)
             enemy2.createanimaion(rectE2)
             enemy3.createanimaion(rectE3)
@@ -489,11 +516,15 @@ while(True):
     if immortal:
         if(immortaltime>=2000):immortal=False
         immortaltime+=dt
-        
+    if playerattack:
+        if player.index>=len(player_shot):
+            immortal=True
+            playerattack=False    
     if question_scrn:
         screen.blit(board.frameF,board.rect)
         if(kpressed[pygame.K_o]):
-            immortal=True
+            player.index=0
+            playerattack=True
             immortaltime=0
             question_scrn=False 
     screen.blit(testtext,(10,10))
