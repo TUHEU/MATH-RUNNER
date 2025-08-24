@@ -1,8 +1,87 @@
 import pygame
 import random
-import os
 from sys import exit
 
+import cv2  # OpenCV for computer vision tasks
+import numpy as np  # to handle arrays and matrices
+from tensorflow.keras.models import load_model  # Keras for loading the pre-trained model
+import threading  # For running emotion detection in a separate thread (simultaneous execution)
+
+# --- EMOTION DETECTOR SETUP ---
+
+# Load the pre-trained emotion recognition model
+model = load_model("Assets/Emotion detection models/fer2013_mini_XCEPTION.102-0.66.hdf5", compile=False)
+
+# List of emotions in the same order as the model's output neurons
+Emotions_list = ['Angry', 'Disgust', 'Fear', 'Happy', 'Suprise', 'Sad', 'Neutral']
+
+# Initialize webcam
+cap = cv2.VideoCapture(0)
+
+# Load face detection model (Caffe-based DNN)
+net = cv2.dnn.readNetFromCaffe("Assets/Emotion detection models/dat.prototxt", "Assets/Emotion detection models/caffe.caffemodel")
+
+# Input size expected by the emotion model
+input_height, input_width = 64, 64
+
+# Contrast Limited Adaptive Histogram Equalization (CLAHE) for enhancing faces
+clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+
+# Shared variable for storing detected emotion (default = Neutral)
+current_emotion = "Neutral"
+
+def emotion_loop():
+    """Continuously reads frames from webcam, detects faces using Caffe DNN,
+    preprocesses the face, and updates the global variable 'current_emotion'
+    with the detected emotion."""
+    global current_emotion
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Convert frame to grayscale for face detection
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        (h, w) = gray.shape[:2]
+        blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
+
+        net.setInput(blob)
+        detections = net.forward()
+
+        faces = []
+        for i in range(0, detections.shape[2]):
+            confidence = detections[0, 0, i, 2]
+            if confidence > 0.5:
+                box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+                (startX, startY, endX, endY) = box.astype("int")
+
+                # Extract the face ROI
+                face_roi = gray[startY:endY, startX:endX]
+                if face_roi.size == 0:
+                    continue
+
+                # Apply CLAHE to the face ROI
+                face_roi = clahe.apply(face_roi)
+
+                # Resize and normalize for the emotion model
+                face_roi = cv2.resize(face_roi, (input_height, input_width))
+                face_roi = face_roi.astype("float") / 255.0
+                face_roi = np.expand_dims(face_roi, axis=0)
+                face_roi = np.expand_dims(face_roi, axis=-1)
+
+                # Predict emotion
+                preds = model.predict(face_roi)[0]
+                emotion_index = np.argmax(preds)
+                current_emotion = Emotions_list[emotion_index]
+                break  # Process only the first detected face
+
+
+# Start emotion detection in background thread
+# Normal (non-daemon) thread → the program will wait for it to finish before exiting.
+# Daemon thread→ the program will not wait for it. When the main program ends, daemon threads are killed automatically.
+threading.Thread(target=emotion_loop, daemon=True).start()
+
+# --- PYGAME SETUP ---
 pygame.init()
 window = pygame.display.Info()
 x = window.current_w
@@ -12,59 +91,47 @@ clock = pygame.time.Clock()
 unitx = x / 1000
 unity = y / 1000
 
-# Game states
-class GameState:
-    MENU = 0
-    PLAYING = 1
-    TRANSITION = 2
-
-current_state = GameState.MENU
-transition_alpha = 0
-
-# Setup asset folders
-def load_image(path, size):
-    img = pygame.image.load(os.path.join('Assets', path)).convert_alpha()
-    return pygame.transform.scale(img, size)
-
-#pages booleans
+# pages booleans
 menu_scrn = True
 start_scrn = False
+pause_scrn = False  # New boolean for pause screen
 
-#font
+# font
 font1 = pygame.font.Font("Assets/Fonts/1.TTF", 50)
 
-#physics variables
+# physics variables
 player_vel_y = 0
 gravity = 1 * unity
 jump_strength = -25 * unity
 
-#Creating background swap animation (Fadeout) variables
+# Creating background swap animation (Fadeout) variables
 fade_surface = pygame.Surface((x, y))
 fade_surface.fill((0, 0, 0))
 fade_surface.set_alpha(0)
 alpha = 0
 
-#player variables
+# player variables
 framesize = (1.7 * unitx, 2.6 * unity)
+framesizeE = (.3 * unitx, .6 * unity)
 
-#animation variables
+# animation variables
 signs = ['+', '-', '/', '*']
 
-#backgrounds variables
+# backgrounds variables
 sizebk = (7000 * unitx, y)
 speedbk = 4 * unitx
 k = 0
 
-#floor variables
+# floor variables
 l = 0
 sizefl = (21000 * unitx, 200 * unity)
 speedfl = 12 * unitx
 
-#animation variables
+# animation variables
 ground = y - (200 * unity)
 onground = True
 
-# Frame class
+# --- Frame class for player animations ---
 class Frame:
     def __init__(self, size, path):
         self.size = size
@@ -73,8 +140,9 @@ class Frame:
         self.frameF = pygame.transform.scale(self.frameF, (self.frameF.get_width() * size[0], self.frameF.get_height() * size[1]))
         self.frameB = pygame.transform.flip(self.frameF, 1, 0)
         self.rect = self.frameF.get_rect(bottomleft=(0, ground))
+        self.rectE1 = self.frameF.get_rect(bottomleft=(x, ground))
 
-# Background class
+# --- Background class ---
 class background:
     def __init__(self, path, speed, size):
         self.size = size
@@ -83,30 +151,30 @@ class background:
         self.img = pygame.image.load(path).convert_alpha()
         self.img = pygame.transform.scale(self.img, (size[0], size[1]))
         self.rect = self.img.get_rect(bottomleft=(0, y))
-    
+
     def move(self, front):
         if front:
             self.rect.left -= self.speed
         else:
             self.rect.left += self.speed
 
-# Equation class
+# --- Equation class ---
 class equationC:
-    def __init__(self, equation="", sign="", ans=0, isactive=False, delay=0):
-        self.equation = equation
+    def __init__(self, eqaution="", sign="", ans=0, isactive=False, delay=0):
+        self.equation = eqaution
         self.isactive = isactive
         self.sign = sign
         self.ans = ans
         self.delay = delay
-    
+
     def generate_equation(self, signs):
         self.equation = str(random.randint(1, 50)) + signs[random.randint(0, 3)] + str(random.randint(1, 50))
         self.ans = str(int(eval(self.equation)))
         self.delay = 0
         self.equation = self.equation + "=" + self.ans
         return self.equation
-    
-    def active(self, wait, dt, cur_equation, eqn_locx, eqn_locy, i):
+
+    def active(self, wait, dt, cur_equation, eqn_locx, eqn_locy):
         if self.delay < wait:
             equationText = font1.render(f"{cur_equation[i]}", True, "Black")
             screen.blit(equationText, (eqn_locx[i], eqn_locy[i]))
@@ -114,30 +182,30 @@ class equationC:
             self.isactive = True
         else:
             cur_equation[i] = self.generate_equation(signs)
-            eqn_locx[i] = random.randint(int(unitx * 100), int(x - (unitx * 200)))
-            eqn_locy[i] = random.randint(int(unity * 100), int(y - (unity * 150)))
+            eqn_locx[i] = (random.randint(int(unitx * 100), int(x - (unitx * 200))))
+            eqn_locy[i] = (random.randint(int(unity * 100), int(y - (unity * 150))))
             self.isactive = False
         return self.isactive
 
-# Button class
+# --- Button class ---
 class button:
     def __init__(self, default_path, size, rect_pos, key=""):
         self.size = size
         self.default_img = pygame.image.load(default_path).convert_alpha()
         self.default_img = pygame.transform.scale(self.default_img, self.size)
-        self.touched_img = pygame.transform.scale(self.default_img, (self.size[0] * 0.8, self.size[1] * 0.8))
+        self.touched_img = pygame.transform.scale(self.default_img, (int(self.size[0] * 0.8), int(self.size[1] * 0.8)))
         self.rect = self.default_img.get_rect(topleft=rect_pos)
         self.touched = False
         self.touching = True
         self.key = key
-    
+
     def draw(self, screen):
         if self.touched:
             img = self.touched_img
         else:
             img = self.default_img
         screen.blit(img, self.rect)
-    
+
     def handle_event(self, event, mouse_pos):
         self.touched = self.rect.collidepoint(mouse_pos)
         if self.touched and self.touching:
@@ -149,243 +217,191 @@ class button:
             return self.key
         return None
 
+# --- Enemy class ---
+class Enemy:
+    def __init__(self, index=0, enemysuf=None, enemyrect=None):
+        self.index = index
+        self.frontE = False
+        self.enemysuf = enemysuf if enemysuf else enemy1_idle[0].frameF
+        self.enemyrect = enemyrect if enemyrect else enemy1_idle[0].rectE1
+        self.collide = False
 
-# Player animations
-player_run = [Frame(framesize, f"Assets/Player/run/{i}.png") for i in range(1, 9)]
-player_jump = [Frame(framesize, f"Assets/Player/jump/{i}.png") for i in range(1, 9)]
-player_idle = [Frame(framesize, f"Assets/Player/idle/{i}.png") for i in range(1, 9)]
-player_shot = [Frame(framesize, f"Assets/Player/shot/{i}.png") for i in range(1, 14)]
-player_hurt = [Frame(framesize, f"Assets/Player/hurt/{i}.png") for i in range(1, 4)]
-player_death = [Frame(framesize, f"Assets/Player/death/{i}.png") for i in range(1, 6)]
-player_knee = [Frame(framesize, f"Assets/Player/knee/{i}.png") for i in range(1, 3)]
+    def createanimaion(self, rectE1):
+        if self.index >= len(enemy1_Walk):
+            self.index = 0
+        if not self.frontE and not self.collide:
+            self.enemysuf = enemy1_Walk[int(self.index)].frameB
+            self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
+            self.enemyrect.left -= 5
+        elif self.frontE and not self.collide:
+            self.front = False
+            self.enemysuf = enemy1_Walk[int(self.index)].frameF
+            self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
+            self.enemyrect.left += 3 * unitx
+        elif self.collide:
+            if self.frontE:
+                self.enemysuf = enemy1_idle[int(self.index)].frameF
+            else:
+                self.enemysuf = enemy1_idle[int(self.index)].frameB
+            self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
+        if self.enemyrect.left < 0:
+            self.frontE = True
+        if self.enemyrect.right >= x:
+            self.frontE = False
+        if player.playerrect.colliderect(self.enemyrect):
+            self.collide = True
+        self.index += 0.4
 
-# Animation class
+# --- Player Animation class ---
 class Animation:
-    def __init__(self, index=0, front=True, playersuf=player_idle[0].frameF, playerrect=player_idle[0].rect):
+    def __init__(self, index=0, front=True, playersuf=None, playerrect=None):
         self.index = index
         self.front = front
-        self.playersuf = playersuf
-        self.playerrect = playerrect
+        self.playersuf = playersuf if playersuf else player_idle[0].frameF
+        self.playerrect = playerrect if playerrect else player_idle[0].rect
         self.vel_y = 0
-    
-    def createanimation(self, rect, onground, kpressed):
-        if kpressed[pygame.K_d]:
-            self.front = True
-            self.playersuf = player_run[int(self.index)].frameF
-            self.playerrect = self.playersuf.get_rect(bottomleft=rect)
-            backgrounds[k].move(True)
-            floors[l].move(True)
-            if self.playerrect.right <= x - (unitx * 150):
-                self.playerrect.left += 5
-        
-        elif kpressed[pygame.K_a]:
-            self.front = False
-            self.playersuf = player_run[int(self.index)].frameB
-            self.playerrect = self.playersuf.get_rect(bottomleft=rect)
-            if self.playerrect.left > x - 980 * unitx:
-                backgrounds[k].move(False)
-                floors[l].move(False)
-                self.playerrect.left -= 5
-        
-        elif kpressed[pygame.K_s]:
-            self.index -= 0.02
-            self.index %= len(player_knee)
-            if self.front:
-                self.playersuf = player_knee[int(self.index)].frameF
-            else:
-                self.playersuf = player_knee[int(self.index)].frameB
-            self.playerrect = self.playersuf.get_rect(bottomleft=rect)
-        
-        elif onground:
-            if self.front:
-                self.playersuf = player_idle[int(self.index)].frameF
-            else:
-                self.playersuf = player_idle[int(self.index)].frameB
-            self.playerrect = self.playersuf.get_rect(bottomleft=rect)
-        
-        if kpressed[pygame.K_w] and onground:
-            self.vel_y = jump_strength
-            self.index = 0
-            onground = False
-            self.playerrect = player_jump[1].frameF.get_rect(bottomleft=rect)
-        
-        self.vel_y += gravity
-        self.playerrect.bottom += self.vel_y
-        
-        if self.playerrect.bottom >= ground:
-            self.playerrect.bottom = ground
-            self.vel_y = 0
-            onground = True
-        
-        if not onground:
-            self.index += 0.07
-            if self.index >= len(player_jump):
-                self.index = 7
-            if self.front:
-                self.playersuf = player_jump[int(self.index)].frameF
-            else:
-                self.playersuf = player_jump[int(self.index)].frameB
-        
-        self.index += 0.1
-        self.index %= len(player_run)
-        return onground
 
-# Menu class
-class Menu:
-    def __init__(self):
-        self.buttons = [
-            button("Assets/Buttons/Default/start.png", (x/4, y/8), ((x/2) - (unitx * 120), (y/2) - (unity * 300)), "start"),
-            button("Assets/Buttons/Default/options.png", (x/4, y/8), ((x/2) - (unitx * 120), (y/2) - (unity * 150)), "options"),
-            button("Assets/Buttons/Default/custom level.png", (x/4, y/8), ((x/2) - (unitx * 120), (y/2) - unity), "custom level"),
-            button("Assets/Buttons/Default/exit.png", (x/4, y/8), ((x/2) - (unitx * 120), (y/2) + (unity * 150)), "exit")
-        ]
-    
-    def draw(self, screen):
-        for button in self.buttons:
-            button.draw(screen)
+    def createanimaion(self, rect, onground, kpressed):
+        pass  # Placeholder, as the original code had an empty method.
 
-# Background system with transitions
-class BackgroundSystem:
-    def __init__(self):
-        self.backgrounds = [
-            background("Assets/Backgrounds/1.png", speedbk, sizebk),
-            background("Assets/Backgrounds/2.png", speedbk, sizebk),
-            background("Assets/Backgrounds/3.png", speedbk, sizebk),
-            background("Assets/Backgrounds/4.png", speedbk, sizebk)
-        ]
-        self.current_bg = 0
-        self.scroll = 0
-    
-    def update(self):
-        self.scroll += 2
-        if self.scroll > x:
-            global current_state, transition_alpha
-            current_state = GameState.TRANSITION
-            transition_alpha = 0
-            self.scroll = 0
-    
-    def draw(self, surface):
-        surface.blit(self.backgrounds[self.current_bg].img, (-self.scroll, 0))
-        surface.blit(self.backgrounds[(self.current_bg + 1) % len(self.backgrounds)].img, (x - self.scroll, 0))
+# --- GAME ASSET INITIALIZATION ---
 
-# Initialize objects
+# button list
 buttons = [
-    button("Assets/Buttons/Default/start.png", (x/4, y/8), ((x/2) - (unitx * 120), (y/2) - (unity * 300)), "start"),
-    button("Assets/Buttons/Default/options.png", (x/4, y/8), ((x/2) - (unitx * 120), (y/2) - (unity * 150)), "options"),
-    button("Assets/Buttons/Default/custom level.png", (x/4, y/8), ((x/2) - (unitx * 120), (y/2) - unity), "custom level"),
-    button("Assets/Buttons/Default/exit.png", (x/4, y/8), ((x/2) - (unitx * 120), (y/2) + (unity * 150)), "exit")
+    button("Assets/Buttons/Default/start.png", (x / 4, y / 8), ((x / 2) - (unitx * 120), (y / 2) - (unity * 300)), "start"),
+    button("Assets/Buttons/Default/options.png", (x / 4, y / 8), ((x / 2) - (unitx * 120), (y / 2) - (unity * 150)), "options"),
+    button("Assets/Buttons/Default/custom level.png", (x / 4, y / 8), ((x / 2) - (unitx * 120), (y / 2) - (unity)), "custom level"),
+    button("Assets/Buttons/Default/exit.png", (x / 4, y / 8), ((x / 2) - (unitx * 120), (y / 2) + (unity * 150)), "exit")
 ]
 
+# equations list
 equations = [equationC() for _ in range(13)]
+cur_equation = [""] * 13
+eqn_locx = [0] * 13
+eqn_locy = [0] * 13
+
+# background list
 backgrounds = [
     background("Assets/Backgrounds/1.png", speedbk, sizebk),
     background("Assets/Backgrounds/2.png", speedbk, sizebk),
     background("Assets/Backgrounds/3.png", speedbk, sizebk),
-    background("Assets/Backgrounds/4.png", speedbk, sizebk)
+    background("Assets/Backgrounds/4.png", speedbk, sizebk),
 ]
 
-floors = [
-    background("Assets/Floor/1.png", speedfl, sizefl),
-    background("Assets/Floor/2.png", speedfl, sizefl)
-]
+# floor list
+floors = [background("Assets/Floor/1.png", speedfl, sizefl), background("Assets/Floor/2.png", speedfl, sizefl)]
 
+# player animations lists
+player_run = [Frame(framesize, f"Assets/Player/run/{i}.png") for i in range(1, 9)]
+player_jump = [Frame(framesize, f"Assets/Player/jump/{i}.png") for i in range(1, 9)]
+player_idle = [Frame(framesize, f"Assets/Player/idle/{i}.png") for i in range(1, 9)]
+player_shot = [Frame(framesize, f"Assets/Player/shot/{i}.png") for i in range(1, 15)]
+player_hurt = [Frame(framesize, f"Assets/Player/hurt/{i}.png") for i in range(1, 4)]
+player_death = [Frame(framesize, f"Assets/Player/death/{i}.png") for i in range(1, 6)]
+player_knee = [Frame(framesize, f"Assets/Player/knee/{i}.png") for i in range(1, 3)]
 
-# Sounds
+# Enemy1 Lists
+enemy1_attack = [Frame(framesizeE, f"Assets/Enemy/Enemy1/attack/{i}.png") for i in range(0, 12)]
+enemy1_dying = [Frame(framesizeE, f"Assets/Enemy/Enemy1/Dying/{i}.png") for i in range(0, 15)]
+enemy1_hurt = [Frame(framesizeE, f"Assets/Enemy/Enemy1/Hurt/{i}.png") for i in range(0, 12)]
+enemy1_idle = [Frame(framesizeE, f"Assets/Enemy/Enemy1/Idle/{i}.png") for i in range(0, 12)]
+enemy1_idleBlink = [Frame(framesizeE, f"Assets/Enemy/Enemy1/Idle Blink/{i}.png") for i in range(0, 12)]
+enemy1_Walk = [Frame(framesizeE, f"Assets/Enemy/Enemy1/Walk/{i}.png") for i in range(0, 12)]
+
+# sounds
 pygame.mixer.init()
 pygame.mixer.music.load('Assets/Sounds/touch.mp3')
 pygame.mixer.music.play()
 pygame.mixer.music.set_volume(0.25)
 touch_sound = pygame.mixer.Sound("Assets/Sounds/touch.mp3")
 
-# Menu
-menu_img = pygame.image.load("Assets/Menu/menu.jpg")
-menu_rect = menu_img.get_rect(topleft=(0, 0))
-menu_img = pygame.transform.scale(menu_img, (x, y))
+# menu
+menu = pygame.image.load("Assets/Menu/menu.jpg")
+menu_rect = menu.get_rect(topleft=(0, 0))
+menu = pygame.transform.scale(menu, (x, y))
 
-# Game variables
 j = 0
-cur_equation = ["" for _ in range(13)]
-eqn_locx = [0 for _ in range(13)]
-eqn_locy = [0 for _ in range(13)]
 player = Animation()
+enemy1 = Enemy()
+enemy2 = Enemy()
+enemy3 = Enemy()
 q = 600
-menu = Menu()
-bg_system = BackgroundSystem()
+ground = player.playerrect.bottom
 
-# Main game loop
+# --- GAME LOOP ---
 while True:
     rect = player.playerrect.bottomleft
+    rectE1 = enemy1.enemyrect.bottomleft
     if player.playerrect.bottom < q:
         q = player.playerrect.bottom
-    
     dt = clock.tick(60)
     mouse = pygame.mouse.get_pos()
-    testtext = font1.render(f"ply {q}  {unity}  {gravity} groun {ground} vbot {player.playerrect.bottom} ong {onground} b {backgrounds[k].rect.right}   mou{mouse}", False, "Black")
+    testtext = font1.render(f"curemo {current_emotion}  {x}  {enemy1.enemyrect.left} groun {ground} S {enemy1.frontE} ", False, "Black")
     kpressed = pygame.key.get_pressed()
-    
+
+    # --- Event handling ---
     for event in pygame.event.get():
         if event.type == pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
         
-        if current_state == GameState.MENU:
-            for button in menu.buttons:
-                result = button.handle_event(event, mouse)
-                if result == "exit":
-                    pygame.quit()
-                    exit()
-                elif result == "start":
-                    current_state = GameState.PLAYING
+        # Toggle pause with 'P' key
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+            if start_scrn:
+                pause_scrn = not pause_scrn
+        
+        # Handle button clicks
+        for button in buttons:
+            key_pressed = button.handle_event(event, mouse)
+            if key_pressed == "exit":
+                pygame.quit()
+                exit()
+            if key_pressed == "start":
+                menu_scrn = False
+                start_scrn = True
+                pause_scrn = False # Ensure game is not paused when starting
     
-    screen.blit(menu_img, menu_rect)
-    
-    # State updates
-    if current_state == GameState.MENU:
+    # --- Game State Logic ---
+    if menu_scrn:
+        screen.blit(menu, menu_rect)
         i = 0
         for equ in equations:
-            wait = random.randint(400, 800)
-            if not equ.active(wait, dt, cur_equation, eqn_locx, eqn_locy, i):
+            print(equ.isactive)
+            wait = (random.randint(400, 800))
+            if not equ.active(wait, dt, cur_equation, eqn_locx, eqn_locy):
                 if j < 13:
-                    cur_equation[i] = equ.generate_equation(signs)
-                    eqn_locx[i] = random.randint(int(unitx * 100), int(x - (unitx * 100)))
-                    eqn_locy[i] = random.randint(int(unity * 100), int(y - (unity * 100)))
+                    cur_equation[i] = (equ.generate_equation(signs))
+                    eqn_locx[i] = (random.randint(int(unitx * 100), int(x - (unitx * 100))))
+                    eqn_locy[i] = (random.randint(int(unity * 100), int(y - (unity * 100))))
                     i += 1
-                    j += 1
-        
-        menu.draw(screen)
-    
-    elif current_state == GameState.PLAYING:
-        if backgrounds[k].rect.right >= x:
-            screen.blit(backgrounds[k].img, backgrounds[k].rect)
-            screen.blit(floors[l].img, floors[l].rect)
-            onground = player.createanimation(rect, onground, kpressed)
-            screen.blit(player.playersuf, player.playerrect)
+                j += 1
+        for button in buttons:
+            button.draw(screen)
+    elif start_scrn:
+        if not pause_scrn:
+            # --- Game Update Logic (when not paused) ---
+            # (Your existing game update code goes here, e.g., player movement, enemy logic, etc.)
             
-            if backgrounds[k].rect.right <= x + 250 * unitx:
-                fade_surface.set_alpha(alpha)
-                alpha += 5
-                screen.blit(fade_surface, (0, 0))
-            else:
-                backgrounds[k].rect.bottomleft = (0, y)
-                floors[l].rect.bottomleft = (0, y)
-                k += 1
-                l += 1
-                k %= 4
-                l %= 2
-                alpha = 0
-                player.playerrect.left = 10 * unitx
-        
-        screen.blit(testtext, (10, 10))
-    
-    elif current_state == GameState.TRANSITION:
-        transition_alpha += 5
-        if transition_alpha >= 255:
-            transition_alpha = 255
-            player.rect.left = 0
-            k = (k + 1) % len(backgrounds)
-            current_state = GameState.PLAYING
-        
-        fade_surface.set_alpha(transition_alpha)
-        screen.blit(fade_surface, (0, 0))
-    
+            # Example placeholder for game logic:
+            screen.fill((255, 255, 255)) # Fill with white to show game is running
+            game_text = font1.render("Game is running! Press 'P' to pause.", True, "Black")
+            screen.blit(game_text, (x/2 - game_text.get_width()/2, y/2 - game_text.get_height()/2))
+
+        else:
+            # --- Pause screen logic ---
+            # (Draw pause menu, 'Paused' text, or other elements)
+            
+            # Example placeholder for pause screen:
+            pause_overlay = pygame.Surface((x, y), pygame.SRCALPHA) # Transparent surface
+            pause_overlay.fill((0, 0, 0, 128))  # Black with 50% transparency
+            screen.blit(pause_overlay, (0, 0))
+            
+            pause_text = font1.render("PAUSED", True, "White")
+            screen.blit(pause_text, (x/2 - pause_text.get_width()/2, y/2 - pause_text.get_height()/2))
+            resume_text = font1.render("Press 'P' to resume", True, "White")
+            screen.blit(resume_text, (x/2 - resume_text.get_width()/2, y/2 + 50))
+
+    if player.playerrect.bottom < ground:
+        onground = False
+
     pygame.display.update()

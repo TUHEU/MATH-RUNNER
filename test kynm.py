@@ -134,7 +134,7 @@ alpha=0
 
 #player variables
 framesize=(1.7*unitx,2.6*unity)
-
+framesizeE=(.3*unitx,.6*unity)
 
 #animation variables
 signs=['+','-','/','*']
@@ -161,6 +161,7 @@ class Frame:
         self.frameF=pygame.transform.scale(self.frameF,(self.frameF.get_width()*size[0],self.frameF.get_height()*size[1]))
         self.frameB=pygame.transform.flip(self.frameF,1,0)
         self.rect=self.frameF.get_rect(bottomleft=(0,ground))
+        self.rectE1=self.frameF.get_rect(bottomleft=(x,ground))
 
 #class background
 class background:
@@ -249,64 +250,61 @@ backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
 floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
 
 #player animations lists
-player_run=[Frame(framesize,"Assets/Player/run/1.png"),
-            Frame(framesize,"Assets/Player/run/2.png"),
-            Frame(framesize,"Assets/Player/run/3.png"),
-            Frame(framesize,"Assets/Player/run/4.png"),
-            Frame(framesize,"Assets/Player/run/5.png"),
-            Frame(framesize,"Assets/Player/run/6.png"),
-            Frame(framesize,"Assets/Player/run/7.png"),
-            Frame(framesize,"Assets/Player/run/8.png")]    
+player_run=[Frame(framesize,f"Assets/Player/run/{i}.png") for i in range(1,9)]    
 
-player_jump=[Frame(framesize,"Assets/Player/jump/1.png"),
-             Frame(framesize,"Assets/Player/jump/2.png"),
-             Frame(framesize,"Assets/Player/jump/3.png"),
-             Frame(framesize,"Assets/Player/jump/4.png"),
-             Frame(framesize,"Assets/Player/jump/5.png"),
-             Frame(framesize,"Assets/Player/jump/6.png"),
-             Frame(framesize,"Assets/Player/jump/7.png"),
-             Frame(framesize,"Assets/Player/jump/8.png"),
-            ]
+player_jump=[Frame(framesize,f"Assets/Player/jump/{i}.png") for i in range(1,9)]
 
-player_idle=[Frame(framesize,"Assets/Player/idle/1.png"),
-             Frame(framesize,"Assets/Player/idle/2.png"),
-             Frame(framesize,"Assets/Player/idle/3.png"),
-             Frame(framesize,"Assets/Player/idle/4.png"),
-             Frame(framesize,"Assets/Player/idle/5.png"),
-             Frame(framesize,"Assets/Player/idle/6.png"),
-             Frame(framesize,"Assets/Player/idle/7.png"),
-             Frame(framesize,"Assets/Player/idle/8.png"),
-             Frame(framesize,"Assets/Player/idle/8.png")]
+player_idle=[Frame(framesize,f"Assets/Player/idle/{i}.png") for i in range(1,9)]
 
-player_shot=[Frame(framesize,"Assets/Player/shot/1.png"),
-             Frame(framesize,"Assets/Player/shot/2.png"),
-             Frame(framesize,"Assets/Player/shot/3.png"),
-             Frame(framesize,"Assets/Player/shot/4.png"),
-             Frame(framesize,"Assets/Player/shot/5.png"),
-             Frame(framesize,"Assets/Player/shot/6.png"),
-             Frame(framesize,"Assets/Player/shot/7.png"),
-             Frame(framesize,"Assets/Player/shot/8.png"),
-             Frame(framesize,"Assets/Player/shot/9.png"),
-             Frame(framesize,"Assets/Player/shot/10.png"),
-             Frame(framesize,"Assets/Player/shot/11.png"),
-             Frame(framesize,"Assets/Player/shot/12.png"),
-             Frame(framesize,"Assets/Player/shot/13.png")]
+player_shot=[Frame(framesize,f"Assets/Player/shot/{i}.png") for i in range(1,15)]
 
-player_hurt=[Frame(framesize,"Assets/Player/hurt/1.png"),
-             Frame(framesize,"Assets/Player/hurt/2.png"),
-             Frame(framesize,"Assets/Player/hurt/3.png")]
+player_hurt=[Frame(framesize,f"Assets/Player/hurt/{i}.png") for i in range(1,4)]
 
-player_death=[Frame(framesize,"Assets/Player/death/1.png"),
-              Frame(framesize,"Assets/Player/death/2.png"),
-              Frame(framesize,"Assets/Player/death/3.png"),
-              Frame(framesize,"Assets/Player/death/4.png"),
-              Frame(framesize,"Assets/Player/death/5.png")]
+player_death=[Frame(framesize,f"Assets/Player/death/{i}.png") for i in range(1,6)]
 
-player_knee=[Frame(framesize,"Assets/Player/knee/1.png"),
-             Frame(framesize,"Assets/Player/knee/2.png")]        
+player_knee=[Frame(framesize,f"Assets/Player/knee/{i}.png") for i in range(1,3)]      
 
 
-#animation class
+#Enemy1 Lists
+enemy1_attack=[Frame(framesizeE,f"Assets/Enemy/Enemy1/attack/{i}.png") for i in range(0,12)]
+enemy1_dying=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Dying/{i}.png") for i in range(0,15)]
+enemy1_hurt=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Hurt/{i}.png") for i in range(0,12)]
+enemy1_idle=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Idle/{i}.png") for i in range(0,12)]
+enemy1_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Idle Blink/{i}.png") for i in range(0,12)]
+enemy1_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Walk/{i}.png") for i in range(0,12)]
+
+#animation enemy class
+class Enemy:
+    def __init__(self, index=0, enemysuf=enemy1_idle[0].frameF, enemyrect=enemy1_idle[0].rectE1):
+        self.index = index
+        self.frontE = False
+        self.enemysuf = enemysuf
+        self.enemyrect = enemyrect
+        self.collide=False
+    def createanimaion(self, rectE1):
+        if self.index >= len(enemy1_Walk):self.index = 0
+        if  not self.frontE and not self.collide:
+            self.enemysuf = enemy1_Walk[int(self.index)].frameB
+            self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
+            self.enemyrect.left-=3 * unitx
+        elif self.frontE and not self.collide:
+            self.front = False
+            self.enemysuf= enemy1_Walk[int(self.index)].frameF
+            self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
+            self.enemyrect.left += 3 * unitx
+        elif self.collide:
+            if self.frontE:
+                self.enemysuf = enemy1_idle[int(self.index)].frameF
+            else:
+                self.enemysuf = enemy1_idle[int(self.index)].frameB
+            self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
+        if(self.enemyrect.left<0):self.frontE=True
+        if(self.enemyrect.right>=x):self.frontE=False
+        if(player.playerrect.colliderect(self.enemyrect)):self.collide=True
+        else:self.collide=False
+        self.index += 0.4
+
+#animation player class
 class Animation:
     def __init__(self,index=0,front=True,playersuf=player_idle[0].frameF,playerrect=player_idle[0].rect):
         self.index=index
@@ -322,7 +320,7 @@ class Animation:
             self.playerrect=self.playersuf.get_rect(bottomleft=rect)
             backgrounds[k].move(True)
             floors[l].move(True)
-            if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5
+            if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5*unitx
 
         elif(kpressed[pygame.K_a]):
             self.front= False
@@ -331,7 +329,7 @@ class Animation:
             if self.playerrect.left>x-980*unitx:
                 backgrounds[k].move(False)
                 floors[l].move(False)
-                self.playerrect.left-=5
+                self.playerrect.left-=5*unitx
 
         elif(kpressed[pygame.K_s]):
             self.index-=.02
@@ -358,7 +356,7 @@ class Animation:
             self.playerrect.bottom=ground
             self.vel_y = 0
             onground = True
-
+        #if(kpressed[pygame.K_k]):
         if not onground:
             self.index+=.07
             if(self.index >=len(player_jump)):self.index=7
@@ -367,7 +365,7 @@ class Animation:
             else:
                 self.playersuf = player_jump[int(self.index)].frameB
         
-        self.index+=0.1
+        self.index+=0.2
         self.index%= len(player_run)
         return onground
 
@@ -388,15 +386,23 @@ j=0
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
-player=Animation() 
+player=Animation()
+enemy1=Enemy()
+# enemy2=Enemy()
+# enemy3=Enemy() 
 q=600
 ground=player.playerrect.bottom
 while(True):
     rect=player.playerrect.bottomleft
+    rectE1=enemy1.enemyrect.bottomleft
     if(player.playerrect.bottom<q):q=player.playerrect.bottom
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
+<<<<<<< HEAD
     testtext=font1.render(f"curemo {current_emotion}  {clock.get_fps()}  {gravity} groun {ground} vbot {player.playerrect.bottom} ong {onground} b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
+=======
+    testtext=font1.render(f"curemo {current_emotion}  {x}  {enemy1.enemyrect.left} groun {ground} S {enemy1.frontE} ",False,"Black")
+>>>>>>> 4992a88f14cb7def5c2e30d4f6576adee47b0a41
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
@@ -433,6 +439,8 @@ while(True):
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
             onground=player.createanimaion(rect,onground,kpressed)
+            enemy1.createanimaion((rectE1))
+            screen.blit(enemy1.enemysuf,enemy1.enemyrect)
             screen.blit(player.playersuf,player.playerrect)
             if (backgrounds[k].rect.right <= x + 250 * unitx):
                 fade_surface.set_alpha(alpha)
@@ -449,6 +457,5 @@ while(True):
               alpha=0
               player.playerrect.left=10*unitx
     screen.blit(testtext,(10,10))
-
 
     pygame.display.update()
