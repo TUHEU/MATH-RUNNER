@@ -405,7 +405,7 @@ class Animation:
             self.index%= len(player_run)
             return onground
         elif playerattack:
-            self.index+=.3
+            self.index+=.25
             if self.index >= len(player_shot):
                 playerattack = False
                 return 
