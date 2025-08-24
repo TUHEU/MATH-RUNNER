@@ -268,6 +268,7 @@ player_idle=[Frame(framesize,f"Assets/Player/idle/{i}.png") for i in range(1,9)]
 player_shot=[Frame(framesize,f"Assets/Player/shot/{i}.png") for i in range(1,15)]
 player_hurt=[Frame(framesize,f"Assets/Player/hurt/{i}.png") for i in range(1,4)]
 player_death=[Frame(framesize,f"Assets/Player/death/{i}.png") for i in range(1,6)]
+player_attack=[Frame(framesize,f"Assets/Player/attack/{i}.png") for i in range(1,7)]
 player_knee=[Frame(framesize,f"Assets/Player/knee/{i}.png") for i in range(1,3)]      
 
 
@@ -346,6 +347,7 @@ class Animation:
         self.vel_y = 0
     def createanimaion(self, rect,onground,kpressed,playerattack):
         if not question_scrn and not enemyattack and not  playerattack:
+            if(self.index >=len(player_jump)):self.index=0
             if(kpressed[pygame.K_d] ):
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
@@ -393,7 +395,6 @@ class Animation:
                 self.playerrect.bottom=ground
                 self.vel_y = 0
                 onground = True
-            #if(kpressed[pygame.K_k]):
             if not onground:
                 self.index+=.07
                 if(self.index >=len(player_jump)):self.index=7
@@ -406,25 +407,25 @@ class Animation:
             return onground
         elif playerattack:
             self.index+=.25
-            if self.index >= len(player_shot):
+            if self.index >= len(player_attack):
                 playerattack = False
                 return 
             if self.playerrect.colliderect (enemy1.enemyrect):
                 if enemy1.enemyrect.right>=self.playerrect.right:
-                    self.playersuf=player_shot[int(self.index)].frameF
+                    self.playersuf=player_attack[int(self.index)].frameF
                 else:
-                    self.playersuf=player_shot[int(self.index)].frameB
+                    self.playersuf=player_attack[int(self.index)].frameB
             if self.playerrect.colliderect (enemy2.enemyrect):
                 if enemy2.enemyrect.right>=self.playerrect.right:
-                    self.playersuf=player_shot[int(self.index)].frameF
+                    self.playersuf=player_attack[int(self.index)].frameF
                 else:
-                    self.playersuf=player_shot[int(self.index)].frameB
+                    self.playersuf=player_attack[int(self.index)].frameB
             if self.playerrect.colliderect (enemy3.enemyrect):
                 if enemy3.enemyrect.right>=self.playerrect.right:
-                    self.playersuf=player_shot[int(self.index)].frameF
+                    self.playersuf=player_attack[int(self.index)].frameF
                 else:
-                    self.playersuf=player_shot[int(self.index)].frameB
-            self.playerrect=player_shot[1].frameF.get_rect(bottomleft=rect)
+                    self.playersuf=player_attack[int(self.index)].frameB
+            self.playerrect=player_shot[0].frameF.get_rect(bottomleft=rect)
 
 
 #sounds
@@ -498,7 +499,10 @@ while(True):
             screen.blit(enemy1.enemysuf,enemy1.enemyrect)
             screen.blit(enemy2.enemysuf,enemy2.enemyrect)
             screen.blit(enemy3.enemysuf,enemy3.enemyrect)
-            screen.blit(player.playersuf,player.playerrect)
+            if(not immortal):
+                screen.blit(player.playersuf,player.playerrect)
+            elif(immortal and dt%2==0):
+                screen.blit(player.playersuf,player.playerrect)
             if (backgrounds[k].rect.right <= x + 250 * unitx):
                 fade_surface.set_alpha(alpha)
                 alpha += 5
@@ -523,6 +527,7 @@ while(True):
     if question_scrn:
         screen.blit(board.frameF,board.rect)
         if(kpressed[pygame.K_o]):
+            player.playerrect.bottom=ground
             player.index=0
             playerattack=True
             immortaltime=0
