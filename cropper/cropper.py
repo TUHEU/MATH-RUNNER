@@ -14,9 +14,9 @@ pygame.init()
 pygame.display.set_mode((1, 1), pygame.HIDDEN)
 while(i<12):
     if i < 10:
-        sprite = pygame.image.load(f"tobecropped\enemy1\Idle Blink\Wraith_03_Idle Blinking_00{i}.png").convert_alpha()
+        sprite = pygame.image.load(f"cropper\tobecropped\enemy2\Attacking\Wraith_01_Attack_00{i}.png").convert_alpha()
     elif i>=10:
-        sprite = pygame.image.load(f"tobecropped\enemy1\Idle Blink\Wraith_03_Idle Blinking_0{i}.png").convert_alpha()
+        sprite = pygame.image.load(f"cropper\tobecropped\enemy2\Attacking\Wraith_01_Attack_0{i}.png").convert_alpha()
 
     # Crop it
     cropped_sprite = crop_to_sprite(sprite)
