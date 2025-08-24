@@ -308,6 +308,11 @@ class Enemy:
         self.attack = False
         self.enemysuf = enemysuf
         self.key = key
+        self.wave=2
+        # NEW STATES
+        self.dying = False
+        self.dead = False
+        self.death_timer = 0
 
         if key == "enemy1":
             self.enemyrect = enemy1_idleBlink[0].frameF.get_rect(bottomleft=(x, ground))
@@ -321,37 +326,48 @@ class Enemy:
             )
 
     def createanimation(self, rectE1):
-        global playerattack, question_scrn, immortal, enemyattack 
+        global playerattack, question_scrn, immortal, enemyattack,dt
+        # 1. If already DEAD (stay on ground, then disappear)
+        if self.dead:
+            self.death_timer += dt
+            if self.death_timer > 100:  # after ~100 frames remove enemy
+                if(self.wave>0):
+                    self.dead = False
+                    self.dying = False
+                    self.enemyrect.bottomleft= (x + (random.randint(200, 500) * unitx), ground)  # Move off-screen
+                    self.wave-=1
+                elif(self.wave==0):
+                    self.enemyrect.bottom=-100*unity
+            return
+        # 2. DYING animation in progress
+        if self.dying:
+            self.index += 0.2
+            death_frames = enemy1_dying if self.key == "enemy1" else enemy2_dying if self.key == "enemy2" else enemy3_dying
+            
+            if int(self.index) >= len(death_frames):
+                self.index = len(death_frames) - 1
+                self.dying = False
+                self.dead = True
+                self.death_timer = 0
+            self.enemysuf = death_frames[int(self.index)].frameF
+            return
 
-        # Movement & idle animations when no attack is happening
+        # 3. MOVEMENT & ATTACK if alive
         if not question_scrn and not playerattack and not self.attack:
             if self.index >= len(enemy1_Walk):
                 self.index = 0
 
             # Movement left/right
-            if not self.frontE and not self.attack:
-                if self.key == "enemy1":
-                    self.enemysuf = enemy1_Walk[int(self.index)].frameB
-                elif self.key == "enemy2":
-                    self.enemysuf = enemy2_Walk[int(self.index)].frameB
-                elif self.key == "enemy3":
-                    self.enemysuf = enemy3_Walk[int(self.index)].frameB
-                self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
+            if not self.frontE:
+                self._set_walk_frame(rectE1, forward=False)
                 self.enemyrect.left -= 3 * unitx
-
-            elif self.frontE and not self.attack:
-                if self.key == "enemy1":
-                    self.enemysuf = enemy1_Walk[int(self.index)].frameF
-                elif self.key == "enemy2":
-                    self.enemysuf = enemy2_Walk[int(self.index)].frameF
-                elif self.key == "enemy3":
-                    self.enemysuf = enemy3_Walk[int(self.index)].frameF
-                self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
+            else:
+                self._set_walk_frame(rectE1, forward=True)
                 self.enemyrect.left += 3 * unitx
 
             # Boundaries
-            if(self.enemyrect.left<0):self.frontE=True
-            if(self.enemyrect.right>=x):self.frontE=False
+            if self.enemyrect.left < 0: self.frontE = True
+            if self.enemyrect.right >= x: self.frontE = False
             self.index += 0.4
 
             # Start attack if collides with player and no other enemy is attacking
@@ -359,38 +375,55 @@ class Enemy:
                 self.attack = True
                 Enemy.active_attacker = self
                 question_scrn = False
-        # ATTACK animation phase
+
+        # 4. ATTACK animation
         elif self.attack:
             self.index += 0.2
             if self.index >= len(enemy1_attack):
-                # Reset attack state once animation completes
                 self.index = 0
                 self.attack = False
-                immortal=True
-                enemyattack=False
+                immortal = True
+                enemyattack = False
                 Enemy.active_attacker = None
-                #question_scrn = False  # Close question screen when done
                 return
 
-            # Select attack frame based on position relative to player
-            if self.key == "enemy1":
-                self.enemysuf = (
-                    enemy1_attack[int(self.index)].frameF
-                    if self.enemyrect.right <= player.playerrect.right
-                    else enemy1_attack[int(self.index)].frameB
-                )
-            elif self.key == "enemy2":
-                self.enemysuf = (
-                    enemy2_attack[int(self.index)].frameF
-                    if self.enemyrect.right <= player.playerrect.right
-                    else enemy2_attack[int(self.index)].frameB
-                )
-            elif self.key == "enemy3":
-                self.enemysuf = (
-                    enemy3_attack[int(self.index)].frameF
-                    if self.enemyrect.right <= player.playerrect.right
-                    else enemy3_attack[int(self.index)].frameB
-                )
+            self._set_attack_frame()
+
+    def _set_walk_frame(self, rectE1, forward):
+        # Helper to set walking frames
+        if self.key == "enemy1":
+            self.enemysuf = enemy1_Walk[int(self.index)].frameF if forward else enemy1_Walk[int(self.index)].frameB
+        elif self.key == "enemy2":
+            self.enemysuf = enemy2_Walk[int(self.index)].frameF if forward else enemy2_Walk[int(self.index)].frameB
+        elif self.key == "enemy3":
+            self.enemysuf = enemy3_Walk[int(self.index)].frameF if forward else enemy3_Walk[int(self.index)].frameB
+        self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
+
+    def _set_attack_frame(self):
+        # Helper to set attack frames
+        if self.key == "enemy1":
+            self.enemysuf = (
+                enemy1_attack[int(self.index)].frameF
+                if self.enemyrect.right <= player.playerrect.right
+                else enemy1_attack[int(self.index)].frameB
+            )
+        elif self.key == "enemy2":
+            self.enemysuf = (
+                enemy2_attack[int(self.index)].frameF
+                if self.enemyrect.right <= player.playerrect.right
+                else enemy2_attack[int(self.index)].frameB
+            )
+        elif self.key == "enemy3":
+            self.enemysuf = (
+                enemy3_attack[int(self.index)].frameF
+                if self.enemyrect.right <= player.playerrect.right
+                else enemy3_attack[int(self.index)].frameB
+            )
+
+    def trigger_death(self):
+        """Call this when the player successfully finishes an attack on this enemy"""
+        self.dying = True
+        self.index = 0
 #animation player class
 class Animation:
     def __init__(self,index=0,front=True,playersuf=player_idle[0].frameF,playerrect=player_idle[0].rect):
@@ -463,6 +496,9 @@ class Animation:
             self.index+=.2
             if self.index >= len(player_attack):
                 playerattack = False
+                if self.playerrect.colliderect (enemy1.enemyrect):enemy1.trigger_death()
+                elif self.playerrect.colliderect (enemy2.enemyrect):enemy2.trigger_death()
+                elif self.playerrect.colliderect (enemy3.enemyrect):enemy3.trigger_death()
                 return 
             if self.playerrect.colliderect (enemy1.enemyrect):
                 if enemy1.enemyrect.right>=self.playerrect.right:
