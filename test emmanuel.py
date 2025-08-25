@@ -11,7 +11,7 @@ screen_height = window.current_h
 
 # Create the game window
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Math Runner - Background Class Added")
+pygame.display.set_caption("Math Runner - Player Added")
 
 # Clock to control frame rate
 clock = pygame.time.Clock()
@@ -23,20 +23,42 @@ class Background:
         self.color = color
 
     def draw(self, surface):
-        surface.fill(self.color)  # Fill entire screen with the color
+        surface.fill(self.color)
 
-# Create background instance
+# Player class
+class Player:
+    def __init__(self, x, y, width=50, height=80, color=(255, 50, 50)):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.color = color
+        self.vel_x = 5  # Horizontal movement speed
+
+    def handle_input(self, keys):
+        if keys[pygame.K_a]:
+            self.rect.x -= self.vel_x
+        if keys[pygame.K_d]:
+            self.rect.x += self.vel_x
+
+    def draw(self, surface):
+        pygame.draw.rect(surface, self.color, self.rect)
+
+# Create instances
 background = Background()
+player = Player(screen_width//2 - 25, screen_height - 100)
 
 # Game loop
 running = True
 while running:
+    keys = pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # Draw background
+    # Handle player input
+    player.handle_input(keys)
+
+    # Draw everything
     background.draw(screen)
+    player.draw(screen)
 
     # Update the display
     pygame.display.update()
