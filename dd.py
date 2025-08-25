@@ -300,8 +300,19 @@ enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in rang
 
 
 #Questions/Answers dictionaries
+questionsize=(unitx*1.3,2*unity)
+position_question=(200*unitx,600*unity)
 answer_easy=['A','B','C','D','A','B','C','D','A','B','C','D','A','B','C']
-questions_east_dict={Frame(questionsize,f"Assets/Questions/Easy/{i}.png"):answer_easy[i-1] for i in range(1,16):}
+answer_medium=['A','B','C','D','A','B','C','D','A','B','C','D','A','B','C']
+answer_hard=['A','B','C','D','A','B','C','D','A','B','C','D','A','B','C']
+
+question_easy=[Frame(questionsize,f"Assets/Questions/Easy/{i}.png",position_question) for i in range(1,16)]
+question_Medium=[Frame(questionsize,f"Assets/Questions/Medium/{i}.png",position_question) for i in range(1,16)]
+question_High=[Frame(questionsize,f"Assets/Questions/High/{i}.png",position_question) for i in range(1,16)]
+
+questions_east_dict={question_easy[i]:answer_easy[i] for i in range(0,15)}
+questions_medium_dict={question_Medium[i]:answer_medium[i] for i in range(0,15)}
+questions_hard_dict={question_High[i]:answer_hard[i] for i in range(0,15)}
 
 
 #animation enemy class
@@ -623,6 +634,7 @@ while(True):
             playerattack=False    
     if question_scrn:
         screen.blit(board.frameF,board.rect)
+        screen.blit(question_Medium[0].frameF,question_Medium[0].rect)
         if(kpressed[pygame.K_o]):
             player.playerrect.bottom=ground
             player.index=0
@@ -630,7 +642,6 @@ while(True):
             immortaltime=0
             question_scrn=False 
         elif(kpressed[pygame.K_i]):
-            #enemy1.enemyrect.bottom=ground
             enemy1.index=0
             enemy2.index=0
             enemy3.index=0
