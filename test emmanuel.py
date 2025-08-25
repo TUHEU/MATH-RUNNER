@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random
 
 # Initialize pygame
 pygame.init()
@@ -11,11 +12,14 @@ screen_height = window.current_h
 
 # Create the game window
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Math Runner - Player Added")
+pygame.display.set_caption("Math Runner - Equation Generator Added")
 
 # Clock to control frame rate
 clock = pygame.time.Clock()
 FPS = 60
+
+# Font for displaying equations
+font = pygame.font.SysFont(None, 50)
 
 # Background class
 class Background:
@@ -41,9 +45,34 @@ class Player:
     def draw(self, surface):
         pygame.draw.rect(surface, self.color, self.rect)
 
+# Equation class
+class Equation:
+    def __init__(self):
+        self.equation = ""
+        self.answer = 0
+
+    def generate(self):
+        num1 = random.randint(1, 50)
+        num2 = random.randint(1, 50)
+        op = random.choice(["+", "-", "*", "/"])
+        # Avoid division by zero
+        if op == "/":
+            num2 = random.randint(1, 10)
+            self.answer = round(num1 / num2, 2)
+        else:
+            self.answer = eval(f"{num1}{op}{num2}")
+        self.equation = f"{num1} {op} {num2} = {self.answer}"
+        return self.equation
+
+    def draw(self, surface, x, y):
+        text = font.render(self.equation, True, (0, 0, 0))
+        surface.blit(text, (x, y))
+
 # Create instances
 background = Background()
 player = Player(screen_width//2 - 25, screen_height - 100)
+equation = Equation()
+equation.generate()
 
 # Game loop
 running = True
@@ -59,6 +88,7 @@ while running:
     # Draw everything
     background.draw(screen)
     player.draw(screen)
+    equation.draw(screen, 50, 50)
 
     # Update the display
     pygame.display.update()
