@@ -140,6 +140,14 @@ immortaltime=0
 playerattack=False
 playerinjure=False
 
+
+#Questions variables
+questionsize=(unitx*1.2,2*unity)
+position_question=(200*unitx,600*unity)
+answer=''
+answer_chosen=False
+
+
 #Enemies variables
 framesizeE=(.3*unitx,.6*unity)
 Enemydead=False
@@ -300,11 +308,9 @@ enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in rang
 
 
 #Questions/Answers dictionaries
-questionsize=(unitx*1.3,2*unity)
-position_question=(200*unitx,600*unity)
-answer_easy=['A','B','C','D','A','B','C','D','A','B','C','D','A','B','C']
-answer_medium=['A','B','C','D','A','B','C','D','A','B','C','D','A','B','C']
-answer_hard=['A','B','C','D','A','B','C','D','A','B','C','D','A','B','C']
+answer_easy=['a','b','c','d','a','b','c','d','a','b','c','d','a','b','c']
+answer_medium=['a','b','c','d','a','b','c','d','a','b','c','d','a','b','c']
+answer_hard=['a','b','c','d','a','b','c','d','a','b','c','d','a','b','c']
 
 question_easy=[Frame(questionsize,f"Assets/Questions/Easy/{i}.png",position_question) for i in range(1,16)]
 question_Medium=[Frame(questionsize,f"Assets/Questions/Medium/{i}.png",position_question) for i in range(1,16)]
@@ -451,7 +457,7 @@ class Animation:
         self.playerrect=playerrect
         self.vel_y = 0
     def createanimation(self, rect,onground,kpressed,playerattack):
-        if not question_scrn and not  playerattack:
+        if not question_scrn and not  playerattack and not enemyattack:
             if(self.index >=len(player_jump)):self.index=0
             if(kpressed[pygame.K_d] ):
                 self.front=True
@@ -565,12 +571,18 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} ply {player.playerrect.width} immt {immortaltime} ques {question_scrn} {enemy1.frontE} ",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} ans{answer_chosen} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
+        if question_scrn and event.type==pygame.KEYDOWN:
+            char = event.unicode
+            if char.lower() in "abcd":
+                answer=char
+            if event.key==pygame.K_RETURN and answer!='':
+                    answer_chosen=True
     screen.blit(menu,menu_rect)
 #menu true  
     if menu_scrn:
@@ -595,7 +607,10 @@ while(True):
                 menu_scrn=False
                 start_scrn=True
     if(player.playerrect.bottom<ground):onground=False
-    if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):question_scrn=True
+    if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):
+        if(not question_scrn):
+            question_num= random.randint(0,14)
+        question_scrn=True
     if start_scrn:
           if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
@@ -634,21 +649,22 @@ while(True):
             playerattack=False    
     if question_scrn:
         screen.blit(board.frameF,board.rect)
-        quest=9
-        screen.blit(question_easy[quest].frameF,question_easy[quest].rect)
-        if(kpressed[pygame.K_o]):
+        screen.blit(question_easy[question_num].frameF,question_easy[question_num].rect)
+        if(answer_chosen and answer==answer_easy[question_num]):
             player.playerrect.bottom=ground
             player.index=0
             playerattack=True
             immortaltime=0
             question_scrn=False 
-        elif(kpressed[pygame.K_i]):
+            answer_chosen=False
+        elif(answer_chosen and answer!=answer_easy[question_num]):
             enemy1.index=0
             enemy2.index=0
             enemy3.index=0
             immortaltime=0
             enemyattack=True
             question_scrn=False 
+            answer_chosen=False
     screen.blit(testtext,(10,10))
 
     pygame.display.update()
