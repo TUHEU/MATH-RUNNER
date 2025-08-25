@@ -1,0 +1,184 @@
+Math Runner: Requirements Specification Document
+
+Contents
+ 
+1	Introduction	3
+1.1	Project Overview . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .	3
+1.2	Purpose of the Document	. . . . . . . . . . . . . . . . . . . . . . . . . .	3
+1.3	Scope	. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .	3
+1.4	Stakeholders . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .	3
+2	Functional Requirements	3
+2.1	User Authentication and Profile Selection . . . . . . . . . . . . . . . . . .	3
+2.2	Game Mechanics	. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .	4
+2.3	Question Generation and Management  . . . . . . . . . . . . . . . . . . .	4
+2.4	Scoring and Progression	. . . . . . . . . . . . . . . . . . . . . . . . . . .	4
+2.5	User Interface and Controls	. . . . . . . . . . . . . . . . . . . . . . . . .	5
+2.6	Help and Tutorials  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .	5
+3	Non-Functional Requirements	5
+3.1	Performance . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .	5
+3.2	Usability . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .	5
+3.3	Reliability . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .	5
+3.4	Security  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .	5
+3.5	Maintainability  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .	6
+3.6	Portability . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .	6
+4	Feasibility Analysis	6
+4.1	Technical Feasibility	. . . . . . . . . . . . . . . . . . . . . . . . . . . . .	6
+4.2	Economic Feasibility  . . . . . . . . . . . . . . . . . . . . . . . . . . . . .	6
+4.3	Operational Feasibility . . . . . . . . . . . . . . . . . . . . . . . . . . . .	6
+4.4	Schedule Feasibility . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .	6
+4.5	Legal and Ethical Feasibility . . . . . . . . . . . . . . . . . . . . . . . . .	7
+5	Use Cases	7
+5.1	Use Case: Starting a Game	. . . . . . . . . . . . . . . . . . . . . . . . .	7
+5.2	Use Case: Answering a Question . . . . . . . . . . . . . . . . . . . . . . .	7
+6	Assumptions and Dependencies	7
+7	Appendix	8
+
+ 
+1	Introduction
+1.1	Project Overview
+Math Runner is an educational game developed in Python, designed to engage users in solving math problems while navigating a runner-style game environment. Players select their education level (e.g., elementary, middle school, high school) to receive appropriately challenging math questions. Correct answers allow the player to overcome obstacles and defeat enemies, progressing through levels. Incorrect answers result in penalties, such as losing lives or restarting sections. The game aims to make learning mathematics fun and interactive, targeting students and casual learners.
+The project leverages Python, potentially using Pygame for game mechanics, graphics, and user input handling. This document outlines the requirements elicitation and analysis for Phase 2 of the project.
+
+1.2	Purpose of the Document
+This Requirements Specification Document (RSD) defines the functional and non-functional requirements of the Math Runner system. It analyzes the feasibility of these requirements and serves as a blueprint for design, implementation, and testing. The document is based on stakeholder needs (e.g., students, educators, developers) and ensures the system is fea-
+sible within the constraints of a semester project.
+
+1.3	Scope
+•	In Scope: User registration/selection of difficulty levels, generation of math ques- tions, game mechanics (running, jumping, obstacles, enemies), scoring, and basic UI.
+•	Out of Scope: Multiplayer features, online leaderboards, advanced AI for ene- mies, mobile deployment, or integration with external databases for question banks (unless expanded later).
+
+1.4	Stakeholders
+•	Primary Users: Students/players of various education levels.
+•	Developers: The student team building the game.
+•	Educators: Potential users for classroom integration.
+•	Testers: Team members or peers evaluating the game.
+
+2	Functional Requirements
+Functional requirements describe what the system must do, categorized by core features.
+
+2.1	User Authentication and Profile Selection
+•	FR1.1: The system shall allow users to start a new game by selecting their educa- tion level (e.g., Elementary: basic arithmetic; Middle School: algebra; High School:
+ 
+calculus/trigonometry).
+•	FR1.2: The system shall provide an option for guest play without saving progress, or registered play to save scores and levels.
+•	FR1.3: Upon selection, the system shall load a question bank tailored to the chosen level.
+
+2.2	Game Mechanics
+•	FR2.1: The system shall display a side-scrolling runner environment where the player character automatically runs forward.
+•	FR2.2: The system shall generate obstacles (e.g., pits, walls) and enemies that require math questions to be solved for progression.
+–	Sub-requirement: Questions appear as pop-ups when approaching an obsta- cle/enemy.
+•	FR2.3: The system shall accept user input (e.g., keyboard or on-screen choices) for answering multiple-choice or short-answer math questions.
+–	Correct answer: Player jumps over obstacle or defeats enemy.
+–	Incorrect answer: Player loses a life, slows down, or respawns at a checkpoint.
+•	FR2.4: The system shall include power-ups (e.g., extra lives, hints) earned through consecutive correct answers.
+•	FR2.5: The system shall end the game when lives reach zero or a level is completed, displaying a final score.
+
+2.3	Question Generation and Management
+•	FR3.1: The system shall randomly generate math questions from a predefined bank, ensuring variety (e.g., addition, subtraction, equations).
+•	FR3.2: Questions shall scale in difficulty based on the user’s education level and progress (e.g., harder questions in later levels).
+•	FR3.3: The system shall validate answers in real-time, providing immediate feed- back (correct/incorrect with explanations).
+
+2.4	Scoring and Progression
+•	FR4.1: The system shall track scores based on correct answers, speed, and combo streaks.
+•	FR4.2: The system shall save high scores locally for registered users.
+•	FR4.3: The system shall unlock new levels or themes upon reaching score thresh- olds.
+ 
+2.5	User Interface and Controls
+•	FR5.1: The system shall provide a main menu with options: Start Game, Select Level, View Scores, Exit.
+•	FR5.2: In-game UI shall display lives, score, current question, and timer (if appli- cable).
+•	FR5.3: Controls shall include keyboard inputs (e.g., arrow keys for movement, number keys for answers) and support for mouse clicks.
+
+2.6	Help and Tutorials
+•	FR6.1: The system shall include a tutorial mode explaining controls and mechan- ics.
+•	FR6.2: The system shall offer hints for difficult questions, limited per level.
+
+3	Non-Functional Requirements
+Non-functional requirements specify how the system performs.
+
+3.1	Performance
+•	NFR1.1: The game shall run smoothly at 60 FPS on standard hardware (e.g., mid-range laptops with Python 3.x).
+•	NFR1.2: Question generation and validation shall occur in under 1 second to maintain flow.
+•	NFR1.3: The system shall handle up to 100 questions per session without signifi- cant memory leaks.
+
+3.2	Usability
+•	NFR2.1: The interface shall be intuitive, with clear instructions and responsive controls.
+•	NFR2.2: The game shall be accessible to color-blind users (e.g., high-contrast modes) and support keyboard-only navigation.
+•	NFR2.3: Error messages (e.g., invalid input) shall be user-friendly and educa- tional.
+
+3.3	Reliability
+•	NFR3.1: The system shall handle invalid inputs gracefully without crashing.
+•	NFR3.2: Saved data (scores) shall be recoverable after unexpected exits.
+
+3.4	Security
+•	NFR4.1: Local data storage shall be secure against basic tampering (e.g., en- crypted score files).
+ 
+•	NFR4.2: No external network access required, minimizing security risks.
+
+3.5	Maintainability
+•	NFR5.1: Code shall be modular (e.g., separate modules for game logic, UI, ques- tions) for easy updates.
+•	NFR5.2: The system shall include comments and documentation for future exten- sions.
+
+3.6	Portability
+•	NFR6.1: The game shall run on Windows, macOS, and Linux with Python in- stalled.
+•	NFR6.2: Dependencies limited to standard libraries and Pygame.
+
+4	Feasibility Analysis
+4.1	Technical Feasibility
+•	Assessment: Python is suitable for game development with Pygame handling graphics and input. Question generation can use built-in random and math li- braries. No advanced hardware needed.
+•	Risks: Integrating real-time question pop-ups with game loop may require opti- mization to avoid lag. Mitigation: Use event-driven programming.
+•	Conclusion: Feasible with team Python skills; Pygame tutorials available online.
+
+4.2	Economic Feasibility
+•	Assessment: Development costs are low (free tools: Python, Pygame). No budget for hardware/software beyond personal computers.
+•	Risks: Time constraints in a 6-week phase; prioritize core features.
+•	Conclusion: Economically viable as a student project with no monetary outlay.
+
+4.3	Operational Feasibility
+•	Assessment: Users (students) will find the game engaging and easy to operate. Educators can integrate it for practice.
+•	Risks: Ensuring questions are educationally accurate; validate against standards.
+•	Conclusion: Operationally sound, with potential for positive user adoption.
+
+4.4	Schedule Feasibility
+•	Assessment: Phase 2 (2/6 weeks) focuses on requirements; subsequent phases for design/coding. Break into sprints: Week 1 for elicitation, Week 2 for analy- sis/documentation.
+ 
+•	Risks: Team coordination; use tools like Git for collaboration.
+•	Conclusion: Feasible within semester timeline if scoped appropriately.
+
+4.5	Legal and Ethical Feasibility
+•	Assessment: Questions must be original or public domain to avoid copyright issues. Promote ethical learning (no cheating mechanics).
+•	Risks: Accessibility compliance (e.g., for disabilities).
+•	Conclusion: No major legal barriers; ensure inclusive design.
+
+5	Use Cases
+5.1	Use Case: Starting a Game
+•	Actors: Player.
+•	Preconditions: Game launched.
+•	Steps:
+1.	Player selects education level.
+2.	System loads questions.
+3.	Player begins running; encounters first obstacle.
+4.	Answers question correctly to proceed.
+•	Postconditions: Game in progress.
+•	Alternatives: Incorrect answer leads to penalty.
+
+5.2	Use Case: Answering a Question
+•	Actors: Player.
+•	Preconditions: Question displayed.
+•	Steps:
+1.	Player inputs answer.
+2.	System validates.
+3.	Provides feedback.
+•	Postconditions: Progression or penalty applied.
+
+6	Assumptions and Dependencies
+•	Assumptions: Users have basic computer skills; Python environment set up.
+•	Dependencies: Pygame library installed (pip install pygame).
+•	Constraints: Limited to single-player; no internet required.
+ 
+7	Appendix
+•	Glossary:
+–	Obstacle: In-game barrier requiring a math solution.
+–	Education Level: User-selected difficulty tier.
+•	References: Python documentation, Pygame tutorials.
+•	Version History: Version 1.0 - Initial draft for Phase 2.
+This document provides a comprehensive foundation. Refine based on team feedback or testing. If needed, prototype core features in Python to validate feasibility further.
