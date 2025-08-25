@@ -260,7 +260,7 @@ floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor
 
 
 #question images
-board=Frame((unitx*.8,unity*1.5),f"Assets/Questtions/board.png",(150*unitx,800*unity))
+board=Frame((unitx*.8,unity*1.5),f"Assets/Questions/board.png",(150*unitx,800*unity))
 
 
 #player animations lists
@@ -297,6 +297,12 @@ enemy3_hurt=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Hurt/{i}.png") for i in rang
 enemy3_idle=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle/{i}.png") for i in range(0,12)]
 enemy3_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle Blink/{i}.png") for i in range(0,12)]
 enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in range(0,12)]
+
+
+#Questions/Answers dictionaries
+answer_easy=['A','B','C','D','A','B','C','D','A','B','C','D','A','B','C']
+questions_east_dict={Frame(questionsize,f"Assets/Questions/Easy/{i}.png"):answer_easy[i-1] for i in range(1,16):}
+
 
 #animation enemy class
 class Enemy:

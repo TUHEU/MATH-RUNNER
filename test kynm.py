@@ -350,6 +350,7 @@ class Enemy:
                 self.dead = True
                 self.death_timer = 0
             self.enemysuf = death_frames[int(self.index)].frameF
+            self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
             return
 
         # 3. MOVEMENT & ATTACK if alive
@@ -547,7 +548,7 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion}  {clock.get_fps()}  {gravity} groun {ground} vbot {player.playerrect.bottom} ong {onground} b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} ply {player.playerrect.width} immt {immortaltime} ques {question_scrn} {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
