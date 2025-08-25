@@ -350,6 +350,7 @@ class Enemy:
                 self.dead = True
                 self.death_timer = 0
             self.enemysuf = death_frames[int(self.index)].frameF
+            self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
             return
 
         # 3. MOVEMENT & ATTACK if alive

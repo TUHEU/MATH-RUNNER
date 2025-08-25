@@ -260,7 +260,7 @@ floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor
 
 
 #question images
-board=Frame((unitx*.8,unity*1.5),f"Assets/Questtions/board.png",(150*unitx,800*unity))
+board=Frame((unitx*.8,unity*1.5),f"Assets/Questions/board.png",(150*unitx,800*unity))
 
 
 #player animations lists
