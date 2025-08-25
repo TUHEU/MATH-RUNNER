@@ -1,15 +1,27 @@
-# ... (Keep all imports and initial setup same as commit 10)
-
-# Enemy class with death animation
+import pygame
+import random
+# Enemy class with multiple types
 class Enemy:
-    def __init__(self, x, y, width=40, height=60, color=(0, 0, 0), speed=5):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.color = color
-        self.speed = speed
+    def __init__(self, x, y, enemy_type=1):
+        # Define properties per type
+        if enemy_type == 1:
+            self.width, self.height = 40, 60
+            self.color = (0, 0, 0)
+            self.speed = 5
+        elif enemy_type == 2:
+            self.width, self.height = 60, 80
+            self.color = (50, 0, 150)
+            self.speed = 3
+        elif enemy_type == 3:
+            self.width, self.height = 30, 50
+            self.color = (150, 0, 0)
+            self.speed = 7
+
+        self.rect = pygame.Rect(x, y, self.width, self.height)
         self.alive = True
         self.dying = False
         self.death_timer = 0
-        self.max_death_time = 15  # frames for death animation
+        self.max_death_time = 15  # frames
 
     def update(self):
         if self.alive and not self.dying:
@@ -22,10 +34,8 @@ class Enemy:
 
     def draw(self, surface):
         if self.alive:
-            # Draw enemy normally
             pygame.draw.rect(surface, self.color, self.rect)
         elif self.dying:
-            # Draw fading death animation
             alpha = max(0, 255 - int((self.death_timer/self.max_death_time)*255))
             death_surface = pygame.Surface((self.rect.width, self.rect.height))
             death_surface.fill((255,0,0))
@@ -36,10 +46,8 @@ class Enemy:
         self.dying = True
         self.death_timer = 0
 
-# ... (Keep Player, Equation, Background classes same as commit 10)
-
-# Collision check for attack
-for enemy in enemies:
-    if player.attacking and player.attack_rect.colliderect(enemy.rect):
-        enemy.die()  # trigger death animation
-        player.attacking = False
+# Spawn enemies randomly with different types
+if random.randint(0, 100) < 2:
+    enemy_y = screen_height - 100
+    enemy_type = random.choice([1, 2, 3])
+    enemies.append(Enemy(screen_width, enemy_y, enemy_type))
