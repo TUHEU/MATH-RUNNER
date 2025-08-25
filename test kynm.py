@@ -547,7 +547,15 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
+<<<<<<< HEAD
+<<<<<<< HEAD
+    testtext=font1.render(f"curemo {current_emotion}  {clock.get_fps()}  {gravity} groun {ground} vbot {player.playerrect.bottom} ong {onground} b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
+=======
+    testtext=font1.render(f"curemo {current_emotion}  {x}  {enemy1.enemyrect.left} groun {ground} S {enemy1.frontE} ",False,"Black")
+>>>>>>> 4992a88f14cb7def5c2e30d4f6576adee47b0a41
+=======
     testtext=font1.render(f"curemo {current_emotion} ply {player.playerrect.width} immt {immortaltime} ques {question_scrn} {enemy1.frontE} ",False,"Black")
+>>>>>>> 0aa15c0bb06df27fea60dc07008e115014d7e10d
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
