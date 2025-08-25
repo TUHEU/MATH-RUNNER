@@ -634,8 +634,8 @@ while(True):
             playerattack=False    
     if question_scrn:
         screen.blit(board.frameF,board.rect)
-        random.randint(0,2)
-        screen.blit(question_easy[].frameF,question_easy[4].rect)
+        quest=9
+        screen.blit(question_easy[quest].frameF,question_easy[quest].rect)
         if(kpressed[pygame.K_o]):
             player.playerrect.bottom=ground
             player.index=0
