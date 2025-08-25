@@ -12,7 +12,7 @@ screen_height = window.current_h
 
 # Create the game window
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Math Runner - Collision Detection Added")
+pygame.display.set_caption("Math Runner - Jump Mechanic Added")
 
 # Clock to control frame rate
 clock = pygame.time.Clock()
@@ -29,18 +29,36 @@ class Background:
     def draw(self, surface):
         surface.fill(self.color)
 
-# Player class
+# Player class with jump mechanic
 class Player:
     def __init__(self, x, y, width=50, height=80, color=(255, 50, 50)):
         self.rect = pygame.Rect(x, y, width, height)
         self.color = color
-        self.vel_x = 5  # Horizontal movement speed
+        self.vel_x = 5
+        self.vel_y = 0
+        self.jump_strength = -15
+        self.gravity = 1
+        self.on_ground = True
 
     def handle_input(self, keys):
         if keys[pygame.K_a]:
             self.rect.x -= self.vel_x
         if keys[pygame.K_d]:
             self.rect.x += self.vel_x
+        if keys[pygame.K_w] and self.on_ground:
+            self.vel_y = self.jump_strength
+            self.on_ground = False
+
+    def update(self):
+        # Apply gravity
+        self.vel_y += self.gravity
+        self.rect.y += self.vel_y
+
+        # Check ground collision
+        if self.rect.bottom >= screen_height - 50:
+            self.rect.bottom = screen_height - 50
+            self.vel_y = 0
+            self.on_ground = True
 
     def draw(self, surface):
         pygame.draw.rect(surface, self.color, self.rect)
@@ -75,10 +93,10 @@ class Enemy:
         self.speed = speed
 
     def update(self):
-        self.rect.x -= self.speed  # Move left
+        self.rect.x -= self.speed
 
     def draw(self, surface):
-        pygame.draw.rect(self.color, self.rect, self.rect)
+        pygame.draw.rect(surface, self.color, self.rect)
 
 # Create instances
 background = Background()
@@ -95,11 +113,12 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Handle player input
+    # Handle player input and update
     player.handle_input(keys)
+    player.update()
 
     # Spawn enemies randomly
-    if random.randint(0, 100) < 2:  # 2% chance each frame
+    if random.randint(0, 100) < 2:
         enemy_y = screen_height - 100
         enemies.append(Enemy(screen_width, enemy_y))
 
@@ -113,8 +132,8 @@ while running:
     # Collision detection
     for enemy in enemies:
         if player.rect.colliderect(enemy.rect):
-            print("Player hit!")  # For now just print
-            running = False  # Stop the game
+            print("Player hit!")
+            running = False
 
     # Draw everything
     background.draw(screen)
@@ -123,10 +142,8 @@ while running:
     for enemy in enemies:
         enemy.draw(screen)
 
-    # Update the display
+    # Update display
     pygame.display.update()
-
-    # Maintain 60 FPS
     clock.tick(FPS)
 
 # Quit pygame
