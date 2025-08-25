@@ -22,3 +22,14 @@ class Background:
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
+# Initialize background
+background = Background("Assets/Backgrounds/1.png", speed=3)
+
+# In main game loop
+keys = pygame.key.get_pressed()
+if keys[pygame.K_d]:
+    background.update(moving_right=True)
+elif keys[pygame.K_a]:
+    background.update(moving_right=False)
+
+background.draw(screen)
