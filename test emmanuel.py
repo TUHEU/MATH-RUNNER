@@ -12,7 +12,7 @@ screen_height = window.current_h
 
 # Create the game window
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Math Runner - Enemies Added")
+pygame.display.set_caption("Math Runner - Collision Detection Added")
 
 # Clock to control frame rate
 clock = pygame.time.Clock()
@@ -78,14 +78,13 @@ class Enemy:
         self.rect.x -= self.speed  # Move left
 
     def draw(self, surface):
-        pygame.draw.rect(surface, self.color, self.rect)
+        pygame.draw.rect(self.color, self.rect, self.rect)
 
 # Create instances
 background = Background()
 player = Player(screen_width//2 - 25, screen_height - 100)
 equation = Equation()
 equation.generate()
-
 enemies = []
 
 # Game loop
@@ -101,7 +100,7 @@ while running:
 
     # Spawn enemies randomly
     if random.randint(0, 100) < 2:  # 2% chance each frame
-        enemy_y = screen_height - 100  # same level as player
+        enemy_y = screen_height - 100
         enemies.append(Enemy(screen_width, enemy_y))
 
     # Update enemies
@@ -110,6 +109,12 @@ while running:
 
     # Remove off-screen enemies
     enemies = [e for e in enemies if e.rect.right > 0]
+
+    # Collision detection
+    for enemy in enemies:
+        if player.rect.colliderect(enemy.rect):
+            print("Player hit!")  # For now just print
+            running = False  # Stop the game
 
     # Draw everything
     background.draw(screen)
