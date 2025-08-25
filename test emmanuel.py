@@ -12,7 +12,7 @@ screen_height = window.current_h
 
 # Create the game window
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Math Runner - Jump Mechanic Added")
+pygame.display.set_caption("Math Runner - Multiple Equations Added")
 
 # Clock to control frame rate
 clock = pygame.time.Clock()
@@ -29,7 +29,7 @@ class Background:
     def draw(self, surface):
         surface.fill(self.color)
 
-# Player class with jump mechanic
+# Player class
 class Player:
     def __init__(self, x, y, width=50, height=80, color=(255, 50, 50)):
         self.rect = pygame.Rect(x, y, width, height)
@@ -68,6 +68,7 @@ class Equation:
     def __init__(self):
         self.equation = ""
         self.answer = 0
+        self.pos = (0, 0)
 
     def generate(self):
         num1 = random.randint(1, 50)
@@ -79,11 +80,12 @@ class Equation:
         else:
             self.answer = eval(f"{num1}{op}{num2}")
         self.equation = f"{num1} {op} {num2} = {self.answer}"
+        self.pos = (random.randint(50, screen_width - 200), random.randint(50, screen_height - 200))
         return self.equation
 
-    def draw(self, surface, x, y):
+    def draw(self, surface):
         text = font.render(self.equation, True, (0, 0, 0))
-        surface.blit(text, (x, y))
+        surface.blit(text, self.pos)
 
 # Enemy class
 class Enemy:
@@ -101,9 +103,12 @@ class Enemy:
 # Create instances
 background = Background()
 player = Player(screen_width//2 - 25, screen_height - 100)
-equation = Equation()
-equation.generate()
 enemies = []
+
+# Create multiple equations
+equations = [Equation() for _ in range(5)]
+for eq in equations:
+    eq.generate()
 
 # Game loop
 running = True
@@ -138,7 +143,8 @@ while running:
     # Draw everything
     background.draw(screen)
     player.draw(screen)
-    equation.draw(screen, 50, 50)
+    for eq in equations:
+        eq.draw(screen)
     for enemy in enemies:
         enemy.draw(screen)
 
