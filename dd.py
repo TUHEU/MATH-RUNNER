@@ -122,6 +122,7 @@ question_scrn=False
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
+font3=pygame.font.Font("Assets/Fonts/3.fon",150)
 #physics variables
 player_vel_y = 0  
 gravity = 1 * unity  
@@ -147,8 +148,10 @@ position_question=(200*unitx,600*unity)
 answer=''
 answer_chosen=False
 correction_delay=0
-timer=0
-
+timer=30
+second=0
+seconds=0
+minutes=0
 
 #Enemies variables
 framesizeE=(.3*unitx,.6*unity)
@@ -613,6 +616,7 @@ while(True):
         if(not question_scrn):
             question_num= random.randint(0,14)
             correction_delay=0
+            timer=30
         question_scrn=True
     if start_scrn:
           if backgrounds[k].rect.right>=x:
@@ -651,12 +655,20 @@ while(True):
             immortal=True
             playerattack=False    
     if question_scrn:
+        second+=dt
+        if second>=1000 and timer>0:
+            timer-=1
+            second=0
+            seconds=timer%60
+            minutes=int(timer/60)%60
         display_answer=font2.render(f"Your Answer (press 'Enter' to validate) : {answer.upper()}",True,"Black")
         display_correct=font2.render(f"CORRECT!!!",True,"Green")
         display_wrong=font2.render(f"FAILED!!! correct = {answer_easy[question_num].upper()}",True,"Red")
+        display_timer=font2.render(f"Timer {minutes:02}:{seconds:02}",True,"White")
         screen.blit(board.frameF,board.rect)
         screen.blit(question_easy[question_num].frameF,question_easy[question_num].rect)
         screen.blit(display_answer,(240*unitx,620*unity))
+        screen.blit(display_timer,(500*unitx,400*unity))
         if(answer_chosen and answer.lower()==answer_easy[question_num]):
             screen.blit(display_correct,(240*unitx,675*unity))
             correction_delay+=dt
@@ -669,7 +681,7 @@ while(True):
             question_scrn=False 
             answer_chosen=False
             answer=''
-        elif(answer_chosen and answer.lower()!=answer_easy[question_num]):
+        elif(answer_chosen and answer.lower()!=answer_easy[question_num] or timer<=0):
             screen.blit(display_wrong,(240*unitx,670*unity))
             correction_delay+=dt
         if(correction_delay>=2000):
