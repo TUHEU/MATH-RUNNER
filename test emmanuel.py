@@ -12,7 +12,7 @@ screen_height = window.current_h
 
 # Create the game window
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Math Runner - Equation Generator Added")
+pygame.display.set_caption("Math Runner - Enemies Added")
 
 # Clock to control frame rate
 clock = pygame.time.Clock()
@@ -55,7 +55,6 @@ class Equation:
         num1 = random.randint(1, 50)
         num2 = random.randint(1, 50)
         op = random.choice(["+", "-", "*", "/"])
-        # Avoid division by zero
         if op == "/":
             num2 = random.randint(1, 10)
             self.answer = round(num1 / num2, 2)
@@ -68,11 +67,26 @@ class Equation:
         text = font.render(self.equation, True, (0, 0, 0))
         surface.blit(text, (x, y))
 
+# Enemy class
+class Enemy:
+    def __init__(self, x, y, width=40, height=60, color=(0, 0, 0), speed=5):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.color = color
+        self.speed = speed
+
+    def update(self):
+        self.rect.x -= self.speed  # Move left
+
+    def draw(self, surface):
+        pygame.draw.rect(surface, self.color, self.rect)
+
 # Create instances
 background = Background()
 player = Player(screen_width//2 - 25, screen_height - 100)
 equation = Equation()
 equation.generate()
+
+enemies = []
 
 # Game loop
 running = True
@@ -85,10 +99,24 @@ while running:
     # Handle player input
     player.handle_input(keys)
 
+    # Spawn enemies randomly
+    if random.randint(0, 100) < 2:  # 2% chance each frame
+        enemy_y = screen_height - 100  # same level as player
+        enemies.append(Enemy(screen_width, enemy_y))
+
+    # Update enemies
+    for enemy in enemies:
+        enemy.update()
+
+    # Remove off-screen enemies
+    enemies = [e for e in enemies if e.rect.right > 0]
+
     # Draw everything
     background.draw(screen)
     player.draw(screen)
     equation.draw(screen, 50, 50)
+    for enemy in enemies:
+        enemy.draw(screen)
 
     # Update the display
     pygame.display.update()
