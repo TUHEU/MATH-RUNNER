@@ -560,7 +560,8 @@ while(True):
         for equ in equations:
             print(equ.isactive)
             wait=(random.randint(400,800))
-            if not equ.active(wait,dt,cur_equation,eqn_locx,eqn_locy):
+            if not equ.active(wait, dt, cur_equation, eqn_locx, eqn_locy, i):
+
                 if(j<13):
                     cur_equation[i]=(equ.generate_equation(signs))
                     eqn_locx[i]=(random.randint(int(unitx*100),int(x-(unitx*100))))
