@@ -121,7 +121,7 @@ start_scrn=False
 question_scrn=False
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
-
+font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
 #physics variables
 player_vel_y = 0  
 gravity = 1 * unity  
@@ -146,6 +146,8 @@ questionsize=(unitx*1.2,2*unity)
 position_question=(200*unitx,600*unity)
 answer=''
 answer_chosen=False
+correction_delay=0
+timer=0
 
 
 #Enemies variables
@@ -350,7 +352,7 @@ class Enemy:
 
     def createanimation(self, rectE1):
         global playerattack, question_scrn, immortal, enemyattack,dt
-        # 1. If already DEAD (stay on ground, then disappear)
+        #If already DEAD (stay on ground, then disappear)
         if self.dead:
             self.death_timer += dt
             if self.death_timer > 100:  # after ~100 frames remove enemy
@@ -362,7 +364,7 @@ class Enemy:
                 elif(self.wave==0):
                     self.enemyrect.bottom=-100*unity
             return
-        # 2. DYING animation in progress
+        #DYING animation in progress
         if self.dying:
             self.index += 0.2
             death_frames = enemy1_dying if self.key == "enemy1" else enemy2_dying if self.key == "enemy2" else enemy3_dying
@@ -376,7 +378,7 @@ class Enemy:
             self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
             return
 
-        # 3. MOVEMENT & ATTACK if alive
+        # MOVEMENT & ATTACK if alive
         if not question_scrn and not playerattack and not self.attack:
             if self.index >= len(enemy1_Walk):
                 self.index = 0
@@ -400,7 +402,7 @@ class Enemy:
                 Enemy.active_attacker = self
                 question_scrn = False
 
-        # 4. ATTACK animation
+        # ATTACK animation
         elif self.attack:
             self.index += 0.2
             if self.index >= len(enemy1_attack):
@@ -457,9 +459,9 @@ class Animation:
         self.playerrect=playerrect
         self.vel_y = 0
     def createanimation(self, rect,onground,kpressed,playerattack):
-        if not question_scrn and not  playerattack and not enemyattack:
+        if not question_scrn and not  playerattack:
             if(self.index >=len(player_jump)):self.index=0
-            if(kpressed[pygame.K_d] ):
+            if(kpressed[pygame.K_d] and not enemyattack):
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -469,7 +471,7 @@ class Animation:
                 floors[l].move(True)
                 if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5*unitx
 
-            elif(kpressed[pygame.K_a]):
+            elif(kpressed[pygame.K_a] and not enemyattack):
                 self.front= False
                 self.playersuf=player_run[int(self.index)].frameB
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -479,7 +481,7 @@ class Animation:
                     floors[l].move(False)
                     self.playerrect.left-=5*unitx
 
-            elif(kpressed[pygame.K_s]):
+            elif(kpressed[pygame.K_s] and not enemyattack):
                 self.index-=.02
                 self.index%=len(player_knee)
                 if(self.front):self.playersuf=player_knee[int(self.index)].frameF
@@ -492,7 +494,7 @@ class Animation:
                 else: self.playersuf=player_idle[int(self.index)].frameB
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
                 
-            if(kpressed[pygame.K_w] and onground):
+            if(kpressed[pygame.K_w] and onground and not enemyattack):
                 self.vel_y=jump_strength
                 self.index=0
                 onground=False
@@ -571,7 +573,7 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} ans{answer_chosen} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
@@ -580,7 +582,7 @@ while(True):
         if question_scrn and event.type==pygame.KEYDOWN:
             char = event.unicode
             if char.lower() in "abcd":
-                answer=char
+                answer=char.upper()
             if event.key==pygame.K_RETURN and answer!='':
                     answer_chosen=True
     screen.blit(menu,menu_rect)
@@ -610,6 +612,7 @@ while(True):
     if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):
         if(not question_scrn):
             question_num= random.randint(0,14)
+            correction_delay=0
         question_scrn=True
     if start_scrn:
           if backgrounds[k].rect.right>=x:
@@ -648,16 +651,29 @@ while(True):
             immortal=True
             playerattack=False    
     if question_scrn:
+        display_answer=font2.render(f"Your Answer (press 'Enter' to validate) : {answer.upper()}",True,"Black")
+        display_correct=font2.render(f"CORRECT!!!",True,"Green")
+        display_wrong=font2.render(f"FAILED!!! correct = {answer_easy[question_num].upper()}",True,"Red")
         screen.blit(board.frameF,board.rect)
         screen.blit(question_easy[question_num].frameF,question_easy[question_num].rect)
-        if(answer_chosen and answer==answer_easy[question_num]):
+        screen.blit(display_answer,(240*unitx,620*unity))
+        if(answer_chosen and answer.lower()==answer_easy[question_num]):
+            screen.blit(display_correct,(240*unitx,675*unity))
+            correction_delay+=dt
+        if(correction_delay>=2000):
             player.playerrect.bottom=ground
             player.index=0
+            correction_delay=0
             playerattack=True
             immortaltime=0
             question_scrn=False 
             answer_chosen=False
-        elif(answer_chosen and answer!=answer_easy[question_num]):
+            answer=''
+        elif(answer_chosen and answer.lower()!=answer_easy[question_num]):
+            screen.blit(display_wrong,(240*unitx,670*unity))
+            correction_delay+=dt
+        if(correction_delay>=2000):
+            correction_delay=0
             enemy1.index=0
             enemy2.index=0
             enemy3.index=0
@@ -665,6 +681,7 @@ while(True):
             enemyattack=True
             question_scrn=False 
             answer_chosen=False
+            answer=''
     screen.blit(testtext,(10,10))
 
     pygame.display.update()
