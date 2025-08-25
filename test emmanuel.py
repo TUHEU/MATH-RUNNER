@@ -11,11 +11,22 @@ screen_height = window.current_h
 
 # Create the game window
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Math Runner - Main Loop Added")
+pygame.display.set_caption("Math Runner - Background Class Added")
 
 # Clock to control frame rate
 clock = pygame.time.Clock()
 FPS = 60
+
+# Background class
+class Background:
+    def __init__(self, color=(50, 150, 200)):
+        self.color = color
+
+    def draw(self, surface):
+        surface.fill(self.color)  # Fill entire screen with the color
+
+# Create background instance
+background = Background()
 
 # Game loop
 running = True
@@ -24,8 +35,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Fill background with black
-    screen.fill((0, 0, 0))
+    # Draw background
+    background.draw(screen)
 
     # Update the display
     pygame.display.update()
