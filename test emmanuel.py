@@ -1,184 +1,45 @@
-import pygame
-import sys
-import random
+# ... (Keep all imports and initial setup same as commit 10)
 
-# Initialize pygame
-pygame.init()
-
-# Get screen size
-window = pygame.display.Info()
-screen_width = window.current_w
-screen_height = window.current_h
-
-# Create the game window
-screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Math Runner - Player Attack Added")
-
-# Clock to control frame rate
-clock = pygame.time.Clock()
-FPS = 60
-
-# Font for displaying equations
-font = pygame.font.SysFont(None, 50)
-
-# Background class
-class Background:
-    def __init__(self, color=(50, 150, 200)):
-        self.color = color
-
-    def draw(self, surface):
-        surface.fill(self.color)
-
-# Player class with attack mechanic
-class Player:
-    def __init__(self, x, y, width=50, height=80, color=(255, 50, 50)):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.color = color
-        self.vel_x = 5
-        self.vel_y = 0
-        self.jump_strength = -15
-        self.gravity = 1
-        self.on_ground = True
-        self.attacking = False
-        self.attack_cooldown = 0
-        self.attack_rect = pygame.Rect(0,0,50,20)  # attack hitbox
-
-    def handle_input(self, keys):
-        if keys[pygame.K_a]:
-            self.rect.x -= self.vel_x
-        if keys[pygame.K_d]:
-            self.rect.x += self.vel_x
-        if keys[pygame.K_w] and self.on_ground:
-            self.vel_y = self.jump_strength
-            self.on_ground = False
-        if keys[pygame.K_SPACE] and self.attack_cooldown <= 0:
-            self.attacking = True
-            self.attack_cooldown = 20  # frames
-
-    def update(self):
-        # Apply gravity
-        self.vel_y += self.gravity
-        self.rect.y += self.vel_y
-
-        # Check ground collision
-        if self.rect.bottom >= screen_height - 50:
-            self.rect.bottom = screen_height - 50
-            self.vel_y = 0
-            self.on_ground = True
-
-        # Handle attack cooldown
-        if self.attack_cooldown > 0:
-            self.attack_cooldown -= 1
-
-        # Update attack hitbox
-        if self.attacking:
-            self.attack_rect = pygame.Rect(self.rect.right, self.rect.centery-10, 50, 20)
-        else:
-            self.attack_rect = pygame.Rect(0,0,0,0)
-
-    def draw(self, surface):
-        pygame.draw.rect(surface, self.color, self.rect)
-        # Draw attack hitbox
-        if self.attacking:
-            pygame.draw.rect(surface, (255, 255, 0), self.attack_rect)
-
-# Equation class
-class Equation:
-    def __init__(self):
-        self.equation = ""
-        self.answer = 0
-        self.pos = (0, 0)
-
-    def generate(self):
-        num1 = random.randint(1, 50)
-        num2 = random.randint(1, 50)
-        op = random.choice(["+", "-", "*", "/"])
-        if op == "/":
-            num2 = random.randint(1, 10)
-            self.answer = round(num1 / num2, 2)
-        else:
-            self.answer = eval(f"{num1}{op}{num2}")
-        self.equation = f"{num1} {op} {num2} = {self.answer}"
-        self.pos = (random.randint(50, screen_width - 200), random.randint(50, screen_height - 200))
-        return self.equation
-
-    def draw(self, surface):
-        text = font.render(self.equation, True, (0, 0, 0))
-        surface.blit(text, self.pos)
-
-# Enemy class
+# Enemy class with death animation
 class Enemy:
     def __init__(self, x, y, width=40, height=60, color=(0, 0, 0), speed=5):
         self.rect = pygame.Rect(x, y, width, height)
         self.color = color
         self.speed = speed
         self.alive = True
+        self.dying = False
+        self.death_timer = 0
+        self.max_death_time = 15  # frames for death animation
 
     def update(self):
-        self.rect.x -= self.speed
+        if self.alive and not self.dying:
+            self.rect.x -= self.speed
+        elif self.dying:
+            self.death_timer += 1
+            if self.death_timer >= self.max_death_time:
+                self.alive = False
+                self.dying = False
 
     def draw(self, surface):
         if self.alive:
+            # Draw enemy normally
             pygame.draw.rect(surface, self.color, self.rect)
+        elif self.dying:
+            # Draw fading death animation
+            alpha = max(0, 255 - int((self.death_timer/self.max_death_time)*255))
+            death_surface = pygame.Surface((self.rect.width, self.rect.height))
+            death_surface.fill((255,0,0))
+            death_surface.set_alpha(alpha)
+            surface.blit(death_surface, (self.rect.x, self.rect.y))
 
-# Create instances
-background = Background()
-player = Player(screen_width//2 - 25, screen_height - 100)
-enemies = []
+    def die(self):
+        self.dying = True
+        self.death_timer = 0
 
-# Create multiple equations
-equations = [Equation() for _ in range(5)]
-for eq in equations:
-    eq.generate()
+# ... (Keep Player, Equation, Background classes same as commit 10)
 
-# Game loop
-running = True
-while running:
-    keys = pygame.key.get_pressed()
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-    # Handle player input and update
-    player.handle_input(keys)
-    player.update()
-
-    # Spawn enemies randomly
-    if random.randint(0, 100) < 2:
-        enemy_y = screen_height - 100
-        enemies.append(Enemy(screen_width, enemy_y))
-
-    # Update enemies
-    for enemy in enemies:
-        enemy.update()
-
-    # Remove off-screen enemies
-    enemies = [e for e in enemies if e.rect.right > 0]
-
-    # Check attack collisions
-    for enemy in enemies:
-        if player.attacking and player.attack_rect.colliderect(enemy.rect):
-            enemy.alive = False
-            player.attacking = False
-
-    # Collision detection with player
-    for enemy in enemies:
-        if enemy.alive and player.rect.colliderect(enemy.rect):
-            print("Player hit!")
-            running = False
-
-    # Draw everything
-    background.draw(screen)
-    player.draw(screen)
-    for eq in equations:
-        eq.draw(screen)
-    for enemy in enemies:
-        enemy.draw(screen)
-
-    # Update display
-    pygame.display.update()
-    clock.tick(FPS)
-
-# Quit pygame
-pygame.quit()
-sys.exit()
+# Collision check for attack
+for enemy in enemies:
+    if player.attacking and player.attack_rect.colliderect(enemy.rect):
+        enemy.die()  # trigger death animation
+        player.attacking = False
