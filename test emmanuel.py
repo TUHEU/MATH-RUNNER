@@ -1,28 +1,35 @@
-# ... (Keep all imports and existing classes same as commit 14)
 
-# Initialize player health
-player_health = 100
-max_health = 100
-health_bar_width = 200
-health_bar_height = 20
+# ... (Keep all imports and existing classes same as commit 15)
 
-# Function to draw health bar
-def draw_health_bar(surface, x, y, health, max_health):
-    # Background bar
-    pygame.draw.rect(surface, (255,0,0), (x, y, health_bar_width, health_bar_height))
-    # Current health
-    current_width = int((health / max_health) * health_bar_width)
-    pygame.draw.rect(surface, (0,255,0), (x, y, current_width, health_bar_height))
-    # Border
-    pygame.draw.rect(surface, (0,0,0), (x, y, health_bar_width, health_bar_height), 2)
-    
-    
-    # In main game loop, after updating enemies
-for enemy in enemies:
-    if player.rect.colliderect(enemy.rect) and not player.attacking:
-        player_health -= 10  # Reduce health
-        enemy.die()          # Optional: enemy defeated after hitting player
-        if player_health < 0:
-            player_health = 0
-            # TODO: handle game over
+# Enemy respawn delay (in milliseconds)
+respawn_delay = 3000  # 3 seconds
 
+# Update Enemy class to handle respawn
+class Enemy:
+    def __init__(self, x, y, enemy_type=1):
+        # Existing initialization code ...
+        self.alive = True
+        self.dying = False
+        self.respawn_timer = 0
+
+    def update(self, dt):
+        if self.alive and not self.dying:
+            self.rect.x -= self.speed
+        elif self.dying:
+            self.respawn_timer += dt
+            if self.respawn_timer >= respawn_delay:
+                self.respawn()
+
+    def die(self):
+        self.dying = True
+        self.alive = False
+        self.respawn_timer = 0
+
+    def respawn(self):
+        self.dying = False
+        self.alive = True
+        self.rect.x = screen_width + random.randint(50, 200)
+        self.rect.y = screen_height - self.height - 50
+        self.respawn_timer = 0
+        # Optionally randomize type or speed on respawn
+        self.speed = random.choice([3, 5, 7])
