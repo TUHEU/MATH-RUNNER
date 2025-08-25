@@ -37,3 +37,13 @@ class Player:
         # Optional: add jump color change or animation
         if self.is_jumping:
             pygame.draw.rect(surface, (255, 255, 0), self.rect)  # yellow while jumping
+# Check jump input
+keys = pygame.key.get_pressed()
+if keys[pygame.K_w] or keys[pygame.K_SPACE]:
+    player.jump()
+
+# Update player position
+player.update()
+
+# Draw player
+player.draw(screen)
