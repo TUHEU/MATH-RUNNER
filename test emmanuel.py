@@ -1,22 +1,17 @@
-current_time = pygame.time.get_ticks()
+# ... (Keep all imports and existing classes same as commit 14)
 
-# Player attack input
-if keys[pygame.K_SPACE]:
-    player.attack(current_time)
+# Initialize player health
+player_health = 100
+max_health = 100
+health_bar_width = 200
+health_bar_height = 20
 
-# Collision check with enemies
-for enemy in enemies:
-    if player.attacking and player.rect.colliderect(enemy.rect):
-        enemy.die()
-        player.attacking = False
-# ... (Keep all imports and existing classes same as commit 13)
-
-# Initialize score
-score = 0
-font_score = pygame.font.Font(None, 40)  # default font, size 40
-
-# In main loop, after checking enemy deaths
-for enemy in enemies:
-    if not enemy.alive and not enemy.dying:
-        score += 10  # Increase score for each defeated enemy
-        enemies.remove(enemy)  # Remove enemy from list
+# Function to draw health bar
+def draw_health_bar(surface, x, y, health, max_health):
+    # Background bar
+    pygame.draw.rect(surface, (255,0,0), (x, y, health_bar_width, health_bar_height))
+    # Current health
+    current_width = int((health / max_health) * health_bar_width)
+    pygame.draw.rect(surface, (0,255,0), (x, y, current_width, health_bar_height))
+    # Border
+    pygame.draw.rect(surface, (0,0,0), (x, y, health_bar_width, health_bar_height), 2)
