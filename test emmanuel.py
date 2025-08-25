@@ -12,7 +12,7 @@ screen_height = window.current_h
 
 # Create the game window
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Math Runner - Multiple Equations Added")
+pygame.display.set_caption("Math Runner - Player Attack Added")
 
 # Clock to control frame rate
 clock = pygame.time.Clock()
@@ -29,7 +29,7 @@ class Background:
     def draw(self, surface):
         surface.fill(self.color)
 
-# Player class
+# Player class with attack mechanic
 class Player:
     def __init__(self, x, y, width=50, height=80, color=(255, 50, 50)):
         self.rect = pygame.Rect(x, y, width, height)
@@ -39,6 +39,9 @@ class Player:
         self.jump_strength = -15
         self.gravity = 1
         self.on_ground = True
+        self.attacking = False
+        self.attack_cooldown = 0
+        self.attack_rect = pygame.Rect(0,0,50,20)  # attack hitbox
 
     def handle_input(self, keys):
         if keys[pygame.K_a]:
@@ -48,6 +51,9 @@ class Player:
         if keys[pygame.K_w] and self.on_ground:
             self.vel_y = self.jump_strength
             self.on_ground = False
+        if keys[pygame.K_SPACE] and self.attack_cooldown <= 0:
+            self.attacking = True
+            self.attack_cooldown = 20  # frames
 
     def update(self):
         # Apply gravity
@@ -60,8 +66,21 @@ class Player:
             self.vel_y = 0
             self.on_ground = True
 
+        # Handle attack cooldown
+        if self.attack_cooldown > 0:
+            self.attack_cooldown -= 1
+
+        # Update attack hitbox
+        if self.attacking:
+            self.attack_rect = pygame.Rect(self.rect.right, self.rect.centery-10, 50, 20)
+        else:
+            self.attack_rect = pygame.Rect(0,0,0,0)
+
     def draw(self, surface):
         pygame.draw.rect(surface, self.color, self.rect)
+        # Draw attack hitbox
+        if self.attacking:
+            pygame.draw.rect(surface, (255, 255, 0), self.attack_rect)
 
 # Equation class
 class Equation:
@@ -93,12 +112,14 @@ class Enemy:
         self.rect = pygame.Rect(x, y, width, height)
         self.color = color
         self.speed = speed
+        self.alive = True
 
     def update(self):
         self.rect.x -= self.speed
 
     def draw(self, surface):
-        pygame.draw.rect(surface, self.color, self.rect)
+        if self.alive:
+            pygame.draw.rect(surface, self.color, self.rect)
 
 # Create instances
 background = Background()
@@ -134,9 +155,15 @@ while running:
     # Remove off-screen enemies
     enemies = [e for e in enemies if e.rect.right > 0]
 
-    # Collision detection
+    # Check attack collisions
     for enemy in enemies:
-        if player.rect.colliderect(enemy.rect):
+        if player.attacking and player.attack_rect.colliderect(enemy.rect):
+            enemy.alive = False
+            player.attacking = False
+
+    # Collision detection with player
+    for enemy in enemies:
+        if enemy.alive and player.rect.colliderect(enemy.rect):
             print("Player hit!")
             running = False
 
