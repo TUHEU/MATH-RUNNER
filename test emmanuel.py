@@ -1,41 +1,39 @@
+# ... (Keep all imports and previous classes same as commit 16)
 
-# ... (Keep all imports and existing classes same as commit 15)
+# Player jump variables
+jump_strength = -15
+gravity = 0.8
+is_jumping = False
+player_vel_y = 0
 
-# Enemy respawn delay (in milliseconds)
-respawn_delay = 3000  # 3 seconds
+# Update Player class with jump animation
+class Player:
+    def __init__(self, x, y, width=50, height=80):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.color = (0, 100, 200)
+        self.attacking = False
+        self.attack_cooldown = 1000
+        self.last_attack_time = 0
+        self.is_jumping = False
+        self.vel_y = 0
 
-# Update Enemy class to handle respawn
-class Enemy:
-    def __init__(self, x, y, enemy_type=1):
-        # Existing initialization code ...
-        self.alive = True
-        self.dying = False
-        self.respawn_timer = 0
+    def jump(self):
+        if not self.is_jumping:
+            self.is_jumping = True
+            self.vel_y = jump_strength
 
-    def update(self, dt):
-        if self.alive and not self.dying:
-            self.rect.x -= self.speed
-        elif self.dying:
-            self.respawn_timer += dt
-            if self.respawn_timer >= respawn_delay:
-                self.respawn()
+    def update(self):
+        # Gravity
+        if self.is_jumping:
+            self.vel_y += gravity
+            self.rect.y += int(self.vel_y)
+            if self.rect.bottom >= screen_height - 50:
+                self.rect.bottom = screen_height - 50
+                self.is_jumping = False
+                self.vel_y = 0
 
-    def die(self):
-        self.dying = True
-        self.alive = False
-        self.respawn_timer = 0
-
-    def respawn(self):
-        self.dying = False
-        self.alive = True
-        self.rect.x = screen_width + random.randint(50, 200)
-        self.rect.y = screen_height - self.height - 50
-        self.respawn_timer = 0
-        # Optionally randomize type or speed on respawn
-        self.speed = random.choice([3, 5, 7])
-        # In main loop
-dt = clock.tick(60)  # milliseconds since last frame
-
-for enemy in enemies:
-    enemy.update(dt)
-
+    def draw(self, surface):
+        pygame.draw.rect(surface, self.color, self.rect)
+        # Optional: add jump color change or animation
+        if self.is_jumping:
+            pygame.draw.rect(surface, (255, 255, 0), self.rect)  # yellow while jumping
