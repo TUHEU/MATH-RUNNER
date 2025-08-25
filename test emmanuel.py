@@ -33,3 +33,9 @@ class Enemy:
         self.respawn_timer = 0
         # Optionally randomize type or speed on respawn
         self.speed = random.choice([3, 5, 7])
+        # In main loop
+dt = clock.tick(60)  # milliseconds since last frame
+
+for enemy in enemies:
+    enemy.update(dt)
+
