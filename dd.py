@@ -332,12 +332,9 @@ def load_questions(filename):
             answer = lines[5]  # correct answer index (1–4)
             questions.append((q, options, answer))
     return questions
-def choose_level():
-    level=""
-    #question_easy
-    #question_medium
-    questions=load_questions("Assets\Questions\high.txt")
-level_buttons=[]
+level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy"),
+               button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"medium"),
+               button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*100)),"high")]
 
 #animation enemy class
 class Enemy:
@@ -627,6 +624,18 @@ while(True):
         for button in level_buttons:
             button.draw(screen)
             button.handle_event(event,mouse)
+            if(button.handle_event(event,mouse)=="easy"):
+                questions=load_questions("Assets\Questions\easy.txt")
+                level_scrn=False
+                #start_scrn=True
+            if(button.handle_event(event,mouse)=="medium"):
+                questions=load_questions("Assets\Questions\medium.txt")
+                level_scrn=False
+                #start_scrn=True
+            if(button.handle_event(event,mouse)=="high"):
+                questions=load_questions("Assets\Questions\high.txt")
+                level_scrn=False
+                #start_scrn=True
 
     if(player.playerrect.bottom<ground):onground=False
     if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):
