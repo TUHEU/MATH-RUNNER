@@ -1,62 +1,81 @@
-from docx import Document
+import pygame
 import random
 
-# Function to generate hard-level math MCQs
-def generate_math_mcqs(n=20):
-    mcqs = []
-    for i in range(n):
-        q_type = random.choice(["algebra", "calculus", "geometry", "number_theory", "probability"])
-        
-        if q_type == "algebra":
-            a, b = random.randint(2, 9), random.randint(2, 9)
-            q = f"Solve for x: {a}x + {b} = 0"
-            correct = f"x = {-b}/{a}"
-            options = [correct, f"x = {b}/{a}", f"x = {a}/{b}", f"x = {-a}/{b}"]
-        
-        elif q_type == "calculus":
-            n_exp = random.randint(2, 5)
-            q = f"Differentiate: f(x) = x^{n_exp}"
-            correct = f"{n_exp}x^{n_exp-1}"
-            options = [correct, f"x^{n_exp}", f"{n_exp-1}x^{n_exp}", f"{n_exp+1}x^{n_exp-2}"]
-        
-        elif q_type == "geometry":
-            side = random.randint(3, 12)
-            q = f"Find the area of a square with side {side}."
-            correct = str(side**2)
-            options = [correct, str(2*side), str(side*4), str(side**3)]
-        
-        elif q_type == "number_theory":
-            num = random.randint(10, 50)
-            q = f"Find the remainder when {num}^2 is divided by 5."
-            correct = str((num**2) % 5)
-            options = [correct, str((num**2+1)%5), str((num**2+2)%5), str((num**2+3)%5)]
-        
-        elif q_type == "probability":
-            total = random.randint(4, 8)
-            fav = random.randint(1, total-1)
-            q = f"A bag has {total} balls, {fav} of which are red. Probability of picking a red ball?"
-            correct = f"{fav}/{total}"
-            options = [correct, f"{total-fav}/{total}", f"1/{total}", f"{fav}/{total+1}"]
-        
-        random.shuffle(options)
-        mcqs.append((q, options, correct))
-    return mcqs
+# Initialize pygame
+pygame.init()
 
-# Generate 20 math MCQs
-mcqs = generate_math_mcqs(20)
+# Screen settings
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("MCQ Quiz")
 
-# Create Word document
-doc = Document()
-doc.add_heading("Hard Level Math MCQs", 0)
+# Fonts
+font = pygame.font.SysFont(None, 36)
 
-for i, (q, opts, correct) in enumerate(mcqs, start=1):
-    doc.add_paragraph(f"Q{i}. {q}")
-    for j, opt in enumerate(opts):
-        doc.add_paragraph(f"   {chr(65+j)}. {opt}")
-    doc.add_paragraph("")
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (0, 200, 0)
+RED = (200, 0, 0)
 
-# Save document
-output_docx = "/mnt/data/hard_math_mcqs.docx"
-doc.save(output_docx)
+# Load questions from txt file
+def load_questions(filename):
+    questions = []
+    with open(filename, "r") as f:
+        content = f.read().strip().split("\n\n")  # Questions separated by blank line
+        for block in content:
+            lines = block.split("\n")
+            q = lines[0]
+            options = lines[1:5]
+            answer = int(lines[5])  # correct answer index (1–4)
+            questions.append((q, options, answer))
+    return questions
 
-output_docx
+questions = load_questions("questions.txt")
+
+# Pick a random question
+question, options, correct_answer = random.choice(questions)
+selected_answer = None
+feedback = ""
+
+running = True
+while running:
+    screen.fill(WHITE)
+
+    # Display question
+    question_surface = font.render(question, True, BLACK)
+    screen.blit(question_surface, (50, 50))
+
+    # Display options
+    for i, option in enumerate(options):
+        option_surface = font.render(f"{i+1}. {option}", True, BLACK)
+        screen.blit(option_surface, (100, 150 + i*50))
+
+    # Display feedback
+    if feedback:
+        feedback_surface = font.render(feedback, True, GREEN if "Correct" in feedback else RED)
+        screen.blit(feedback_surface, (50, 400))
+
+    pygame.display.flip()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key in [pygame.K_1, pygame.K_KP1]:
+                selected_answer = 1
+            elif event.key in [pygame.K_2, pygame.K_KP2]:
+                selected_answer = 2
+            elif event.key in [pygame.K_3, pygame.K_KP3]:
+                selected_answer = 3
+            elif event.key in [pygame.K_4, pygame.K_KP4]:
+                selected_answer = 4
+
+            if selected_answer:
+                if selected_answer == correct_answer:
+                    feedback = "Correct!"
+                else:
+                    feedback = f"Wrong! Correct answer: {correct_answer}. {options[correct_answer-1]}"
+                question, options, correct_answer = random.choice(questions)
+
+pygame.quit()

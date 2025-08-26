@@ -1,0 +1,34 @@
+What is the capital of France?
+Paris
+London
+Berlin
+Rome
+1
+
+What is 2 + 2?
+3
+4
+5
+6
+2
+
+Which planet is known as the Red Planet?
+Earth
+Mars
+Jupiter
+Saturn
+2
+
+Who wrote 'Hamlet'?
+Charles Dickens
+Mark Twain
+William Shakespeare
+Jane Austen
+3
+
+What is the largest mammal?
+Elephant
+Blue Whale
+Giraffe
+Hippopotamus
+2
