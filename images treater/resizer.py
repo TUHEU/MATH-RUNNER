@@ -13,7 +13,7 @@ pygame.init()
 pygame.display.set_mode((1, 1), pygame.HIDDEN)
 while(i<16):
     #if i < 10:
-    sprite = pygame.image.load(f"Assets\Questions\Easy\{i}.png")
+    sprite = pygame.image.load(f"Assets\Questions\High\{i}.png")
     #elif i>=10:
      #   sprite = pygame.image.load(f"cropper\\toberesized\enemy3\Walking\Wraith_02_Moving Forward_0{i}.png").convert_alpha()
 

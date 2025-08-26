@@ -318,12 +318,12 @@ answer_medium=['a','b','c','d','a','b','c','d','a','b','c','d','a','b','c']
 answer_hard=['a','b','c','d','a','b','c','d','a','b','c','d','a','b','c']
 
 question_easy=[Frame(questionsize,f"Assets/Questions/Easy/{i}.png",position_question) for i in range(1,16)]
-question_Medium=[Frame(questionsize,f"Assets/Questions/Medium/{i}.png",position_question) for i in range(1,16)]
-#question_High=[Frame(questionsize,f"Assets/Questions/High/{i}.png",position_question) for i in range(1,16)]
+question_medium=[Frame(questionsize,f"Assets/Questions/Medium/{i}.png",position_question) for i in range(1,16)]
+question_hard=[Frame(questionsize,f"Assets/Questions/High/{i}.png",position_question) for i in range(1,16)]
 
 questions_east_dict={question_easy[i]:answer_easy[i] for i in range(0,15)}
-questions_medium_dict={question_Medium[i]:answer_medium[i] for i in range(0,15)}
-#questions_hard_dict={question_High[i]:answer_hard[i] for i in range(0,15)}
+questions_medium_dict={question_medium[i]:answer_medium[i] for i in range(0,15)}
+questions_hard_dict={question_hard[i]:answer_hard[i] for i in range(0,15)}
 
 
 #animation enemy class
@@ -666,10 +666,10 @@ while(True):
         display_wrong=font2.render(f"FAILED!!! correct = {answer_easy[question_num].upper()}",True,"Red")
         display_timer=font3.render(f"Timer {minutes:02}:{seconds:02}",True,"White")
         screen.blit(board.frameF,board.rect)
-        screen.blit(question_easy[question_num].frameF,question_easy[question_num].rect)
+        screen.blit(question_hard[question_num].frameF,question_hard[question_num].rect)
         screen.blit(display_answer,(240*unitx,620*unity))
         screen.blit(display_timer,(500*unitx,400*unity))
-        if(answer_chosen and answer.lower()==answer_easy[question_num]):
+        if(answer_chosen and answer.lower()==answer_hard[question_num]):
             screen.blit(display_correct,(240*unitx,675*unity))
             correction_delay+=dt
         if(correction_delay>=2000):
@@ -681,7 +681,7 @@ while(True):
             question_scrn=False 
             answer_chosen=False
             answer=''
-        elif(answer_chosen and answer.lower()!=answer_easy[question_num] or timer<=0):
+        elif(answer_chosen and answer.lower()!=answer_hard[question_num] or timer<=0):
             screen.blit(display_wrong,(240*unitx,670*unity))
             correction_delay+=dt
         if(correction_delay>=2000):
