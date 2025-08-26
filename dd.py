@@ -122,7 +122,7 @@ question_scrn=False
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
-font3=pygame.font.Font("Assets/Fonts/3.fon",150)
+font3=pygame.font.Font("Assets/Fonts/3.ttf",50)
 #physics variables
 player_vel_y = 0  
 gravity = 1 * unity  
@@ -319,11 +319,11 @@ answer_hard=['a','b','c','d','a','b','c','d','a','b','c','d','a','b','c']
 
 question_easy=[Frame(questionsize,f"Assets/Questions/Easy/{i}.png",position_question) for i in range(1,16)]
 question_Medium=[Frame(questionsize,f"Assets/Questions/Medium/{i}.png",position_question) for i in range(1,16)]
-question_High=[Frame(questionsize,f"Assets/Questions/High/{i}.png",position_question) for i in range(1,16)]
+#question_High=[Frame(questionsize,f"Assets/Questions/High/{i}.png",position_question) for i in range(1,16)]
 
 questions_east_dict={question_easy[i]:answer_easy[i] for i in range(0,15)}
 questions_medium_dict={question_Medium[i]:answer_medium[i] for i in range(0,15)}
-questions_hard_dict={question_High[i]:answer_hard[i] for i in range(0,15)}
+#questions_hard_dict={question_High[i]:answer_hard[i] for i in range(0,15)}
 
 
 #animation enemy class
@@ -664,7 +664,7 @@ while(True):
         display_answer=font2.render(f"Your Answer (press 'Enter' to validate) : {answer.upper()}",True,"Black")
         display_correct=font2.render(f"CORRECT!!!",True,"Green")
         display_wrong=font2.render(f"FAILED!!! correct = {answer_easy[question_num].upper()}",True,"Red")
-        display_timer=font2.render(f"Timer {minutes:02}:{seconds:02}",True,"White")
+        display_timer=font3.render(f"Timer {minutes:02}:{seconds:02}",True,"White")
         screen.blit(board.frameF,board.rect)
         screen.blit(question_easy[question_num].frameF,question_easy[question_num].rect)
         screen.blit(display_answer,(240*unitx,620*unity))
