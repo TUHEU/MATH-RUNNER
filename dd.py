@@ -178,6 +178,10 @@ speedfl=12*unitx
 ground=y-(200*unity)
 onground=True
 
+#mouse variables
+click_allowed=True
+
+
 # player animations Frame class
 class Frame:
     def __init__(self,size,path,pos=(0,ground)):
@@ -252,7 +256,7 @@ class button:
             touch_sound.play()
         self.touching=False
         if(not self.touched):self.touching=True
-        if self.touched and event.type == pygame.MOUSEBUTTONDOWN: 
+        if self.touched and click_allowed and event.type == pygame.MOUSEBUTTONDOWN: 
             return self.key    
         return None
 
@@ -620,6 +624,7 @@ while(True):
             if(button.handle_event(event,mouse)=="start"):
                 menu_scrn=False
                 level_scrn=True
+                click_allowed=False
     if level_scrn:
         for button in level_buttons:
             button.draw(screen)
@@ -627,16 +632,17 @@ while(True):
             if(button.handle_event(event,mouse)=="easy"):
                 questions=load_questions("Assets\Questions\easy.txt")
                 level_scrn=False
-                #start_scrn=True
+                start_scrn=True
             if(button.handle_event(event,mouse)=="medium"):
                 questions=load_questions("Assets\Questions\medium.txt")
                 level_scrn=False
-                #start_scrn=True
+                start_scrn=True
             if(button.handle_event(event,mouse)=="high"):
                 questions=load_questions("Assets\Questions\high.txt")
                 level_scrn=False
-                #start_scrn=True
-
+                start_scrn=True
+    if event.type == pygame.MOUSEBUTTONUP:
+        click_allowed = True
     if(player.playerrect.bottom<ground):onground=False
     if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):
         if(not question_scrn):
