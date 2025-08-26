@@ -2,6 +2,11 @@ import pygame
 import random
 from sys import exit
 
+# Removed TensorFlow, OpenCV, and related emotion detection imports
+import threading # For running other background tasks if needed
+
+# Removed all emotion detection setup code
+
 pygame.init()
 window=pygame.display.Info()
 x=window.current_w
@@ -246,6 +251,7 @@ class Enemy:
                 self.dead = True
                 self.death_timer = 0
             self.enemysuf = death_frames[int(self.index)].frameF
+            self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
             return
 
         # 3. MOVEMENT & ATTACK if alive
@@ -443,7 +449,7 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"{clock.get_fps()}  {gravity} groun {ground} vbot {player.playerrect.bottom} ong {onground} b {backgrounds[k].rect.right}   mou{mouse}",False,"Black")
+    testtext=font1.render(f"ply {player.playerrect.width} immt {immortaltime} ques {question_scrn} {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
@@ -525,7 +531,7 @@ while(True):
             enemy3.index=0
             immortaltime=0
             enemyattack=True
-            question_scrn=False
+            question_scrn=False 
     screen.blit(testtext,(10,10))
 
     pygame.display.update()
