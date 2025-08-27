@@ -736,6 +736,8 @@ while(True):
             for emotion in emotionlist:
                 if emotion==0:
                     bademotion+=1
+        if (bademotion==0):
+            
         if(correction_delay>=2000):
             player.playerrect.bottom=ground
             player.index=0
