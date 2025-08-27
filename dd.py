@@ -737,7 +737,7 @@ while(True):
                 if emotion==0:
                     bademotion+=1
         if (bademotion==0):
-            
+            screen.blit(font2.render("Great! You kept a positive attitude :)",True,"Black"),(600*unitx,700*unity))
         if(correction_delay>=2000):
             player.playerrect.bottom=ground
             player.index=0
