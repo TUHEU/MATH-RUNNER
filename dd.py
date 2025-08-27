@@ -100,7 +100,7 @@ def emotion_loop():
                 # Only process first detected face (break after detection)
                 break
 
-# Start emotion detection in background thread
+#Start emotion detection in background thread
 #Normal (non-daemon) thread → the program will wait for it to finish before exiting.
 #Daemon thread → the program will not wait for it. When the main program ends, daemon threads are killed automatically.
 threading.Thread(target=emotion_loop, daemon=True).start()
@@ -121,11 +121,13 @@ menu_scrn=True
 start_scrn=False
 question_scrn=False
 level_scrn=False
+
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
 font3=pygame.font.Font("Assets/Fonts/3.ttf",50)
 font4=pygame.font.Font(None,50)
+
 #physics variables
 player_vel_y = 0  
 gravity = 1 * unity  
@@ -136,6 +138,10 @@ fade_surface = pygame.Surface((x,y))
 fade_surface.fill((0, 0, 0)) 
 fade_surface.set_alpha(0)
 alpha=0
+
+#emotion_list
+emotionlist=[]
+bademotion=0
 
 #player variables
 framesize=(1.7*unitx,2.6*unity)
@@ -631,14 +637,17 @@ while(True):
             button.handle_event(event,mouse)
             if(button.handle_event(event,mouse)=="easy"):
                 questions=load_questions("Assets\Questions\easy.txt")
+                level="easy"
                 level_scrn=False
                 start_scrn=True
             if(button.handle_event(event,mouse)=="medium"):
                 questions=load_questions("Assets\Questions\medium.txt")
+                level="medium"
                 level_scrn=False
                 start_scrn=True
             if(button.handle_event(event,mouse)=="high"):
                 questions=load_questions("Assets\Questions\high.txt")
+                level="high"
                 level_scrn=False
                 start_scrn=True
     if event.type == pygame.MOUSEBUTTONUP:
@@ -648,7 +657,12 @@ while(True):
         if(not question_scrn):
             question_num= random.randint(0,14)
             correction_delay=0
-            timer=30
+            if level=="easy":
+                timer=random.randrange(40,50,5)
+            elif level=="medium":
+                timer=random.randrange(40,60,10)
+            elif level=="high":
+                timer=random.randrange(50,90,10)
             question, options, correct_answer = random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
         question_scrn=True
@@ -671,7 +685,6 @@ while(True):
                 fade_surface.set_alpha(alpha)
                 alpha += 5
                 screen.blit(fade_surface, (0, 0))
-            
           else:
               backgrounds[k].rect.bottomleft=(0,y)
               floors[l].rect.bottomleft=(0,y)
@@ -691,6 +704,11 @@ while(True):
     if question_scrn:
         second+=dt
         if second>=1000 and timer>0:
+            if len(emotionlist)<30:
+                if(current_emotion=="Happy" or current_emotion=="Neutral"):
+                    emotionlist.append(1)
+                else:
+                    emotionlist.append(0)
             timer-=1
             second=0
             seconds=timer%60
@@ -714,6 +732,12 @@ while(True):
         if(answer_chosen and answer.upper()==correct_answer):
             screen.blit(display_correct,(240*unitx,675*unity))
             correction_delay+=dt
+        if(len(emotionlist)>=30):
+            for emotion in emotionlist:
+                if emotion==0:
+                    bademotion+=1
+        if (bademotion==0):
+            screen.blit(font2.render("Great! You kept a positive attitude :)",True,"Black"),(600*unitx,700*unity))
         if(correction_delay>=2000):
             player.playerrect.bottom=ground
             player.index=0
