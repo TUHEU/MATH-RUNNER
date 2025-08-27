@@ -633,14 +633,17 @@ while(True):
                 questions=load_questions("Assets\Questions\easy.txt")
                 level_scrn=False
                 start_scrn=True
+                timer=30
             if(button.handle_event(event,mouse)=="medium"):
                 questions=load_questions("Assets\Questions\medium.txt")
                 level_scrn=False
                 start_scrn=True
+                timer=random.randrange(30,60,10)
             if(button.handle_event(event,mouse)=="high"):
                 questions=load_questions("Assets\Questions\high.txt")
                 level_scrn=False
                 start_scrn=True
+                timer=random.randrange(50,90,10)
     if event.type == pygame.MOUSEBUTTONUP:
         click_allowed = True
     if(player.playerrect.bottom<ground):onground=False

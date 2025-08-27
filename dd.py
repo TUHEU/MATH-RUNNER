@@ -631,14 +631,17 @@ while(True):
             button.handle_event(event,mouse)
             if(button.handle_event(event,mouse)=="easy"):
                 questions=load_questions("Assets\Questions\easy.txt")
+                level="easy"
                 level_scrn=False
                 start_scrn=True
             if(button.handle_event(event,mouse)=="medium"):
                 questions=load_questions("Assets\Questions\medium.txt")
+                level="medium"
                 level_scrn=False
                 start_scrn=True
             if(button.handle_event(event,mouse)=="high"):
                 questions=load_questions("Assets\Questions\high.txt")
+                level="high"
                 level_scrn=False
                 start_scrn=True
     if event.type == pygame.MOUSEBUTTONUP:
@@ -648,7 +651,12 @@ while(True):
         if(not question_scrn):
             question_num= random.randint(0,14)
             correction_delay=0
-            timer=30
+            if level=="easy":
+                timer=random.randrange(40,50,5)
+            elif level=="medium":
+                timer=random.randrange(40,60,10)
+            elif level=="high":
+                timer=random.randrange(50,90,10)
             question, options, correct_answer = random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
         question_scrn=True
