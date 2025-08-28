@@ -167,6 +167,7 @@ minutes=0
 framesizeE=(.3*unitx,.6*unity)
 Enemydead=False
 enemyattack=False
+wave_interval=0
 
 #animation variables
 signs=['+','-','/','*']
@@ -484,9 +485,10 @@ class Animation:
         self.playerrect=playerrect
         self.vel_y = 0
     def createanimation(self, rect,onground,kpressed,playerattack):
+        global wave_interval
         if not question_scrn and not  playerattack:
             if(self.index >=len(player_jump)):self.index=0
-            if((kpressed[pygame.K_d] or backgrounds[k].rect.right <= x + 250 * unitx) and not enemyattack):
+            if((kpressed[pygame.K_d] or backgrounds[k].rect.right <= x + 250 * unitx ) and not enemyattack):
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -494,6 +496,7 @@ class Animation:
                 self.playerrect.bottomleft=rect
                 backgrounds[k].move(True)
                 floors[l].move(True)
+                wave_interval+=speedbk
                 if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5*unitx
 
             elif(kpressed[pygame.K_a] and not enemyattack):
@@ -503,6 +506,7 @@ class Animation:
                 self.playerrect.width=self.playerrect.width-(91*unitx)
                 if self.playerrect.left>x-980*unitx:
                     backgrounds[k].move(False)
+                    wave_interval-=speedbk
                     floors[l].move(False)
                     self.playerrect.left-=5*unitx
 
@@ -590,6 +594,7 @@ enemy1=Enemy(key="enemy1")
 enemy2=Enemy(key="enemy2")
 enemy3=Enemy(key="enemy3") 
 ground=player.playerrect.bottom
+incomingwave=True
 while(True):
     rect=player.playerrect.bottomleft
     rectE1=enemy1.enemyrect.bottomleft
@@ -600,7 +605,7 @@ while(True):
     mouse = pygame.mouse.get_pos() 
     testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
-    if (enemy1.wave==0 and enemy2.wave==0 and enemy3.wave==0):incomingwave=True
+    #if (enemy1.wave==2 and enemy2.wave==2 and enemy3.wave==2):incomingwave=True
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
@@ -669,6 +674,8 @@ while(True):
             question, options, correct_answer = random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
         question_scrn=True
+        incomingwave=False
+
     if start_scrn:
         if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
@@ -688,8 +695,16 @@ while(True):
                 fade_surface.set_alpha(alpha)
                 alpha += 5
                 screen.blit(fade_surface, (0, 0))
+            if incomingwave:
+                screen.blit(font4.render("INCOMING WAVE",True,"Yellow"),(unitx*200,unity*400))
+            if wave_interval>=2000:
+                enemy1.wave=2 
+                enemy2.wave=2
+                enemy3.wave=2
+                wave_interval=0
         else:
             backgrounds[k].rect.bottomleft=(0,y)
+            wave_interval=0
             floors[l].rect.bottomleft=(0,y)
             k+=1
             l+=1
