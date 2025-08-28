@@ -339,7 +339,8 @@ def load_questions(filename):
             if len(q) > 35:
                 q = "\n".join(textwrap.wrap(q, width=35))
             options = lines[1:5]
-            answer = lines[5]  # correct answer index (1–4)
+            hint = lines[5]  # hint
+            answer = lines[6]  # correct answer index (A–D)
             questions.append((q, options, answer))
     return questions
 level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy"),

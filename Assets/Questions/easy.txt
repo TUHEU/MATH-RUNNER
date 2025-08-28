@@ -3,6 +3,7 @@ A. 11
 B. 12
 C. 13
 D. 14
+Hint: Count up from 7 or use your addition facts
 B
 
 Which number comes after 99?
@@ -10,6 +11,7 @@ A. 100
 B. 98
 C. 90
 D. 1000
+Hint: Think about what happens when you reach the end of a counting sequence
 A
 
 What is 3 multiplied by 4?
@@ -17,6 +19,7 @@ A. 7
 B. 1
 C. 12
 D. 15
+Hint: Multiplication is repeated addition - add 3 four times
 C
 
 If you have 15 apples and give 6 to a friend, how many do you have left?
@@ -24,6 +27,7 @@ A. 8
 B. 9
 C. 10
 D. 21
+Hint: This is a subtraction problem - start with 15 and take away 6
 B
 
 What is one-half of 10?
@@ -31,6 +35,7 @@ A. 2
 B. 5
 C. 8
 D. 10
+Hint: Half means dividing something into two equal parts
 B
 
 Which shape has 3 sides?
@@ -38,6 +43,7 @@ A. Circle
 B. Square
 C. Triangle
 D. Rectangle
+Hint: The prefix "tri-" means three
 C
 
 What is the value of the digit 4 in the number 47?
@@ -45,6 +51,7 @@ A. 4
 B. 40
 C. 7
 D. 47
+Hint: Look at the place value - what position is the 4 in?
 B
 
 What is 20 - 9?
@@ -52,6 +59,7 @@ A. 10
 B. 11
 C. 12
 D. 29
+Hint: Count backwards from 20 or think of what number plus 9 equals 20
 B
 
 How many minutes are in one hour?
@@ -59,6 +67,7 @@ A. 12
 B. 30
 C. 60
 D. 100
+Hint: Look at a clock - how many minutes make up a full circle?
 C
 
 Which of these is the largest number?
@@ -66,4 +75,45 @@ A. 105
 B. 150
 C. 100
 D. 99
+Hint: Compare the numbers by looking at the hundreds place first
+B
+
+What is 9 + 8?
+A. 16
+B. 17
+C. 18
+D. 19
+Hint: You can think of it as 10 + 8 minus 1
+B
+
+How many sides does a pentagon have?
+A. 4
+B. 5
+C. 6
+D. 8
+Hint: Think of the Pentagon building
+B
+
+What is 5 x 6?
+A. 25
+B. 30
+C. 35
+D. 40
+Hint: Count by fives six times
+B
+
+Which of these is a fraction?
+A. 12
+B. 3.5
+C. 1/2
+D. 7
+Hint: A fraction represents a part of a whole
+C
+
+What is 100 divided by 10?
+A. 1
+B. 10
+C. 100
+D. 1000
+Hint: Division is the opposite of multiplication
 B

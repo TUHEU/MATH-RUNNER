@@ -3,6 +3,7 @@ A. cos(x)
 B. -sin(x)
 C. tan(x)
 D. sec^2(x)
+Hint: Remember the basic derivative rules for trigonometric functions
 A
 
 The roots of the quadratic equation x^2 - 5x + 6 = 0 are:
@@ -10,6 +11,7 @@ A. (1, 6)
 B. (2, 3)
 C. (3, 5)
 D. (2, 6)
+Hint: Factor the quadratic or use the quadratic formula
 B
 
 What is the value of log_2(32)?
@@ -17,6 +19,7 @@ A. 4
 B. 5
 C. 6
 D. 3
+Hint: Ask yourself: 2 to what power equals 32?
 B
 
 If f(x) = x^3, then f''(2) equals:
@@ -24,6 +27,7 @@ A. 3
 B. 6
 C. 12
 D. 24
+Hint: Find the second derivative first, then substitute x = 2
 C
 
 Simplify: (x^2 - 9)/(x - 3)
@@ -31,6 +35,7 @@ A. x + 3
 B. x - 3
 C. x^2 + 3
 D. x^2 - 3
+Hint: Factor the numerator - it's a difference of squares
 A
 
 What is the area of a circle with radius r?
@@ -38,6 +43,7 @@ A. πr^2
 B. 2πr
 C. πd
 D. r^2
+Hint: This is a fundamental geometry formula
 A
 
 If tan(θ) = 3/4, what is sin(θ)?
@@ -45,6 +51,7 @@ A. 3/5
 B. 4/5
 C. 5/3
 D. 1/5
+Hint: Draw a right triangle or use trigonometric identities
 A
 
 What is the determinant of [[2, 3], [1, 4]]?
@@ -52,6 +59,7 @@ A. 5
 B. 6
 C. 7
 D. 8
+Hint: For a 2x2 matrix [[a,b],[c,d]], determinant = ad - bc
 C
 
 Solve for x: 2^x = 16
@@ -59,6 +67,7 @@ A. 2
 B. 3
 C. 4
 D. 5
+Hint: Express 16 as a power of 2
 C
 
 If the arithmetic sequence starts with 5 and has common difference 3, what is the 10th term?
@@ -66,6 +75,7 @@ A. 32
 B. 35
 C. 27
 D. 30
+Hint: Use the formula: a_n = a_1 + (n-1)d
 A
 
 The sum of interior angles of a hexagon is:
@@ -73,6 +83,7 @@ A. 540°
 B. 720°
 C. 900°
 D. 1080°
+Hint: Use the formula: (n-2) × 180° where n is number of sides
 B
 
 What is the integral of 2x dx?
@@ -80,6 +91,7 @@ A. x^2 + C
 B. 2x^2 + C
 C. ln(x) + C
 D. e^x + C
+Hint: Use the power rule for integration
 A
 
 What is the binomial coefficient C(6,2)?
@@ -87,6 +99,7 @@ A. 12
 B. 15
 C. 20
 D. 30
+Hint: Use the formula: n! / [k!(n-k)!] or Pascal's triangle
 B
 
 The asymptote of y = 1/x is:
@@ -94,6 +107,7 @@ A. x = 0
 B. y = 0
 C. x = y
 D. x = 1
+Hint: Consider what happens as x approaches 0 and as x approaches infinity
 B
 
 If a line has slope 2 and passes through (1, 3), its equation is:
@@ -101,4 +115,45 @@ A. y = 2x + 1
 B. y = 2x + 3
 C. y = 2x - 1
 D. y = 2x - 3
+Hint: Use point-slope form: y - y1 = m(x - x1)
 C
+
+What is the derivative of ln(x)?
+A. 1/x
+B. x
+C. e^x
+D. log(x)
+Hint: This is a standard derivative result to memorize
+A
+
+What is the limit of (x^2 - 4)/(x - 2) as x approaches 2?
+A. 0
+B. 2
+C. 4
+D. Undefined
+Hint: Factor the numerator and simplify
+C
+
+Which trigonometric identity is correct?
+A. sin²θ + cos²θ = 0
+B. sin²θ + cos²θ = 1
+C. tan²θ + 1 = sec²θ
+D. Both B and C
+Hint: Review the Pythagorean identities
+D
+
+Find the derivative of e^(3x)
+A. e^(3x)
+B. 3e^(3x)
+C. e^(3)
+D. 3e^(x)
+Hint: Use the chain rule
+B
+
+What is the solution to the differential equation dy/dx = ky?
+A. y = kx + C
+B. y = Ce^(kx)
+C. y = k ln(x) + C
+D. y = sin(kx)
+Hint: This is the equation for exponential growth/decay
+B
