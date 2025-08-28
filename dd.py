@@ -126,7 +126,8 @@ level_scrn=False
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
 font3=pygame.font.Font("Assets/Fonts/3.ttf",50)
-font4=pygame.font.Font(None,50)
+font4=pygame.font.Font("Assets/Fonts/4.ttf",80)
+font5=pygame.font.Font(None,50)
 
 #physics variables
 player_vel_y = 0  
@@ -485,7 +486,7 @@ class Animation:
     def createanimation(self, rect,onground,kpressed,playerattack):
         if not question_scrn and not  playerattack:
             if(self.index >=len(player_jump)):self.index=0
-            if(kpressed[pygame.K_d] and not enemyattack and backgrounds[k].rect.right >= x + 250 * unitx):
+            if((kpressed[pygame.K_d] or backgrounds[k].rect.right <= x + 250 * unitx) and not enemyattack):
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -495,7 +496,7 @@ class Animation:
                 floors[l].move(True)
                 if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5*unitx
 
-            elif(kpressed[pygame.K_a] and not enemyattack and backgrounds[k].rect.right >= x + 250 * unitx):
+            elif(kpressed[pygame.K_a] and not enemyattack):
                 self.front= False
                 self.playersuf=player_run[int(self.index)].frameB
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -668,7 +669,7 @@ while(True):
             wrapped_lines = textwrap.wrap(question, width=35)
         # question_scrn=True
     if start_scrn:
-          if backgrounds[k].rect.right>=x:
+        if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
             onground=player.createanimation(rect,onground,kpressed,playerattack)
@@ -678,27 +679,31 @@ while(True):
             screen.blit(enemy1.enemysuf,enemy1.enemyrect)
             screen.blit(enemy2.enemysuf,enemy2.enemyrect)
             screen.blit(enemy3.enemysuf,enemy3.enemyrect)
-            if(not immortal):
-                screen.blit(player.playersuf,player.playerrect)
-            elif(immortal and dt%2==0):
-                screen.blit(player.playersuf,player.playerrect)
-            if (backgrounds[k].rect.right <= x + 250 * unitx):
-                fade_surface.set_alpha(alpha)
-                alpha += 5
-                screen.blit(fade_surface, (0, 0))
-                player.playerrect+=6
-          else:
-              backgrounds[k].rect.bottomleft=(0,y)
-              floors[l].rect.bottomleft=(0,y)
-              k+=1
-              l+=1
-              k%=4
-              l%=2
-              alpha=0
-              player.playerrect.left=10*unitx
+        if(not immortal):
+            screen.blit(player.playersuf,player.playerrect)
+        elif(immortal and dt%2==0):
+            screen.blit(player.playersuf,player.playerrect)
+        if (backgrounds[k].rect.right <= x + 250 * unitx):
+            fade_surface.set_alpha(alpha)
+            alpha += 5
+            screen.blit(fade_surface, (0, 0))
+        else:
+            backgrounds[k].rect.bottomleft=(0,y)
+            floors[l].rect.bottomleft=(0,y)
+            k+=1
+            l+=1
+            k%=4
+            l%=2
+            alpha=0
+            player.playerrect.left=10*unitx
+        if incommingwave:
+            screen.blit(font4.render("INCOMING WAVE",(unitx*10,unity*450)))
+        
     if immortal:
         if(immortaltime>=2000):immortal=False
         immortaltime+=dt
+    if (enemy1.wave==0 and enemy2.wave==0 and enemy3.wave==0):
+        incommingwave=True
     if playerattack:
         if player.index>=len(player_attack):
             immortal=True
@@ -722,13 +727,13 @@ while(True):
         screen.blit(board.frameF,board.rect)
         question_posY=230*unity
         for line in wrapped_lines:
-            question_surface = font4.render(line, True, "Black")
+            question_surface = font5.render(line, True, "Black")
             screen.blit(question_surface,(200*unitx,question_posY))
-            question_posY += font4.get_height() + 5*unity
+            question_posY += font5.get_height() + 5*unity
         question_posY+=15*unity
         for i,option in enumerate(options):
-            option_surface = font4.render(f"{option}", True, "Black")
-            screen.blit(option_surface, (200*unitx, question_posY+(i*(font4.get_height()+20)*unity)))
+            option_surface = font5.render(f"{option}", True, "Black")
+            screen.blit(option_surface, (200*unitx, question_posY+(i*(font5.get_height()+20)*unity)))
         screen.blit(display_answer,(240*unitx,620*unity))
         screen.blit(display_timer,(500*unitx,400*unity))
         if(answer_chosen and answer.upper()==correct_answer):
