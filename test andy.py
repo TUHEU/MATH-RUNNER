@@ -208,3 +208,6 @@ while True:
                 menu_scrn=False
                 start_scrn=True
     pygame.display.update()
+
+
+    ljsf;oiEOFGEJ
