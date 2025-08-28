@@ -1,5 +1,6 @@
 import pygame
 import random
+import textwrap
 from sys import exit
 
 import cv2 # OpenCV for computer vision tasks
@@ -99,7 +100,7 @@ def emotion_loop():
                 # Only process first detected face (break after detection)
                 break
 
-# Start emotion detection in background thread
+#Start emotion detection in background thread
 #Normal (non-daemon) thread → the program will wait for it to finish before exiting.
 #Daemon thread → the program will not wait for it. When the main program ends, daemon threads are killed automatically.
 threading.Thread(target=emotion_loop, daemon=True).start()
@@ -119,8 +120,13 @@ unity=y/1000
 menu_scrn=True
 start_scrn=False
 question_scrn=False
+level_scrn=False
+
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
+font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
+font3=pygame.font.Font("Assets/Fonts/3.ttf",50)
+font4=pygame.font.Font(None,50)
 
 #physics variables
 player_vel_y = 0  
@@ -133,12 +139,28 @@ fade_surface.fill((0, 0, 0))
 fade_surface.set_alpha(0)
 alpha=0
 
+#emotion_list
+emotionlist=[]
+bademotion=0
+
 #player variables
 framesize=(1.7*unitx,2.6*unity)
 immortal=False
 immortaltime=0
 playerattack=False
 playerinjure=False
+
+
+#Questions variables
+questionsize=(unitx*1.2,2*unity)
+position_question=(200*unitx,600*unity)
+answer=''
+answer_chosen=False
+correction_delay=0
+timer=30
+second=0
+seconds=0
+minutes=0
 
 #Enemies variables
 framesizeE=(.3*unitx,.6*unity)
@@ -161,6 +183,10 @@ speedfl=12*unitx
 #animation variables
 ground=y-(200*unity)
 onground=True
+
+#mouse variables
+click_allowed=True
+
 
 # player animations Frame class
 class Frame:
@@ -236,7 +262,7 @@ class button:
             touch_sound.play()
         self.touching=False
         if(not self.touched):self.touching=True
-        if self.touched and event.type == pygame.MOUSEBUTTONDOWN: 
+        if self.touched and click_allowed and event.type == pygame.MOUSEBUTTONDOWN: 
             return self.key    
         return None
 
@@ -259,10 +285,10 @@ backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
 floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
 
 
-#question images
-board=Frame((unitx*.8,unity*1.5),f"Assets/Questtions/board.png",(150*unitx,800*unity))
-
-
+#question TEXT BOXES
+board=Frame((unitx*.8,unity*1.5),f"Assets/Questions/board.png",(150*unitx,800*unity))
+hint_active=Frame((unitx*1.16,unity*.3),f"Assets/Questions/board.png",(10*unitx,980*unity))
+hint_inactive=Frame((unitx*.3,unity*.5),f"Assets/Questions/hint.png",(10*unitx,980*unity))
 #player animations lists
 player_run=[Frame(framesize,f"Assets/Player/run/{i}.png") for i in range(1,9)]    
 player_jump=[Frame(framesize,f"Assets/Player/jump/{i}.png") for i in range(1,9)]
@@ -298,6 +324,29 @@ enemy3_idle=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle/{i}.png") for i in rang
 enemy3_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle Blink/{i}.png") for i in range(0,12)]
 enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in range(0,12)]
 
+
+#Questions/Answers datastructures and funtion
+
+# Load questions from txt file
+def load_questions(filename):
+    questions = []
+    with open(filename, "r") as f:
+        content = f.read().strip().split("\n\n")  # Questions separated by blank line
+        for block in content:
+            lines = block.split("\n")
+            q = lines[0]
+            # Wrap the question if it's longer than 55 characters
+            if len(q) > 35:
+                q = "\n".join(textwrap.wrap(q, width=35))
+            options = lines[1:5]
+            hint = lines[5]  # hint
+            answer = lines[6]  # correct answer index (A–D)
+            questions.append((q, options, answer))
+    return questions
+level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy"),
+               button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"medium"),
+               button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*100)),"high")]
+
 #animation enemy class
 class Enemy:
     active_attacker = None  # Class-level: only one enemy can attack at once
@@ -327,7 +376,7 @@ class Enemy:
 
     def createanimation(self, rectE1):
         global playerattack, question_scrn, immortal, enemyattack,dt
-        # 1. If already DEAD (stay on ground, then disappear)
+        #If already DEAD (stay on ground, then disappear)
         if self.dead:
             self.death_timer += dt
             if self.death_timer > 100:  # after ~100 frames remove enemy
@@ -339,7 +388,7 @@ class Enemy:
                 elif(self.wave==0):
                     self.enemyrect.bottom=-100*unity
             return
-        # 2. DYING animation in progress
+        #DYING animation in progress
         if self.dying:
             self.index += 0.2
             death_frames = enemy1_dying if self.key == "enemy1" else enemy2_dying if self.key == "enemy2" else enemy3_dying
@@ -350,9 +399,10 @@ class Enemy:
                 self.dead = True
                 self.death_timer = 0
             self.enemysuf = death_frames[int(self.index)].frameF
+            self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
             return
 
-        # 3. MOVEMENT & ATTACK if alive
+        # MOVEMENT & ATTACK if alive
         if not question_scrn and not playerattack and not self.attack:
             if self.index >= len(enemy1_Walk):
                 self.index = 0
@@ -376,7 +426,7 @@ class Enemy:
                 Enemy.active_attacker = self
                 question_scrn = False
 
-        # 4. ATTACK animation
+        # ATTACK animation
         elif self.attack:
             self.index += 0.2
             if self.index >= len(enemy1_attack):
@@ -435,7 +485,7 @@ class Animation:
     def createanimation(self, rect,onground,kpressed,playerattack):
         if not question_scrn and not  playerattack:
             if(self.index >=len(player_jump)):self.index=0
-            if(kpressed[pygame.K_d] ):
+            if(kpressed[pygame.K_d] and not enemyattack):
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -445,7 +495,7 @@ class Animation:
                 floors[l].move(True)
                 if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5*unitx
 
-            elif(kpressed[pygame.K_a]):
+            elif(kpressed[pygame.K_a] and not enemyattack):
                 self.front= False
                 self.playersuf=player_run[int(self.index)].frameB
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -455,7 +505,7 @@ class Animation:
                     floors[l].move(False)
                     self.playerrect.left-=5*unitx
 
-            elif(kpressed[pygame.K_s]):
+            elif(kpressed[pygame.K_s] and not enemyattack):
                 self.index-=.02
                 self.index%=len(player_knee)
                 if(self.front):self.playersuf=player_knee[int(self.index)].frameF
@@ -468,7 +518,7 @@ class Animation:
                 else: self.playersuf=player_idle[int(self.index)].frameB
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
                 
-            if(kpressed[pygame.K_w] and onground):
+            if(kpressed[pygame.K_w] and onground and not enemyattack):
                 self.vel_y=jump_strength
                 self.index=0
                 onground=False
@@ -547,18 +597,23 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} ply {player.playerrect.width} immt {immortaltime} ques {question_scrn} {enemy1.frontE} ",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
+        if question_scrn and event.type==pygame.KEYDOWN and not answer_chosen:
+            char = event.unicode
+            if char.lower() in "abcd":
+                answer=char.upper()
+            if event.key==pygame.K_RETURN and answer!='':
+                    answer_chosen=True
     screen.blit(menu,menu_rect)
 #menu true  
     if menu_scrn:
         i=0
         for equ in equations:
-            print(equ.isactive)
             wait=(random.randint(400,800))
             if not equ.active(wait,dt,cur_equation,eqn_locx,eqn_locy):
                 if(j<13):
@@ -575,9 +630,43 @@ while(True):
                 exit()
             if(button.handle_event(event,mouse)=="start"):
                 menu_scrn=False
+                level_scrn=True
+                click_allowed=False
+    if level_scrn:
+        for button in level_buttons:
+            button.draw(screen)
+            button.handle_event(event,mouse)
+            if(button.handle_event(event,mouse)=="easy"):
+                questions=load_questions("Assets\Questions\easy.txt")
+                level="easy"
+                level_scrn=False
                 start_scrn=True
+            if(button.handle_event(event,mouse)=="medium"):
+                questions=load_questions("Assets\Questions\medium.txt")
+                level="medium"
+                level_scrn=False
+                start_scrn=True
+            if(button.handle_event(event,mouse)=="high"):
+                questions=load_questions("Assets\Questions\high.txt")
+                level="high"
+                level_scrn=False
+                start_scrn=True
+    if event.type == pygame.MOUSEBUTTONUP:
+        click_allowed = True
     if(player.playerrect.bottom<ground):onground=False
-    if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):question_scrn=True
+    if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):
+        if(not question_scrn):
+            question_num= random.randint(0,14)
+            correction_delay=0
+            if level=="easy":
+                timer=random.randrange(40,50,5)
+            elif level=="medium":
+                timer=random.randrange(40,60,10)
+            elif level=="high":
+                timer=random.randrange(50,90,10)
+            question, options, correct_answer = random.choice(questions)
+            wrapped_lines = textwrap.wrap(question, width=35)
+        question_scrn=True
     if start_scrn:
           if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
@@ -597,7 +686,6 @@ while(True):
                 fade_surface.set_alpha(alpha)
                 alpha += 5
                 screen.blit(fade_surface, (0, 0))
-            
           else:
               backgrounds[k].rect.bottomleft=(0,y)
               floors[l].rect.bottomleft=(0,y)
@@ -615,21 +703,69 @@ while(True):
             immortal=True
             playerattack=False    
     if question_scrn:
+        second+=dt
+        if second>=1000 and timer>0:
+            if len(emotionlist)<30:
+                if(current_emotion=="Happy" or current_emotion=="Neutral"):
+                    emotionlist.append(1)
+                else:
+                    emotionlist.append(0)
+            timer-=1
+            second=0
+            seconds=timer%60
+            minutes=int(timer/60)%60
+        display_answer=font2.render(f"Your Answer (press 'Enter' to validate) : {answer.upper()}",True,"Black")
+        display_correct=font2.render(f"CORRECT!!!",True,"Green")
+        display_wrong=font2.render(f"FAILED!!! correct = {correct_answer.upper()}",True,"Red")
+        display_timer=font3.render(f"Timer {minutes:02}:{seconds:02}",True,"White")
         screen.blit(board.frameF,board.rect)
-        if(kpressed[pygame.K_o]):
+        question_posY=230*unity
+        for line in wrapped_lines:
+            question_surface = font4.render(line, True, "Black")
+            screen.blit(question_surface,(200*unitx,question_posY))
+            question_posY += font4.get_height() + 5*unity
+        question_posY+=15*unity
+        for i,option in enumerate(options):
+            option_surface = font4.render(f"{option}", True, "Black")
+            screen.blit(option_surface, (200*unitx, question_posY+(i*(font4.get_height()+20)*unity)))
+        screen.blit(display_answer,(240*unitx,620*unity))
+        screen.blit(display_timer,(500*unitx,400*unity))
+        if(answer_chosen and answer.upper()==correct_answer):
+            screen.blit(display_correct,(240*unitx,675*unity))
+            correction_delay+=dt
+        if(len(emotionlist)>=30):
+            for emotion in emotionlist:
+                if emotion==0:
+                    bademotion+=1
+        test=font2.render("Hint: A prime number has exactly two distinct positive divisors: 1 and itself",True,"Black")
+        if(bademotion==0):
+            if (kpressed[pygame.K_h] and pygame.KEYDOWN):
+                    screen.blit(hint_active.frameF,hint_active.rect)
+                    screen.blit(test,(40*unitx,880*unity))
+            else:
+                screen.blit(hint_inactive.frameF,hint_inactive.rect)
+        if(correction_delay>=2000):
             player.playerrect.bottom=ground
             player.index=0
+            correction_delay=0
             playerattack=True
             immortaltime=0
             question_scrn=False 
-        elif(kpressed[pygame.K_i]):
-            #enemy1.enemyrect.bottom=ground
+            answer_chosen=False
+            answer=''
+        elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
+            screen.blit(display_wrong,(240*unitx,670*unity))
+            correction_delay+=dt
+        if(correction_delay>=2000):
+            correction_delay=0
             enemy1.index=0
             enemy2.index=0
             enemy3.index=0
             immortaltime=0
             enemyattack=True
             question_scrn=False 
+            answer_chosen=False
+            answer=''
     screen.blit(testtext,(10,10))
 
     pygame.display.update()
