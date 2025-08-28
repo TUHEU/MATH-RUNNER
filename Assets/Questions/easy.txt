@@ -1,10 +1,10 @@
 What is 7 + 5?
 A. 11
-B. 12
+B. 14
 C. 13
-D. 14
+D. 12
 Hint: Count up from 7 or use your addition facts
-B
+D
 
 Which number comes after 99?
 A. 100
@@ -24,11 +24,11 @@ C
 
 If you have 15 apples and give 6 to a friend, how many do you have left?
 A. 8
-B. 9
+B. 21
 C. 10
-D. 21
+D. 9
 Hint: This is a subtraction problem - start with 15 and take away 6
-B
+D
 
 What is one-half of 10?
 A. 2
@@ -55,12 +55,12 @@ Hint: Look at the place value - what position is the 4 in?
 B
 
 What is 20 - 9?
-A. 10
-B. 11
+A. 11
+B. 10
 C. 12
 D. 29
 Hint: Count backwards from 20 or think of what number plus 9 equals 20
-B
+A
 
 How many minutes are in one hour?
 A. 12
@@ -80,27 +80,27 @@ B
 
 What is 9 + 8?
 A. 16
-B. 17
-C. 18
+B. 18
+C. 17
 D. 19
 Hint: You can think of it as 10 + 8 minus 1
-B
+C
 
 How many sides does a pentagon have?
-A. 4
-B. 5
+A. 5
+B. 4
 C. 6
 D. 8
 Hint: Think of the Pentagon building
-B
+A
 
 What is 5 x 6?
 A. 25
-B. 30
+B. 40
 C. 35
-D. 40
+D. 30
 Hint: Count by fives six times
-B
+D
 
 Which of these is a fraction?
 A. 12

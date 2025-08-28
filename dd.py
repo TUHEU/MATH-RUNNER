@@ -285,10 +285,10 @@ backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
 floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
 
 
-#question images
+#question TEXT BOXES
 board=Frame((unitx*.8,unity*1.5),f"Assets/Questions/board.png",(150*unitx,800*unity))
-
-
+hint_active=Frame((unitx*1.16,unity*.3),f"Assets/Questions/board.png",(10*unitx,980*unity))
+hint_inactive=Frame((unitx*.3,unity*.5),f"Assets/Questions/hint.png",(10*unitx,980*unity))
 #player animations lists
 player_run=[Frame(framesize,f"Assets/Player/run/{i}.png") for i in range(1,9)]    
 player_jump=[Frame(framesize,f"Assets/Player/jump/{i}.png") for i in range(1,9)]
@@ -737,8 +737,13 @@ while(True):
             for emotion in emotionlist:
                 if emotion==0:
                     bademotion+=1
-        if (bademotion==0):
-            screen.blit(font2.render("Great! You kept a positive attitude :)",True,"Black"),(600*unitx,700*unity))
+        test=font2.render("Hint: A prime number has exactly two distinct positive divisors: 1 and itself",True,"Black")
+        if(bademotion==0):
+            if (kpressed[pygame.K_h] and pygame.KEYDOWN):
+                    screen.blit(hint_active.frameF,hint_active.rect)
+                    screen.blit(test,(40*unitx,880*unity))
+            else:
+                screen.blit(hint_inactive.frameF,hint_inactive.rect)
         if(correction_delay>=2000):
             player.playerrect.bottom=ground
             player.index=0

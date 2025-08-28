@@ -80,11 +80,11 @@ B
 
 Solve for y: 2y - 7 = 15
 A. 4
-B. 11
+B. 22
 C. 12
-D. 22
+D. 11
 Hint: Isolate y by adding 7 to both sides first
-B
+D
 
 What is the perimeter of a square with a side length of 6 cm?
 A. 12 cm
