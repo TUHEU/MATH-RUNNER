@@ -485,7 +485,7 @@ class Animation:
     def createanimation(self, rect,onground,kpressed,playerattack):
         if not question_scrn and not  playerattack:
             if(self.index >=len(player_jump)):self.index=0
-            if(kpressed[pygame.K_d] and not enemyattack):
+            if(kpressed[pygame.K_d] and not enemyattack and backgrounds[k].rect.right >= x + 250 * unitx):
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -495,7 +495,7 @@ class Animation:
                 floors[l].move(True)
                 if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5*unitx
 
-            elif(kpressed[pygame.K_a] and not enemyattack):
+            elif(kpressed[pygame.K_a] and not enemyattack and backgrounds[k].rect.right >= x + 250 * unitx):
                 self.front= False
                 self.playersuf=player_run[int(self.index)].frameB
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -666,7 +666,7 @@ while(True):
                 timer=random.randrange(50,90,10)
             question, options, correct_answer = random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
-        question_scrn=True
+        # question_scrn=True
     if start_scrn:
           if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
@@ -686,6 +686,7 @@ while(True):
                 fade_surface.set_alpha(alpha)
                 alpha += 5
                 screen.blit(fade_surface, (0, 0))
+                player.playerrect+=6
           else:
               backgrounds[k].rect.bottomleft=(0,y)
               floors[l].rect.bottomleft=(0,y)
