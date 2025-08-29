@@ -264,7 +264,8 @@ class button:
             touch_sound.play()
         self.touching=False
         if(not self.touched):self.touching=True
-        if self.touched and click_allowed and event.type == pygame.MOUSEBUTTONDOWN: 
+        if self.touched and click_allowed and event.type == pygame.MOUSEBUTTONDOWN:
+            click_sound.play() 
             return self.key    
         return None
 
@@ -580,6 +581,7 @@ pygame.mixer.init()
 # pygame.mixer.music.set_volume(0.25)
 
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
+click_sound=pygame.mixer.Sound("Assets/Sounds/buttonclick.mp3")
 
 #menu
 menu=pygame.image.load("Assets/Menu/menu.jpg")
@@ -671,7 +673,7 @@ while(True):
                 timer=random.randrange(40,60,10)
             elif level=="high":
                 timer=random.randrange(50,90,10)
-            question, options, correct_answer = random.choice(questions)
+            question, options,correct_answer= random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
         question_scrn=True
         incomingwave=False
@@ -755,7 +757,7 @@ while(True):
             for emotion in emotionlist:
                 if emotion==0:
                     bademotion+=1
-        test=font2.render("Hint: A prime number has exactly two distinct positive divisors: 1 and itself",True,"Black")
+        test=font2.render("",True,"Black")
         if(bademotion==0):
             if (kpressed[pygame.K_h] and pygame.KEYDOWN):
                     screen.blit(hint_active.frameF,hint_active.rect)

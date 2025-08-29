@@ -344,7 +344,7 @@ def load_questions(filename):
             options = lines[1:5]
             hint = lines[5]  # hint
             answer = lines[6]  # correct answer index (A–D)
-            questions.append((q, options, answer))
+            questions.append((q, options, answer,hint))
     return questions
 level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy"),
                button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"medium"),
@@ -582,6 +582,9 @@ pygame.mixer.init()
 
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
 click_sound=pygame.mixer.Sound("Assets/Sounds/buttonclick.mp3")
+menu_sound=pygame.mixer.Sound("Assets/Sounds/menu.mp3")
+menu_sound.set_volume(0.3)
+
 
 #menu
 menu=pygame.image.load("Assets/Menu/menu.jpg")
@@ -597,6 +600,7 @@ enemy2=Enemy(key="enemy2")
 enemy3=Enemy(key="enemy3") 
 ground=player.playerrect.bottom
 incomingwave=True
+menu_sound.play()
 while(True):
     rect=player.playerrect.bottomleft
     rectE1=enemy1.enemyrect.bottomleft
@@ -659,6 +663,7 @@ while(True):
                 questions=load_questions("Assets\Questions\high.txt")
                 level="high"
                 level_scrn=False
+                menu_sound.stop()
                 start_scrn=True
     if event.type == pygame.MOUSEBUTTONUP:
         click_allowed = True
@@ -673,7 +678,7 @@ while(True):
                 timer=random.randrange(40,60,10)
             elif level=="high":
                 timer=random.randrange(50,90,10)
-            question, options,correct_answer= random.choice(questions)
+            question, options,correct_answer,hint= random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
         question_scrn=True
         incomingwave=False
@@ -757,7 +762,7 @@ while(True):
             for emotion in emotionlist:
                 if emotion==0:
                     bademotion+=1
-        test=font2.render("",True,"Black")
+        test=font2.render(f"{hint}",True,"Black")
         if(bademotion==0):
             if (kpressed[pygame.K_h] and pygame.KEYDOWN):
                     screen.blit(hint_active.frameF,hint_active.rect)
