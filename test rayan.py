@@ -15,6 +15,7 @@ unity=y/1000
 menu_scrn=True
 start_scrn=False
 question_scrn=False
+option_scrn=False
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 
@@ -223,6 +224,7 @@ class Enemy:
 
     def createanimation(self, rectE1):
         global playerattack, question_scrn, immortal, enemyattack,dt
+        
         # 1. If already DEAD (stay on ground, then disappear)
         if self.dead:
             self.death_timer += dt
@@ -413,7 +415,6 @@ class Animation:
                     self.playersuf=player_attack[int(self.index)].frameB
             self.playerrect=player_attack[int(self.index)].frameF.get_rect(bottomleft=rect)
 
-
 #sounds
 pygame.mixer.init()
 # pygame.mixer.music.load('Assets\Sounds\touch.mp3')
@@ -423,9 +424,17 @@ pygame.mixer.init()
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
 
 #menu
-menu=pygame.image.load("Assets/Menu/menu.jpg")
+menu=pygame.image.load("Assets/menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
+#option
+option=pygame.image.load("Assets/option/2.png")
+option_rect=option.get_rect(topleft=(x/2,y/2))
+option=pygame.transform.scale(option,(x,y))   
+if option_scrn==True:
+    menu_scrn=False
+    screen.blit(menu,menu_rect)
+    screen.blit(menu,menu_rect)
 j=0
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -450,6 +459,7 @@ while(True):
             pygame.quit()
             exit()
     screen.blit(menu,menu_rect)
+    screen.blit(option,option_rect)
 #menu true  
     if menu_scrn:
         i=0
@@ -472,6 +482,13 @@ while(True):
             if(button.handle_event(event,mouse)=="start"):
                 menu_scrn=False
                 start_scrn=True
+        for button in buttons:
+            button.draw(screen)
+            button.handle_event(event,mouse)   
+            if(button.handle_event(event,mouse)=="options"):
+                   menu_scrn=False
+                   option_scrn=True
+        
     if(player.playerrect.bottom<ground):onground=False
     if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):question_scrn=True
     if start_scrn:
@@ -527,5 +544,6 @@ while(True):
             enemyattack=True
             question_scrn=False
     screen.blit(testtext,(10,10))
+ 
 
     pygame.display.update()
