@@ -264,7 +264,8 @@ class button:
             touch_sound.play()
         self.touching=False
         if(not self.touched):self.touching=True
-        if self.touched and click_allowed and event.type == pygame.MOUSEBUTTONDOWN: 
+        if self.touched and click_allowed and event.type == pygame.MOUSEBUTTONDOWN:
+            click_sound.play() 
             return self.key    
         return None
 
@@ -580,6 +581,7 @@ pygame.mixer.init()
 # pygame.mixer.music.set_volume(0.25)
 
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
+click_sound=pygame.mixer.Sound("Assets/Sounds/buttonclick.mp3")
 
 #menu
 menu=pygame.image.load("Assets/Menu/menu.jpg")
