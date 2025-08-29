@@ -209,5 +209,3 @@ while True:
                 start_scrn=True
     pygame.display.update()
 
-
-    ljsf;oiEOFGEJ
