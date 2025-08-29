@@ -530,10 +530,13 @@ while(True):
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+            
+        # Only allow pausing when not in question screen
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_p and not question_scrn:
             # Toggle pause state when 'P' is pressed
             paused = not paused
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
+            
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_b and not question_scrn:
             # Return to main menu when 'B' is pressed
             menu_scrn = True
             start_scrn = False
@@ -549,6 +552,7 @@ while(True):
             bademotion = 0
             answer = ''
             answer_chosen = False
+            
         if question_scrn and event.type==pygame.KEYDOWN and not answer_chosen and not paused:
             char = event.unicode
             if char.lower() in "abcd":
