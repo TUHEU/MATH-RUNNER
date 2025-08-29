@@ -122,7 +122,10 @@ question_scrn=False
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
-font3=pygame.font.Font("Assets/Fonts/3.fon",150)
+font3=pygame.font.Font("Assets/Fonts/3.ttf",50)
+font4=pygame.font.Font("Assets/Fonts/4.ttf",80)
+font5=pygame.font.Font(None,50)
+
 #physics variables
 player_vel_y = 0  
 gravity = 1 * unity  
@@ -157,6 +160,7 @@ minutes=0
 framesizeE=(.3*unitx,.6*unity)
 Enemydead=False
 enemyattack=False
+wave_interval=0
 
 #animation variables
 signs=['+','-','/','*']
@@ -272,10 +276,10 @@ backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
 floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
 
 
-#question images
+#question TEXT BOXES
 board=Frame((unitx*.8,unity*1.5),f"Assets/Questions/board.png",(150*unitx,800*unity))
-
-
+hint_active=Frame((unitx*1.16,unity*.3),f"Assets/Questions/board.png",(10*unitx,980*unity))
+hint_inactive=Frame((unitx*.3,unity*.5),f"Assets/Questions/hint.png",(10*unitx,980*unity))
 #player animations lists
 player_run=[Frame(framesize,f"Assets/Player/run/{i}.png") for i in range(1,9)]    
 player_jump=[Frame(framesize,f"Assets/Player/jump/{i}.png") for i in range(1,9)]
@@ -325,6 +329,25 @@ questions_east_dict={question_easy[i]:answer_easy[i] for i in range(0,15)}
 questions_medium_dict={question_Medium[i]:answer_medium[i] for i in range(0,15)}
 questions_hard_dict={question_High[i]:answer_hard[i] for i in range(0,15)}
 
+# Load questions from txt file
+def load_questions(filename):
+    questions = []
+    with open(filename, "r") as f:
+        content = f.read().strip().split("\n\n")  # Questions separated by blank line
+        for block in content:
+            lines = block.split("\n")
+            q = lines[0]
+            # Wrap the question if it's longer than 55 characters
+            if len(q) > 35:
+                q = "\n".join(textwrap.wrap(q, width=35))
+            options = lines[1:5]
+            hint = lines[5]  # hint
+            answer = lines[6]  # correct answer index (A–D)
+            questions.append((q, options, answer))
+    return questions
+level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy"),
+               button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"medium"),
+               button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*100)),"high")]
 
 #animation enemy class
 class Enemy:
@@ -462,9 +485,10 @@ class Animation:
         self.playerrect=playerrect
         self.vel_y = 0
     def createanimation(self, rect,onground,kpressed,playerattack):
+        global wave_interval
         if not question_scrn and not  playerattack:
             if(self.index >=len(player_jump)):self.index=0
-            if(kpressed[pygame.K_d] and not enemyattack):
+            if((kpressed[pygame.K_d] or backgrounds[k].rect.right <= x + 250 * unitx ) and not enemyattack):
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -472,6 +496,7 @@ class Animation:
                 self.playerrect.bottomleft=rect
                 backgrounds[k].move(True)
                 floors[l].move(True)
+                wave_interval+=speedbk
                 if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5*unitx
 
             elif(kpressed[pygame.K_a] and not enemyattack):
@@ -481,6 +506,7 @@ class Animation:
                 self.playerrect.width=self.playerrect.width-(91*unitx)
                 if self.playerrect.left>x-980*unitx:
                     backgrounds[k].move(False)
+                    wave_interval-=speedbk
                     floors[l].move(False)
                     self.playerrect.left-=5*unitx
 
@@ -568,6 +594,7 @@ enemy1=Enemy(key="enemy1")
 enemy2=Enemy(key="enemy2")
 enemy3=Enemy(key="enemy3") 
 ground=player.playerrect.bottom
+incomingwave=True
 while(True):
     rect=player.playerrect.bottomleft
     rectE1=enemy1.enemyrect.bottomleft
@@ -578,6 +605,7 @@ while(True):
     mouse = pygame.mouse.get_pos() 
     testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
+    #if (enemy1.wave==2 and enemy2.wave==2 and enemy3.wave==2):incomingwave=True
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
@@ -618,8 +646,10 @@ while(True):
             correction_delay=0
             timer=30
         question_scrn=True
+        incomingwave=False
+
     if start_scrn:
-          if backgrounds[k].rect.right>=x:
+        if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
             onground=player.createanimation(rect,onground,kpressed,playerattack)
@@ -637,16 +667,24 @@ while(True):
                 fade_surface.set_alpha(alpha)
                 alpha += 5 
                 screen.blit(fade_surface, (0, 0))
-            
-          else:
-              backgrounds[k].rect.bottomleft=(0,y)
-              floors[l].rect.bottomleft=(0,y)
-              k+=1
-              l+=1
-              k%=4
-              l%=2
-              alpha=0
-              player.playerrect.left=10*unitx
+            if incomingwave:
+                screen.blit(font4.render("INCOMING WAVE",True,"Yellow"),(unitx*200,unity*400))
+            if wave_interval>=2000:
+                enemy1.wave=2 
+                enemy2.wave=2
+                enemy3.wave=2
+                wave_interval=0
+        else:
+            backgrounds[k].rect.bottomleft=(0,y)
+            wave_interval=0
+            floors[l].rect.bottomleft=(0,y)
+            k+=1
+            l+=1
+            k%=4
+            l%=2
+            alpha=0
+            player.playerrect.left=10*unitx
+        
     if immortal:
         if(immortaltime>=2000):immortal=False
         immortaltime+=dt
@@ -666,12 +704,31 @@ while(True):
         display_wrong=font2.render(f"FAILED!!! correct = {answer_easy[question_num].upper()}",True,"Red")
         display_timer=font2.render(f"Timer {minutes:02}:{seconds:02}",True,"White")
         screen.blit(board.frameF,board.rect)
-        screen.blit(question_easy[question_num].frameF,question_easy[question_num].rect)
+        question_posY=230*unity
+        for line in wrapped_lines:
+            question_surface = font5.render(line, True, "Black")
+            screen.blit(question_surface,(200*unitx,question_posY))
+            question_posY += font5.get_height() + 5*unity
+        question_posY+=15*unity
+        for i,option in enumerate(options):
+            option_surface = font5.render(f"{option}", True, "Black")
+            screen.blit(option_surface, (200*unitx, question_posY+(i*(font5.get_height()+20)*unity)))
         screen.blit(display_answer,(240*unitx,620*unity))
         screen.blit(display_timer,(500*unitx,400*unity))
         if(answer_chosen and answer.lower()==answer_easy[question_num]):
             screen.blit(display_correct,(240*unitx,675*unity))
             correction_delay+=dt
+        if(len(emotionlist)>=30):
+            for emotion in emotionlist:
+                if emotion==0:
+                    bademotion+=1
+        test=font2.render("Hint: A prime number has exactly two distinct positive divisors: 1 and itself",True,"Black")
+        if(bademotion==0):
+            if (kpressed[pygame.K_h] and pygame.KEYDOWN):
+                    screen.blit(hint_active.frameF,hint_active.rect)
+                    screen.blit(test,(40*unitx,880*unity))
+            else:
+                screen.blit(hint_inactive.frameF,hint_inactive.rect)
         if(correction_delay>=2000):
             player.playerrect.bottom=ground
             player.index=0

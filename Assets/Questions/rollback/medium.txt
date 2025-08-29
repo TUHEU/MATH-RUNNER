@@ -1,0 +1,69 @@
+Solve for x: 3x + 5 = 17
+A. 3
+B. 4
+C. 5
+D. 6
+B
+
+What is the area of a rectangle with a length of 8 cm and a width of 5 cm?
+A. 13 cm²
+B. 40 cm²
+C. 26 cm²
+D. 35 cm²
+B
+
+Simplify the expression: 2(3y - 4) + 5
+A. 6y - 3
+B. 6y + 3
+C. 6y - 13
+D. 11y - 8
+A
+
+What is the value of 5 squared (5²)?
+A. 10
+B. 25
+C. 15
+D. 7
+B
+
+If a = 3 and b = -2, what is the value of a² - b²?
+A. 5
+B. 13
+C. 1
+D. -5
+A
+
+What is the square root of 144?
+A. 12
+B. 14
+C. 72
+D. 16
+A
+
+Which of these is a prime number?
+A. 9
+B. 15
+C. 21
+D. 17
+D
+
+What is the next number in the sequence: 2, 5, 8, 11, ...?
+A. 13
+B. 14
+C. 15
+D. 12
+B
+
+A bag contains 4 red and 6 blue marbles. What is the probability of picking a red marble?
+A. 2/5
+B. 4/5
+C. 3/5
+D. 1/2
+A
+
+What is the mean of these numbers: 5, 7, 9, 11?
+A. 7
+B. 8
+C. 9
+D. 10
+B
