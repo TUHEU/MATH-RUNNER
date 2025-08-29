@@ -533,6 +533,22 @@ while(True):
         if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
             # Toggle pause state when 'P' is pressed
             paused = not paused
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
+            # Return to main menu when 'B' is pressed
+            menu_scrn = True
+            start_scrn = False
+            question_scrn = False
+            level_scrn = False
+            paused = False
+            # Reset game state
+            player = Animation()
+            enemy1 = Enemy(key="enemy1")
+            enemy2 = Enemy(key="enemy2")
+            enemy3 = Enemy(key="enemy3")
+            emotionlist = []
+            bademotion = 0
+            answer = ''
+            answer_chosen = False
         if question_scrn and event.type==pygame.KEYDOWN and not answer_chosen and not paused:
             char = event.unicode
             if char.lower() in "abcd":
