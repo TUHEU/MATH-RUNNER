@@ -1,5 +1,6 @@
 import pygame
 import random
+import textwrap
 from sys import exit
 
 import cv2 # OpenCV for computer vision tasks
@@ -99,7 +100,7 @@ def emotion_loop():
                 # Only process first detected face (break after detection)
                 break
 
-# Start emotion detection in background thread
+#Start emotion detection in background thread
 #Normal (non-daemon) thread → the program will wait for it to finish before exiting.
 #Daemon thread → the program will not wait for it. When the main program ends, daemon threads are killed automatically.
 threading.Thread(target=emotion_loop, daemon=True).start()
@@ -119,6 +120,8 @@ unity=y/1000
 menu_scrn=True
 start_scrn=False
 question_scrn=False
+level_scrn=False
+
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
@@ -136,6 +139,10 @@ fade_surface = pygame.Surface((x,y))
 fade_surface.fill((0, 0, 0)) 
 fade_surface.set_alpha(0)
 alpha=0
+
+#emotion_list
+emotionlist=[]
+bademotion=0
 
 #player variables
 framesize=(1.7*unitx,2.6*unity)
@@ -178,6 +185,10 @@ speedfl=12*unitx
 #animation variables
 ground=y-(200*unity)
 onground=True
+
+#mouse variables
+click_allowed=True
+
 
 # player animations Frame class
 class Frame:
@@ -253,12 +264,8 @@ class button:
             touch_sound.play()
         self.touching=False
         if(not self.touched):self.touching=True
-<<<<<<< HEAD
-        if self.touched and event.type == pygame.MOUSEBUTTONDOWN: 
-=======
         if self.touched and click_allowed and event.type == pygame.MOUSEBUTTONDOWN:
             click_sound.play() 
->>>>>>> d0c79b20c6da23b554dfb08bcec75d0c94efd672
             return self.key    
         return None
 
@@ -321,18 +328,7 @@ enemy3_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle Blink/{i}.png") fo
 enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in range(0,12)]
 
 
-#Questions/Answers dictionaries
-answer_easy=['a','b','c','d','a','b','c','d','a','b','c','d','a','b','c']
-answer_medium=['a','b','c','d','a','b','c','d','a','b','c','d','a','b','c']
-answer_hard=['a','b','c','d','a','b','c','d','a','b','c','d','a','b','c']
-
-question_easy=[Frame(questionsize,f"Assets/Questions/Easy/{i}.png",position_question) for i in range(1,16)]
-question_Medium=[Frame(questionsize,f"Assets/Questions/Medium/{i}.png",position_question) for i in range(1,16)]
-question_High=[Frame(questionsize,f"Assets/Questions/High/{i}.png",position_question) for i in range(1,16)]
-
-questions_east_dict={question_easy[i]:answer_easy[i] for i in range(0,15)}
-questions_medium_dict={question_Medium[i]:answer_medium[i] for i in range(0,15)}
-questions_hard_dict={question_High[i]:answer_hard[i] for i in range(0,15)}
+#Questions/Answers datastructures and funtion
 
 # Load questions from txt file
 def load_questions(filename):
@@ -348,7 +344,7 @@ def load_questions(filename):
             options = lines[1:5]
             hint = lines[5]  # hint
             answer = lines[6]  # correct answer index (A–D)
-            questions.append((q, options, answer))
+            questions.append((q, options, answer,hint))
     return questions
 level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy"),
                button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"medium"),
@@ -586,6 +582,9 @@ pygame.mixer.init()
 
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
 click_sound=pygame.mixer.Sound("Assets/Sounds/buttonclick.mp3")
+menu_sound=pygame.mixer.Sound("Assets/Sounds/menu.mp3")
+menu_sound.set_volume(0.3)
+
 
 #menu
 menu=pygame.image.load("Assets/Menu/menu.jpg")
@@ -601,6 +600,7 @@ enemy2=Enemy(key="enemy2")
 enemy3=Enemy(key="enemy3") 
 ground=player.playerrect.bottom
 incomingwave=True
+menu_sound.play()
 while(True):
     rect=player.playerrect.bottomleft
     rectE1=enemy1.enemyrect.bottomleft
@@ -616,7 +616,7 @@ while(True):
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
-        if question_scrn and event.type==pygame.KEYDOWN:
+        if question_scrn and event.type==pygame.KEYDOWN and not answer_chosen:
             char = event.unicode
             if char.lower() in "abcd":
                 answer=char.upper()
@@ -627,7 +627,6 @@ while(True):
     if menu_scrn:
         i=0
         for equ in equations:
-            print(equ.isactive)
             wait=(random.randint(400,800))
             if not equ.active(wait,dt,cur_equation,eqn_locx,eqn_locy):
                 if(j<13):
@@ -644,24 +643,43 @@ while(True):
                 exit()
             if(button.handle_event(event,mouse)=="start"):
                 menu_scrn=False
+                level_scrn=True
+                click_allowed=False
+    if level_scrn:
+        for button in level_buttons:
+            button.draw(screen)
+            button.handle_event(event,mouse)
+            if(button.handle_event(event,mouse)=="easy"):
+                questions=load_questions("Assets\Questions\easy.txt")
+                level="easy"
+                level_scrn=False
                 start_scrn=True
+            if(button.handle_event(event,mouse)=="medium"):
+                questions=load_questions("Assets\Questions\medium.txt")
+                level="medium"
+                level_scrn=False
+                start_scrn=True
+            if(button.handle_event(event,mouse)=="high"):
+                questions=load_questions("Assets\Questions\high.txt")
+                level="high"
+                level_scrn=False
+                menu_sound.stop()
+                start_scrn=True
+    if event.type == pygame.MOUSEBUTTONUP:
+        click_allowed = True
     if(player.playerrect.bottom<ground):onground=False
     if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):
         if(not question_scrn):
             question_num= random.randint(0,14)
             correction_delay=0
-<<<<<<< HEAD
-            timer=30
-=======
             if level=="easy":
                 timer=random.randrange(40,50,5)
             elif level=="medium":
                 timer=random.randrange(40,60,10)
             elif level=="high":
                 timer=random.randrange(50,90,10)
-            question, options,correct_answer= random.choice(questions)
+            question, options,correct_answer,hint= random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
->>>>>>> d0c79b20c6da23b554dfb08bcec75d0c94efd672
         question_scrn=True
         incomingwave=False
 
@@ -682,7 +700,7 @@ while(True):
                 screen.blit(player.playersuf,player.playerrect)
             if (backgrounds[k].rect.right <= x + 250 * unitx):
                 fade_surface.set_alpha(alpha)
-                alpha += 5 
+                alpha += 5
                 screen.blit(fade_surface, (0, 0))
             if incomingwave:
                 screen.blit(font4.render("INCOMING WAVE",True,"Yellow"),(unitx*200,unity*400))
@@ -712,14 +730,19 @@ while(True):
     if question_scrn:
         second+=dt
         if second>=1000 and timer>0:
+            if len(emotionlist)<30:
+                if(current_emotion=="Happy" or current_emotion=="Neutral"):
+                    emotionlist.append(1)
+                else:
+                    emotionlist.append(0)
             timer-=1
             second=0
             seconds=timer%60
             minutes=int(timer/60)%60
         display_answer=font2.render(f"Your Answer (press 'Enter' to validate) : {answer.upper()}",True,"Black")
         display_correct=font2.render(f"CORRECT!!!",True,"Green")
-        display_wrong=font2.render(f"FAILED!!! correct = {answer_easy[question_num].upper()}",True,"Red")
-        display_timer=font2.render(f"Timer {minutes:02}:{seconds:02}",True,"White")
+        display_wrong=font2.render(f"FAILED!!! correct = {correct_answer.upper()}",True,"Red")
+        display_timer=font3.render(f"Timer {minutes:02}:{seconds:02}",True,"White")
         screen.blit(board.frameF,board.rect)
         question_posY=230*unity
         for line in wrapped_lines:
@@ -732,14 +755,14 @@ while(True):
             screen.blit(option_surface, (200*unitx, question_posY+(i*(font5.get_height()+20)*unity)))
         screen.blit(display_answer,(240*unitx,620*unity))
         screen.blit(display_timer,(500*unitx,400*unity))
-        if(answer_chosen and answer.lower()==answer_easy[question_num]):
+        if(answer_chosen and answer.upper()==correct_answer):
             screen.blit(display_correct,(240*unitx,675*unity))
             correction_delay+=dt
         if(len(emotionlist)>=30):
             for emotion in emotionlist:
                 if emotion==0:
                     bademotion+=1
-        test=font2.render("",True,"Black")
+        test=font2.render(f"{hint}",True,"Black")
         if(bademotion==0):
             if (kpressed[pygame.K_h] and pygame.KEYDOWN):
                     screen.blit(hint_active.frameF,hint_active.rect)
@@ -755,7 +778,7 @@ while(True):
             question_scrn=False 
             answer_chosen=False
             answer=''
-        elif(answer_chosen and answer.lower()!=answer_easy[question_num] or timer<=0):
+        elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
             screen.blit(display_wrong,(240*unitx,670*unity))
             correction_delay+=dt
         if(correction_delay>=2000):
