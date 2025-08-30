@@ -128,6 +128,7 @@ font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
 font3=pygame.font.Font("Assets/Fonts/3.ttf",50)
 font4=pygame.font.Font("Assets/Fonts/4.ttf",80)
 font5=pygame.font.Font(None,50)
+font6=pygame.font.Font("Assets/Fonts/5.ttf",70)
 
 #physics variables
 player_vel_y = 0  
@@ -145,6 +146,7 @@ emotionlist=[]
 bademotion=0
 
 #player variables
+total_lives=1
 framesize=(1.7*unitx,2.6*unity)
 immortal=False
 immortaltime=0
@@ -189,7 +191,7 @@ onground=True
 click_allowed=True
 
 #heart variables
-sizeheart=(60*unitx,60*unity)
+sizeheart=(40*unitx,60*unity)
 
 
 # player animations Frame class
@@ -255,10 +257,10 @@ class Heart:
         self.delay=0
     def draw(self,screen):
         self.delay+=dt
-        if(self.delay>2000):
+        if(self.delay>700):
             self.delay=0
-        if self.delay<=1000:img=self.next_img
-        elif(self.delay>1000):img=self.default_img
+        if self.delay<=350:img=self.next_img
+        elif(self.delay>350):img=self.default_img
         screen.blit(img, self.rect)
 
 #button class
@@ -349,8 +351,8 @@ enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in rang
 
 #list of hearts
 
-lives=[Heart("Assets\Player\heart\heart.png",((10*unitx)+(unitx*(i*75)),unity*50)) for i in range(1,11)]
-
+lives=[Heart("Assets\Player\heart\heart.png",((20*unitx)+(unitx*(i*50)),unity*100)) for i in range(1,6)]
+HP=font6.render(f"HP",True,"Red")
 #Questions/Answers datastructures and funtion
 
 # Load questions from txt file
@@ -615,6 +617,7 @@ fail_sound=pygame.mixer.Sound("Assets/Sounds/fail.mp3")
 gameover_sound=pygame.mixer.Sound("Assets/Sounds/gameover.mp3")
 gameloop_sound=pygame.mixer.Sound("Assets/Sounds/gameloop.mp3")
 jump_sound=pygame.mixer.Sound("Assets/Sounds/jump.mp3")
+gameover_channel=None
 gameloop_channel=None
 walk_channel=None
 menu_sound.set_volume(0.3)
@@ -722,6 +725,12 @@ while(True):
             gameloop_channel=gameloop_sound.play(-1)
         # elif gameloop_channel is not  None and gameloop_channel.get_busy():
         #     gameloop_channel=gameloop_sound.stop()
+        if(total_lives==0):
+                gameover_channel=gameover_sound.play()
+                # if not gameover_channel.get_busy():
+                #     pygame.quit()
+                #     exit()
+
         if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
@@ -732,7 +741,8 @@ while(True):
             screen.blit(enemy1.enemysuf,enemy1.enemyrect)
             screen.blit(enemy2.enemysuf,enemy2.enemyrect)
             screen.blit(enemy3.enemysuf,enemy3.enemyrect)
-            for heart in lives:heart.draw(screen)
+            screen.blit(HP,(10*unitx,50*unity))
+            for i in range(total_lives):lives[i].draw(screen)
             if(not immortal):
                 screen.blit(player.playersuf,player.playerrect)
             elif(immortal and dt%2==0):
@@ -819,7 +829,9 @@ while(True):
             answer_chosen=False
             answer=''
         elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
-            if(correction_delay==0):fail_sound.play()
+            if(correction_delay==0):
+                fail_sound.play()
+                total_lives-=1
             screen.blit(display_wrong,(240*unitx,670*unity))
             correction_delay+=dt
         if(correction_delay>=2000):
