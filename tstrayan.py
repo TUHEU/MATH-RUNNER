@@ -115,7 +115,7 @@ screen=pygame.display.set_mode((x,y))
 clock=pygame.time.Clock() 
 unitx=x/1000
 unity=y/1000
-
+print(x,unity)
 #pages booleans
 menu_scrn=True
 start_scrn=False
