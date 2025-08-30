@@ -351,9 +351,10 @@ enemy3_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle Blink/{i}.png") fo
 enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in range(0,12)]
 
 #list of hearts
-
 lives=[Heart("Assets\Player\heart\heart.png",((20*unitx)+(unitx*(i*50)),unity*100)) for i in range(1,6)]
 HP=font6.render(f"HP",True,"Red")
+
+
 #Questions/Answers datastructures and funtion
 
 # Load questions from txt file
@@ -773,7 +774,7 @@ while(True):
             alpha=0
             player.playerrect.left=10*unitx
     if gameover_scrn:
-
+        pass
         
     if immortal:
         if(immortaltime>=2000):immortal=False
