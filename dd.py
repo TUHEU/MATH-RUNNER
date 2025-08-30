@@ -583,6 +583,15 @@ pygame.mixer.init()
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
 click_sound=pygame.mixer.Sound("Assets/Sounds/buttonclick.mp3")
 menu_sound=pygame.mixer.Sound("Assets/Sounds/menu.mp3")
+attack_player_sound=pygame.mixer.Sound("Assets/Sounds/attack.wav")
+attack_monster_sound=pygame.mixer.Sound("Assets/Sounds/attackmonster.mp3")
+hurt_player_sound=pygame.mixer.Sound("Assets/Sounds/hurt.mp3")
+success_sound=pygame.mixer.Sound("Assets/Sounds/success.mp3")
+walk_sound=pygame.mixer.Sound("Assets/Sounds/walk.wav")
+fail_sound=pygame.mixer.Sound("Assets/Sounds/fail.mp3")
+gameover_sound=pygame.mixer.Sound("Assets/Sounds/gameover.mp3")
+
+
 menu_sound.set_volume(0.3)
 
 
@@ -611,7 +620,7 @@ while(True):
     mouse = pygame.mouse.get_pos() 
     testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
-    #if (enemy1.wave==2 and enemy2.wave==2 and enemy3.wave==2):incomingwave=True
+    
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
@@ -663,7 +672,6 @@ while(True):
                 questions=load_questions("Assets\Questions\high.txt")
                 level="high"
                 level_scrn=False
-                menu_sound.stop()
                 start_scrn=True
     if event.type == pygame.MOUSEBUTTONUP:
         click_allowed = True
@@ -684,6 +692,7 @@ while(True):
         incomingwave=False
 
     if start_scrn:
+        menu_sound.stop()
         if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
@@ -779,6 +788,7 @@ while(True):
             answer_chosen=False
             answer=''
         elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
+            fail_sound.play()
             screen.blit(display_wrong,(240*unitx,670*unity))
             correction_delay+=dt
         if(correction_delay>=2000):
