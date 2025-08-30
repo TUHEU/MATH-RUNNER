@@ -731,11 +731,8 @@ while(True):
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
             gameloop_channel=gameloop_sound.play(-1)
         if(total_lives==0):
-            if (gameover_channel == None):
-                gameover_channel=gameover_sound.play()
-            if not gameover_channel.get_busy():
-                pygame.quit()
-                exit()
+            start_scrn=False
+            gameover_scrn=True
         if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
@@ -774,8 +771,10 @@ while(True):
             alpha=0
             player.playerrect.left=10*unitx
     if gameover_scrn:
-        pass
-        
+        if (gameover_channel == None):
+                gameover_channel=gameover_sound.play()
+        if not gameover_channel.get_busy():
+           pass
     if immortal:
         if(immortaltime>=2000):immortal=False
         immortaltime+=dt
@@ -838,10 +837,10 @@ while(True):
         elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
             if(correction_delay==0):
                 fail_sound.play()
-                total_lives-=1
             screen.blit(display_wrong,(240*unitx,670*unity))
             correction_delay+=dt
         if(correction_delay>=2000):
+            if(answer_chosen and answer.upper()!=correct_answer):total_lives-=1
             correction_delay=0
             enemy1.index=0
             enemy2.index=0
