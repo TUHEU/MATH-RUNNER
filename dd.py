@@ -485,10 +485,12 @@ class Animation:
         self.playerrect=playerrect
         self.vel_y = 0
     def createanimation(self, rect,onground,kpressed,playerattack):
-        global wave_interval,walk,jump
+        global wave_interval,walk_channel
         if not question_scrn and not  playerattack:
             if(self.index >=len(player_jump)):self.index=0
             if((kpressed[pygame.K_d] or backgrounds[k].rect.right <= x + 250 * unitx ) and not enemyattack):
+                if(walk_channel is None or not walk_channel.get_busy()):
+                    walk_channel=walk_sound.play()
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -524,6 +526,7 @@ class Animation:
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
                 
             if(kpressed[pygame.K_w] and onground and not enemyattack):
+                jump_sound.play()
                 self.vel_y=jump_strength
                 self.index=0
                 onground=False
@@ -575,10 +578,6 @@ class Animation:
 
 #sounds
 pygame.mixer.init()
-# pygame.mixer.music.load('Assets\Sounds\touch.mp3')
-# pygame.mixer.music.play()
-# pygame.mixer.music.set_volume(0.25)
-
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
 click_sound=pygame.mixer.Sound("Assets/Sounds/buttonclick.mp3")
 menu_sound=pygame.mixer.Sound("Assets/Sounds/menu.mp3")
@@ -590,7 +589,9 @@ walk_sound=pygame.mixer.Sound("Assets/Sounds/walk.wav")
 fail_sound=pygame.mixer.Sound("Assets/Sounds/fail.mp3")
 gameover_sound=pygame.mixer.Sound("Assets/Sounds/gameover.mp3")
 gameloop_sound=pygame.mixer.Sound("Assets/Sounds/gameloop.mp3")
+jump_sound=pygame.mixer.Sound("Assets/Sounds/jump.mp3")
 gameloop_channel=None
+walk_channel=None
 menu_sound.set_volume(0.3)
 
 
