@@ -254,11 +254,12 @@ class Heart:
         self.rect=self.default_img.get_rect(topleft=rect_pos)
         self.delay=0
     def draw(self,screen):
-        self.delay+=dt
-        if(self.delay>2000):
-            self.delay=0
-        if self.delay<=1000:img=self.next_img
-        elif(self.delay>1000):img=self.default_img
+        # self.delay+=dt
+        # if(self.delay>2000):
+        #     self.delay=0
+        # if self.delay<=1000:img=self.next_img
+        # elif(self.delay>1000):
+        img=self.default_img
         screen.blit(img, self.rect)
 
 #button class
@@ -349,7 +350,7 @@ enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in rang
 
 #list of hearts
 
-lives=[Heart("Assets\Player\heart\heart.png",)]
+lives=Heart("Assets\Player\heart\heart.png",(x/2,y/2))
 
 #Questions/Answers datastructures and funtion
 
@@ -500,6 +501,7 @@ class Enemy:
         """Call this when the player successfully finishes an attack on this enemy"""
         self.dying = True
         self.index = 0
+
 #animation player class
 class Animation:
     def __init__(self,index=0,front=True,playersuf=player_idle[0].frameF,playerrect=player_idle[0].rect):
@@ -716,6 +718,7 @@ while(True):
         incomingwave=False
 
     if start_scrn:
+        lives.draw(screen)
         menu_sound.stop()
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
             gameloop_channel=gameloop_sound.play(-1)
