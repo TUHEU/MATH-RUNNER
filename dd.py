@@ -189,7 +189,7 @@ onground=True
 click_allowed=True
 
 #heart variables
-sizeheart=(0,0)
+sizeheart=(60*unitx,60*unity)
 
 
 # player animations Frame class
@@ -251,15 +251,14 @@ class Heart:
         self.default_img=pygame.image.load(default_path).convert_alpha()
         self.default_img=pygame.transform.scale(self.default_img,self.size)
         self.next_img=pygame.transform.scale(self.default_img,(self.size[0]*.8,self.size[1]*.8))
-        self.rect=self.default_img.get_rect(topleft=rect_pos)
+        self.rect=self.default_img.get_rect(center=rect_pos)
         self.delay=0
     def draw(self,screen):
-        # self.delay+=dt
-        # if(self.delay>2000):
-        #     self.delay=0
-        # if self.delay<=1000:img=self.next_img
-        # elif(self.delay>1000):
-        img=self.default_img
+        self.delay+=dt
+        if(self.delay>2000):
+            self.delay=0
+        if self.delay<=1000:img=self.next_img
+        elif(self.delay>1000):img=self.default_img
         screen.blit(img, self.rect)
 
 #button class
@@ -350,7 +349,7 @@ enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in rang
 
 #list of hearts
 
-lives=Heart("Assets\Player\heart\heart.png",(x/2,y/2))
+lives=[Heart("Assets\Player\heart\heart.png",((10*unitx)+(unitx*(i*75)),unity*50)) for i in range(1,11)]
 
 #Questions/Answers datastructures and funtion
 
@@ -718,7 +717,6 @@ while(True):
         incomingwave=False
 
     if start_scrn:
-        lives.draw(screen)
         menu_sound.stop()
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
             gameloop_channel=gameloop_sound.play(-1)
@@ -734,6 +732,7 @@ while(True):
             screen.blit(enemy1.enemysuf,enemy1.enemyrect)
             screen.blit(enemy2.enemysuf,enemy2.enemyrect)
             screen.blit(enemy3.enemysuf,enemy3.enemyrect)
+            for heart in lives:heart.draw(screen)
             if(not immortal):
                 screen.blit(player.playersuf,player.playerrect)
             elif(immortal and dt%2==0):
