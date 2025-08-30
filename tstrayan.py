@@ -211,7 +211,7 @@ class background:
         #if(self.rect.right>=x):
         if front :self.rect.left-=self.speed   
         else: self.rect.left+=self.speed
-
+print("Loading...")
 #equation                       
 class equationC:
     def __init__(self,eqaution="",sign="",ans=0,isactive=False,delay=0):
