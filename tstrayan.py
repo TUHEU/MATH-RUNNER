@@ -115,6 +115,7 @@ screen=pygame.display.set_mode((x,y))
 clock=pygame.time.Clock() 
 unitx=x/1000
 unity=y/1000
+
 #pages booleans
 menu_scrn=True
 start_scrn=False
@@ -126,7 +127,8 @@ option_scrn=False
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
 font3=pygame.font.Font("Assets/Fonts/3.ttf",50)
-font4=pygame.font.Font(None,50)
+font4=pygame.font.Font("Assets/Fonts/4.ttf",80)
+font5=pygame.font.Font(None,50)
 
 #physics variables
 player_vel_y = 0  
@@ -166,6 +168,7 @@ minutes=0
 framesizeE=(.3*unitx,.6*unity)
 Enemydead=False
 enemyattack=False
+wave_interval=0
 
 #animation variables
 signs=['+','-','/','*']
@@ -211,7 +214,7 @@ class background:
         #if(self.rect.right>=x):
         if front :self.rect.left-=self.speed   
         else: self.rect.left+=self.speed
-print("Loading...")
+
 #equation                       
 class equationC:
     def __init__(self,eqaution="",sign="",ans=0,isactive=False,delay=0):
@@ -262,7 +265,8 @@ class button:
             touch_sound.play()
         self.touching=False
         if(not self.touched):self.touching=True
-        if self.touched and click_allowed and event.type == pygame.MOUSEBUTTONDOWN: 
+        if self.touched and click_allowed and event.type == pygame.MOUSEBUTTONDOWN:
+            click_sound.play() 
             return self.key    
         return None
 
@@ -341,7 +345,7 @@ def load_questions(filename):
             options = lines[1:5]
             hint = lines[5]  # hint
             answer = lines[6]  # correct answer index (A–D)
-            questions.append((q, options, answer))
+            questions.append((q, options, answer,hint))
     return questions
 level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy"),
                button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"medium"),
@@ -483,9 +487,10 @@ class Animation:
         self.playerrect=playerrect
         self.vel_y = 0
     def createanimation(self, rect,onground,kpressed,playerattack):
+        global wave_interval
         if not question_scrn and not  playerattack:
             if(self.index >=len(player_jump)):self.index=0
-            if(kpressed[pygame.K_d] and not enemyattack):
+            if((kpressed[pygame.K_d] or backgrounds[k].rect.right <= x + 250 * unitx ) and not enemyattack):
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -493,6 +498,7 @@ class Animation:
                 self.playerrect.bottomleft=rect
                 backgrounds[k].move(True)
                 floors[l].move(True)
+                wave_interval+=speedbk
                 if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5*unitx
 
             elif(kpressed[pygame.K_a] and not enemyattack):
@@ -502,6 +508,7 @@ class Animation:
                 self.playerrect.width=self.playerrect.width-(91*unitx)
                 if self.playerrect.left>x-980*unitx:
                     backgrounds[k].move(False)
+                    wave_interval-=speedbk
                     floors[l].move(False)
                     self.playerrect.left-=5*unitx
 
@@ -575,6 +582,19 @@ pygame.mixer.init()
 # pygame.mixer.music.set_volume(0.25)
 
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
+click_sound=pygame.mixer.Sound("Assets/Sounds/buttonclick.mp3")
+menu_sound=pygame.mixer.Sound("Assets/Sounds/menu.mp3")
+attack_player_sound=pygame.mixer.Sound("Assets/Sounds/attack.wav")
+attack_monster_sound=pygame.mixer.Sound("Assets/Sounds/attackmonster.mp3")
+hurt_player_sound=pygame.mixer.Sound("Assets/Sounds/hurt.mp3")
+success_sound=pygame.mixer.Sound("Assets/Sounds/success.mp3")
+walk_sound=pygame.mixer.Sound("Assets/Sounds/walk.wav")
+fail_sound=pygame.mixer.Sound("Assets/Sounds/fail.mp3")
+gameover_sound=pygame.mixer.Sound("Assets/Sounds/gameover.mp3")
+
+
+menu_sound.set_volume(0.3)
+
 
 #menu
 menu=pygame.image.load("Assets/Menu/menu.jpg")
@@ -583,7 +603,7 @@ menu=pygame.transform.scale(menu,(x,y))
 #option
 option=pygame.image.load("Assets/option/option2.png")
 option_rect=option.get_rect(center=(x/2,y/2))
-option=pygame.transform.scale(option,(750,1000))   
+option=pygame.transform.scale(option,(750,1000))  
 j=0
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -593,6 +613,8 @@ enemy1=Enemy(key="enemy1")
 enemy2=Enemy(key="enemy2")
 enemy3=Enemy(key="enemy3") 
 ground=player.playerrect.bottom
+incomingwave=True
+menu_sound.play()
 while(True):
     rect=player.playerrect.bottomleft
     rectE1=enemy1.enemyrect.bottomleft
@@ -603,6 +625,7 @@ while(True):
     mouse = pygame.mouse.get_pos() 
     testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
+    
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
@@ -636,6 +659,9 @@ while(True):
                 menu_scrn=False
                 level_scrn=True
                 click_allowed=False
+            if option_scrn==True:
+                  menu_scrn=False
+                  screen.blit(option,option_rect)
     if level_scrn:
         for button in level_buttons:
             button.draw(screen)
@@ -668,11 +694,14 @@ while(True):
                 timer=random.randrange(40,60,10)
             elif level=="high":
                 timer=random.randrange(50,90,10)
-            question, options, correct_answer = random.choice(questions)
+            question, options,correct_answer,hint= random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
         question_scrn=True
+        incomingwave=False
+
     if start_scrn:
-          if backgrounds[k].rect.right>=x:
+        menu_sound.stop()
+        if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
             onground=player.createanimation(rect,onground,kpressed,playerattack)
@@ -690,15 +719,24 @@ while(True):
                 fade_surface.set_alpha(alpha)
                 alpha += 5
                 screen.blit(fade_surface, (0, 0))
-          else:
-              backgrounds[k].rect.bottomleft=(0,y)
-              floors[l].rect.bottomleft=(0,y)
-              k+=1
-              l+=1
-              k%=4
-              l%=2
-              alpha=0
-              player.playerrect.left=10*unitx
+            if incomingwave:
+                screen.blit(font4.render("INCOMING WAVE",True,"Yellow"),(unitx*200,unity*400))
+            if wave_interval>=2000:
+                enemy1.wave=2 
+                enemy2.wave=2
+                enemy3.wave=2
+                wave_interval=0
+        else:
+            backgrounds[k].rect.bottomleft=(0,y)
+            wave_interval=0
+            floors[l].rect.bottomleft=(0,y)
+            k+=1
+            l+=1
+            k%=4
+            l%=2
+            alpha=0
+            player.playerrect.left=10*unitx
+        
     if immortal:
         if(immortaltime>=2000):immortal=False
         immortaltime+=dt
@@ -725,23 +763,24 @@ while(True):
         screen.blit(board.frameF,board.rect)
         question_posY=230*unity
         for line in wrapped_lines:
-            question_surface = font4.render(line, True, "Black")
+            question_surface = font5.render(line, True, "Black")
             screen.blit(question_surface,(200*unitx,question_posY))
-            question_posY += font4.get_height() + 5*unity
+            question_posY += font5.get_height() + 5*unity
         question_posY+=15*unity
         for i,option in enumerate(options):
-            option_surface = font4.render(f"{option}", True, "Black")
-            screen.blit(option_surface, (200*unitx, question_posY+(i*(font4.get_height()+20)*unity)))
+            option_surface = font5.render(f"{option}", True, "Black")
+            screen.blit(option_surface, (200*unitx, question_posY+(i*(font5.get_height()+20)*unity)))
         screen.blit(display_answer,(240*unitx,620*unity))
         screen.blit(display_timer,(500*unitx,400*unity))
         if(answer_chosen and answer.upper()==correct_answer):
+            if(correction_delay==0):success_sound.play()
             screen.blit(display_correct,(240*unitx,675*unity))
             correction_delay+=dt
         if(len(emotionlist)>=30):
             for emotion in emotionlist:
                 if emotion==0:
                     bademotion+=1
-        test=font2.render("Hint: A prime number has exactly two distinct positive divisors: 1 and itself",True,"Black")
+        test=font2.render(f"{hint}",True,"Black")
         if(bademotion==0):
             if (kpressed[pygame.K_h] and pygame.KEYDOWN):
                     screen.blit(hint_active.frameF,hint_active.rect)
@@ -758,6 +797,7 @@ while(True):
             answer_chosen=False
             answer=''
         elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
+            if(correction_delay==0):fail_sound.play()
             screen.blit(display_wrong,(240*unitx,670*unity))
             correction_delay+=dt
         if(correction_delay>=2000):
@@ -771,8 +811,5 @@ while(True):
             answer_chosen=False
             answer=''
     screen.blit(testtext,(10,10))
-    if option_scrn==True:
-        menu_scrn=False
-        screen.blit(option,option_rect)
- 
+
     pygame.display.update()

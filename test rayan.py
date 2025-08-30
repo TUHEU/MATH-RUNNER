@@ -16,6 +16,7 @@ menu_scrn=True
 start_scrn=False
 question_scrn=False
 option_scrn=False
+sound=True
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 
@@ -543,5 +544,6 @@ while(True):
     if option_scrn==True:
      menu_scrn=False
      screen.blit(option,option_rect)
-
+    if sound:
+        pygame.mixer.music.unpause()
     pygame.display.update()
