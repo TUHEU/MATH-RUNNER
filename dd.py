@@ -117,11 +117,11 @@ unitx=x/1000
 unity=y/1000
 
 #pages booleans
-menu_scrn=True
+menu_scrn=False
 start_scrn=False
 question_scrn=False
 level_scrn=False
-gameover_scrn=False
+gameover_scrn=True
 
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
@@ -378,7 +378,8 @@ level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*
                button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*100)),"high")]
 
 #gameover buttons
-descions=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy"),button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy")]
+gameover_background=Frame((unitx*1.4,unity*1.4),"Assets\Gameover\gameovertext.png",(70*unitx,700*unity))
+descions=[button("Assets/Buttons/Default/yes.png",(x/10,y/12),((unitx*300),(unity*800)),"yes"),button("Assets/Buttons/Default/no.png",(x/10,y/12),((unitx*650),(unity*800)),"no")]
 
 #animation enemy class
 class Enemy:
@@ -771,6 +772,9 @@ while(True):
             alpha=0
             player.playerrect.left=10*unitx
     if gameover_scrn:
+        screen.blit(font4.render("RESTART ?",True,"Yellow"),center=(x,y))
+        screen.blit(gameover_background.frameF,gameover_background.rect)
+        for button in descions:button.draw(screen)
         if (gameover_channel == None):
                 gameover_channel=gameover_sound.play()
         if not gameover_channel.get_busy():
