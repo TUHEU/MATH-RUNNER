@@ -623,7 +623,7 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} bademotion {bademotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
     
     for event in pygame.event.get():
@@ -782,7 +782,7 @@ while(True):
                 if emotion==0:
                     bademotion+=1
         test=font2.render(f"{hint}",True,"Black")
-        if(bademotion==0):
+        if(bademotion>10):
             if (kpressed[pygame.K_h] and pygame.KEYDOWN):
                     screen.blit(hint_active.frameF,hint_active.rect)
                     screen.blit(test,(40*unitx,880*unity))
