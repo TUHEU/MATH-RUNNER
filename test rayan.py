@@ -15,7 +15,7 @@ unity=y/1000
 menu_scrn=True
 start_scrn=False
 question_scrn=False
-option_scrn=False
+optin_scrn=False
 sound=True
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
@@ -429,9 +429,9 @@ menu=pygame.image.load("Assets/menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
 #option
-option=pygame.image.load("Assets/option/option2.png")
-option_rect=option.get_rect(center=(x/2,y/2))
-option=pygame.transform.scale(option,(750,1000))   
+optin=pygame.image.load("Assets/option/option2.png")
+optin_rect=optin.get_rect(center=(x/2,y/2))
+optin=pygame.transform.scale(optin,(750,1000))   
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -484,7 +484,7 @@ while(True):
             button.handle_event(event,mouse)   
             if(button.handle_event(event,mouse)=="options"):
                    menu_scrn=False
-                   option_scrn=True
+                   optin_scrn=True
             
     if(player.playerrect.bottom<ground):onground=False
     if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):question_scrn=True
@@ -541,9 +541,9 @@ while(True):
             enemyattack=True
             question_scrn=False
     screen.blit(testtext,(10,10))
-    if option_scrn==True:
+    if optin_scrn==True:
      menu_scrn=False
-     screen.blit(option,option_rect)
+     screen.blit(optin,optin_rect)
     if sound:
         pygame.mixer.music.unpause()
     pygame.display.update()
