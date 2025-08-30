@@ -3,6 +3,7 @@ A. 3
 B. 4
 C. 5
 D. 6
+Hint: Isolate x by subtracting 5 from both sides first
 B
 
 What is the area of a rectangle with a length of 8 cm and a width of 5 cm?
@@ -10,6 +11,7 @@ A. 13 cm²
 B. 40 cm²
 C. 26 cm²
 D. 35 cm²
+Hint: Area of rectangle = length × width
 B
 
 Simplify the expression: 2(3y - 4) + 5
@@ -17,6 +19,7 @@ A. 6y - 3
 B. 6y + 3
 C. 6y - 13
 D. 11y - 8
+Hint: Distribute the 2 first, then combine like terms
 A
 
 What is the value of 5 squared (5²)?
@@ -24,6 +27,7 @@ A. 10
 B. 25
 C. 15
 D. 7
+Hint: Squaring a number means multiplying it by itself
 B
 
 If a = 3 and b = -2, what is the value of a² - b²?
@@ -31,6 +35,7 @@ A. 5
 B. 13
 C. 1
 D. -5
+Hint: Calculate a² and b² separately, then subtract
 A
 
 What is the square root of 144?
@@ -38,6 +43,7 @@ A. 12
 B. 14
 C. 72
 D. 16
+Hint: Think about what number multiplied by itself equals 144
 A
 
 Which of these is a prime number?
@@ -45,6 +51,7 @@ A. 9
 B. 15
 C. 21
 D. 17
+Hint: A prime number has exactly two distinct positive divisors: 1 and itself
 D
 
 What is the next number in the sequence: 2, 5, 8, 11, ...?
@@ -52,6 +59,7 @@ A. 13
 B. 14
 C. 15
 D. 12
+Hint: Look at the pattern - what number is being added each time?
 B
 
 A bag contains 4 red and 6 blue marbles. What is the probability of picking a red marble?
@@ -59,6 +67,7 @@ A. 2/5
 B. 4/5
 C. 3/5
 D. 1/2
+Hint: Probability = (favorable outcomes) ÷ (total possible outcomes)
 A
 
 What is the mean of these numbers: 5, 7, 9, 11?
@@ -66,4 +75,45 @@ A. 7
 B. 8
 C. 9
 D. 10
+Hint: Mean is the average - add all numbers and divide by how many there are
+B
+
+Solve for y: 2y - 7 = 15
+A. 4
+B. 22
+C. 12
+D. 11
+Hint: Isolate y by adding 7 to both sides first
+D
+
+What is the perimeter of a square with a side length of 6 cm?
+A. 12 cm
+B. 24 cm
+C. 36 cm
+D. 30 cm
+Hint: Perimeter of a square = 4 × side length
+B
+
+Evaluate: 4! (4 factorial)
+A. 4
+B. 8
+C. 16
+D. 24
+Hint: 4! = 4 × 3 × 2 × 1
+D
+
+What is 30% of 120?
+A. 36
+B. 40
+C. 48
+D. 60
+Hint: "Of" means multiply, so calculate 0.30 × 120
+A
+
+Which of these is the equation of a line with slope 3 and y-intercept -2?
+A. y = -2x + 3
+B. y = 3x - 2
+C. x = 3y - 2
+D. y = 2x - 3
+Hint: Use the slope-intercept form y = mx + b
 B

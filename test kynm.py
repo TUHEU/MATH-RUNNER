@@ -100,7 +100,7 @@ def emotion_loop():
                 # Only process first detected face (break after detection)
                 break
 
-# Start emotion detection in background thread
+#Start emotion detection in background thread
 #Normal (non-daemon) thread → the program will wait for it to finish before exiting.
 #Daemon thread → the program will not wait for it. When the main program ends, daemon threads are killed automatically.
 threading.Thread(target=emotion_loop, daemon=True).start()
@@ -121,11 +121,13 @@ menu_scrn=True
 start_scrn=False
 question_scrn=False
 level_scrn=False
+
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
 font3=pygame.font.Font("Assets/Fonts/3.ttf",50)
 font4=pygame.font.Font(None,50)
+
 #physics variables
 player_vel_y = 0  
 gravity = 1 * unity  
@@ -136,6 +138,10 @@ fade_surface = pygame.Surface((x,y))
 fade_surface.fill((0, 0, 0)) 
 fade_surface.set_alpha(0)
 alpha=0
+
+#emotion_list
+emotionlist=[]
+bademotion=0
 
 #player variables
 framesize=(1.7*unitx,2.6*unity)
@@ -279,10 +285,10 @@ backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
 floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
 
 
-#question images
+#question TEXT BOXES
 board=Frame((unitx*.8,unity*1.5),f"Assets/Questions/board.png",(150*unitx,800*unity))
-
-
+hint_active=Frame((unitx*1.16,unity*.3),f"Assets/Questions/board.png",(10*unitx,980*unity))
+hint_inactive=Frame((unitx*.3,unity*.5),f"Assets/Questions/hint.png",(10*unitx,980*unity))
 #player animations lists
 player_run=[Frame(framesize,f"Assets/Player/run/{i}.png") for i in range(1,9)]    
 player_jump=[Frame(framesize,f"Assets/Player/jump/{i}.png") for i in range(1,9)]
@@ -333,7 +339,8 @@ def load_questions(filename):
             if len(q) > 35:
                 q = "\n".join(textwrap.wrap(q, width=35))
             options = lines[1:5]
-            answer = lines[5]  # correct answer index (1–4)
+            hint = lines[5]  # hint
+            answer = lines[6]  # correct answer index (A–D)
             questions.append((q, options, answer))
     return questions
 level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy"),
@@ -631,14 +638,17 @@ while(True):
             button.handle_event(event,mouse)
             if(button.handle_event(event,mouse)=="easy"):
                 questions=load_questions("Assets\Questions\easy.txt")
+                level="easy"
                 level_scrn=False
                 start_scrn=True
             if(button.handle_event(event,mouse)=="medium"):
                 questions=load_questions("Assets\Questions\medium.txt")
+                level="medium"
                 level_scrn=False
                 start_scrn=True
             if(button.handle_event(event,mouse)=="high"):
                 questions=load_questions("Assets\Questions\high.txt")
+                level="high"
                 level_scrn=False
                 start_scrn=True
     if event.type == pygame.MOUSEBUTTONUP:
@@ -648,7 +658,12 @@ while(True):
         if(not question_scrn):
             question_num= random.randint(0,14)
             correction_delay=0
-            timer=30
+            if level=="easy":
+                timer=random.randrange(40,50,5)
+            elif level=="medium":
+                timer=random.randrange(40,60,10)
+            elif level=="high":
+                timer=random.randrange(50,90,10)
             question, options, correct_answer = random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
         question_scrn=True
@@ -671,7 +686,6 @@ while(True):
                 fade_surface.set_alpha(alpha)
                 alpha += 5
                 screen.blit(fade_surface, (0, 0))
-            
           else:
               backgrounds[k].rect.bottomleft=(0,y)
               floors[l].rect.bottomleft=(0,y)
@@ -691,6 +705,11 @@ while(True):
     if question_scrn:
         second+=dt
         if second>=1000 and timer>0:
+            if len(emotionlist)<30:
+                if(current_emotion=="Happy" or current_emotion=="Neutral"):
+                    emotionlist.append(1)
+                else:
+                    emotionlist.append(0)
             timer-=1
             second=0
             seconds=timer%60
@@ -714,6 +733,17 @@ while(True):
         if(answer_chosen and answer.upper()==correct_answer):
             screen.blit(display_correct,(240*unitx,675*unity))
             correction_delay+=dt
+        if(len(emotionlist)>=30):
+            for emotion in emotionlist:
+                if emotion==0:
+                    bademotion+=1
+        test=font2.render("Hint: A prime number has exactly two distinct positive divisors: 1 and itself",True,"Black")
+        if(bademotion==0):
+            if (kpressed[pygame.K_h] and pygame.KEYDOWN):
+                    screen.blit(hint_active.frameF,hint_active.rect)
+                    screen.blit(test,(40*unitx,880*unity))
+            else:
+                screen.blit(hint_inactive.frameF,hint_inactive.rect)
         if(correction_delay>=2000):
             player.playerrect.bottom=ground
             player.index=0
