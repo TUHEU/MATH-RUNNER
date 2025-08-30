@@ -765,6 +765,7 @@ while(True):
         screen.blit(display_answer,(240*unitx,620*unity))
         screen.blit(display_timer,(500*unitx,400*unity))
         if(answer_chosen and answer.upper()==correct_answer):
+            if(correction_delay==0):success_sound.play()
             screen.blit(display_correct,(240*unitx,675*unity))
             correction_delay+=dt
         if(len(emotionlist)>=30):
@@ -788,7 +789,7 @@ while(True):
             answer_chosen=False
             answer=''
         elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
-            fail_sound.play()
+            if(correction_delay==0):fail_sound.play()
             screen.blit(display_wrong,(240*unitx,670*unity))
             correction_delay+=dt
         if(correction_delay>=2000):
