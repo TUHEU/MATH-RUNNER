@@ -121,6 +121,7 @@ menu_scrn=True
 start_scrn=False
 question_scrn=False
 level_scrn=False
+option_scrn=False
 
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
