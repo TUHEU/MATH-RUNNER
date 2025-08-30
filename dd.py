@@ -344,7 +344,7 @@ def load_questions(filename):
             options = lines[1:5]
             hint = lines[5]  # hint
             answer = lines[6]  # correct answer index (A–D)
-            questions.append((q, options, answer))
+            questions.append((q, options, answer,hint))
     return questions
 level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy"),
                button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"medium"),
@@ -582,6 +582,18 @@ pygame.mixer.init()
 
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
 click_sound=pygame.mixer.Sound("Assets/Sounds/buttonclick.mp3")
+menu_sound=pygame.mixer.Sound("Assets/Sounds/menu.mp3")
+attack_player_sound=pygame.mixer.Sound("Assets/Sounds/attack.wav")
+attack_monster_sound=pygame.mixer.Sound("Assets/Sounds/attackmonster.mp3")
+hurt_player_sound=pygame.mixer.Sound("Assets/Sounds/hurt.mp3")
+success_sound=pygame.mixer.Sound("Assets/Sounds/success.mp3")
+walk_sound=pygame.mixer.Sound("Assets/Sounds/walk.wav")
+fail_sound=pygame.mixer.Sound("Assets/Sounds/fail.mp3")
+gameover_sound=pygame.mixer.Sound("Assets/Sounds/gameover.mp3")
+
+
+menu_sound.set_volume(0.3)
+
 
 #menu
 menu=pygame.image.load("Assets/Menu/menu.jpg")
@@ -597,6 +609,7 @@ enemy2=Enemy(key="enemy2")
 enemy3=Enemy(key="enemy3") 
 ground=player.playerrect.bottom
 incomingwave=True
+menu_sound.play()
 while(True):
     rect=player.playerrect.bottomleft
     rectE1=enemy1.enemyrect.bottomleft
@@ -607,7 +620,7 @@ while(True):
     mouse = pygame.mouse.get_pos() 
     testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
-    #if (enemy1.wave==2 and enemy2.wave==2 and enemy3.wave==2):incomingwave=True
+    
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
@@ -673,12 +686,13 @@ while(True):
                 timer=random.randrange(40,60,10)
             elif level=="high":
                 timer=random.randrange(50,90,10)
-            question, options,correct_answer= random.choice(questions)
+            question, options,correct_answer,hint= random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
         question_scrn=True
         incomingwave=False
 
     if start_scrn:
+        menu_sound.stop()
         if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
@@ -751,13 +765,14 @@ while(True):
         screen.blit(display_answer,(240*unitx,620*unity))
         screen.blit(display_timer,(500*unitx,400*unity))
         if(answer_chosen and answer.upper()==correct_answer):
+            if(correction_delay==0):success_sound.play()
             screen.blit(display_correct,(240*unitx,675*unity))
             correction_delay+=dt
         if(len(emotionlist)>=30):
             for emotion in emotionlist:
                 if emotion==0:
                     bademotion+=1
-        test=font2.render("",True,"Black")
+        test=font2.render(f"{hint}",True,"Black")
         if(bademotion==0):
             if (kpressed[pygame.K_h] and pygame.KEYDOWN):
                     screen.blit(hint_active.frameF,hint_active.rect)
@@ -774,6 +789,7 @@ while(True):
             answer_chosen=False
             answer=''
         elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
+            if(correction_delay==0):fail_sound.play()
             screen.blit(display_wrong,(240*unitx,670*unity))
             correction_delay+=dt
         if(correction_delay>=2000):

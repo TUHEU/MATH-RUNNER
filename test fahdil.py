@@ -39,10 +39,7 @@ def emotion_loop():
         # Add a small delay to prevent excessive CPU usage
         pygame.time.delay(100)
 
-# Start simulated emotion detection in background thread
-threading.Thread(target=emotion_loop, daemon=True).start()
-
-# Rest of the PyGame code remains the same until the emotion detection parts...
+# PyGame initialization
 pygame.init()
 window=pygame.display.Info()
 x=window.current_w
@@ -51,6 +48,9 @@ screen=pygame.display.set_mode((x,y))
 clock=pygame.time.Clock() 
 unitx=x/1000
 unity=y/1000
+
+# Start simulated emotion detection in background thread (after pygame.init())
+threading.Thread(target=emotion_loop, daemon=True).start()
 
 #pages booleans
 menu_scrn=True
@@ -530,9 +530,29 @@ while(True):
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+            
+        # Only allow pausing when not in question screen
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_p and not question_scrn:
             # Toggle pause state when 'P' is pressed
             paused = not paused
+            
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_b and not question_scrn:
+            # Return to main menu when 'B' is pressed
+            menu_scrn = True
+            start_scrn = False
+            question_scrn = False
+            level_scrn = False
+            paused = False
+            # Reset game state
+            player = Animation()
+            enemy1 = Enemy(key="enemy1")
+            enemy2 = Enemy(key="enemy2")
+            enemy3 = Enemy(key="enemy3")
+            emotionlist = []
+            bademotion = 0
+            answer = ''
+            answer_chosen = False
+            
         if question_scrn and event.type==pygame.KEYDOWN and not answer_chosen and not paused:
             char = event.unicode
             if char.lower() in "abcd":
