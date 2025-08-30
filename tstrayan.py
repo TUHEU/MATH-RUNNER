@@ -121,7 +121,6 @@ menu_scrn=True
 start_scrn=False
 question_scrn=False
 level_scrn=False
-optin_scrn=False
 
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
@@ -151,7 +150,6 @@ immortal=False
 immortaltime=0
 playerattack=False
 playerinjure=False
-
 
 #Questions variables
 questionsize=(unitx*1.2,2*unity)
@@ -189,6 +187,9 @@ onground=True
 
 #mouse variables
 click_allowed=True
+
+#heart variables
+sizeheart=(0,0)
 
 
 # player animations Frame class
@@ -243,6 +244,22 @@ class equationC:
             self.isactive=False
         return self.isactive
 
+#heart lives class
+class Heart:
+    def __init__(self,default_path,rect_pos):
+        self.size=sizeheart
+        self.default_img=pygame.image.load(default_path).convert_alpha()
+        self.default_img=pygame.transform.scale(self.default_img,self.size)
+        self.next_img=pygame.transform.scale(self.default_img,(self.size[0]*.8,self.size[1]*.8))
+        self.rect=self.default_img.get_rect(topleft=rect_pos)
+        self.delay=0
+    def draw(self,screen):
+        self.delay+=dt
+        if(self.delay>2000):
+            self.delay=0
+        if self.delay<=1000:img=self.next_img
+        elif(self.delay>1000):img=self.default_img
+        screen.blit(img, self.rect)
 
 #button class
 class button:
@@ -293,6 +310,8 @@ floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor
 board=Frame((unitx*.8,unity*1.5),f"Assets/Questions/board.png",(150*unitx,800*unity))
 hint_active=Frame((unitx*1.16,unity*.3),f"Assets/Questions/board.png",(10*unitx,980*unity))
 hint_inactive=Frame((unitx*.3,unity*.5),f"Assets/Questions/hint.png",(10*unitx,980*unity))
+
+
 #player animations lists
 player_run=[Frame(framesize,f"Assets/Player/run/{i}.png") for i in range(1,9)]    
 player_jump=[Frame(framesize,f"Assets/Player/jump/{i}.png") for i in range(1,9)]
@@ -328,6 +347,9 @@ enemy3_idle=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle/{i}.png") for i in rang
 enemy3_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle Blink/{i}.png") for i in range(0,12)]
 enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in range(0,12)]
 
+#list of hearts
+
+lives=[Heart("Assets\Player\heart\heart.png",)]
 
 #Questions/Answers datastructures and funtion
 
@@ -487,10 +509,12 @@ class Animation:
         self.playerrect=playerrect
         self.vel_y = 0
     def createanimation(self, rect,onground,kpressed,playerattack):
-        global wave_interval
+        global wave_interval,walk_channel
         if not question_scrn and not  playerattack:
             if(self.index >=len(player_jump)):self.index=0
             if((kpressed[pygame.K_d] or backgrounds[k].rect.right <= x + 250 * unitx ) and not enemyattack):
+                if(walk_channel is None or not walk_channel.get_busy()):
+                    walk_channel=walk_sound.play()
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -526,6 +550,7 @@ class Animation:
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
                 
             if(kpressed[pygame.K_w] and onground and not enemyattack):
+                jump_sound.play()
                 self.vel_y=jump_strength
                 self.index=0
                 onground=False
@@ -577,10 +602,6 @@ class Animation:
 
 #sounds
 pygame.mixer.init()
-# pygame.mixer.music.load('Assets\Sounds\touch.mp3')
-# pygame.mixer.music.play()
-# pygame.mixer.music.set_volume(0.25)
-
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
 click_sound=pygame.mixer.Sound("Assets/Sounds/buttonclick.mp3")
 menu_sound=pygame.mixer.Sound("Assets/Sounds/menu.mp3")
@@ -591,8 +612,10 @@ success_sound=pygame.mixer.Sound("Assets/Sounds/success.mp3")
 walk_sound=pygame.mixer.Sound("Assets/Sounds/walk.wav")
 fail_sound=pygame.mixer.Sound("Assets/Sounds/fail.mp3")
 gameover_sound=pygame.mixer.Sound("Assets/Sounds/gameover.mp3")
-
-
+gameloop_sound=pygame.mixer.Sound("Assets/Sounds/gameloop.mp3")
+jump_sound=pygame.mixer.Sound("Assets/Sounds/jump.mp3")
+gameloop_channel=None
+walk_channel=None
 menu_sound.set_volume(0.3)
 
 
@@ -600,10 +623,6 @@ menu_sound.set_volume(0.3)
 menu=pygame.image.load("Assets/Menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
-#option
-optin=pygame.image.load("Assets/option/option2.png")
-optin_rect=optin.get_rect(center=(x/2,y/2))
-optin=pygame.transform.scale(optin,(750,1000))  
 j=0
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -623,7 +642,7 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} bademotion {bademotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
     kpressed=pygame.key.get_pressed()
     
     for event in pygame.event.get():
@@ -658,10 +677,6 @@ while(True):
             if(button.handle_event(event,mouse)=="start"):
                 menu_scrn=False
                 level_scrn=True
-                click_allowed=False
-            if(button.handle_event(event,mouse)=="options"):
-                menu_scrn=False
-                optin_scrn=True
                 click_allowed=False
     if level_scrn:
         for button in level_buttons:
@@ -702,6 +717,10 @@ while(True):
 
     if start_scrn:
         menu_sound.stop()
+        if(gameloop_channel is None or not gameloop_channel.get_busy()):
+            gameloop_channel=gameloop_sound.play(-1)
+        # elif gameloop_channel is not  None and gameloop_channel.get_busy():
+        #     gameloop_channel=gameloop_sound.stop()
         if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
@@ -782,7 +801,7 @@ while(True):
                 if emotion==0:
                     bademotion+=1
         test=font2.render(f"{hint}",True,"Black")
-        if(bademotion>10):
+        if(bademotion==0):
             if (kpressed[pygame.K_h] and pygame.KEYDOWN):
                     screen.blit(hint_active.frameF,hint_active.rect)
                     screen.blit(test,(40*unitx,880*unity))
@@ -812,7 +831,5 @@ while(True):
             answer_chosen=False
             answer=''
     screen.blit(testtext,(10,10))
-    if optin_scrn==True:
-                  menu_scrn=False
-                  screen.blit(optin,optin_rect)
+
     pygame.display.update()
