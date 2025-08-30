@@ -121,6 +121,7 @@ menu_scrn=True
 start_scrn=False
 question_scrn=False
 level_scrn=False
+gameover_scrn=False
 
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
@@ -375,6 +376,9 @@ level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*
                button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"medium"),
                button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*100)),"high")]
 
+#gameover buttons
+descions=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy"),button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy")]
+
 #animation enemy class
 class Enemy:
     active_attacker = None  # Class-level: only one enemy can attack at once
@@ -603,6 +607,7 @@ class Animation:
             self.playerrect=player_attack[int(self.index)].frameF.get_rect(bottomleft=rect)
 
 
+
 #sounds
 pygame.mixer.init()
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
@@ -619,6 +624,7 @@ gameloop_sound=pygame.mixer.Sound("Assets/Sounds/gameloop.mp3")
 jump_sound=pygame.mixer.Sound("Assets/Sounds/jump.mp3")
 gameover_channel=None
 gameloop_channel=None
+gameloop_sound.set_volume(2)
 walk_channel=None
 menu_sound.set_volume(0.3)
 
@@ -723,14 +729,12 @@ while(True):
         menu_sound.stop()
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
             gameloop_channel=gameloop_sound.play(-1)
-        # elif gameloop_channel is not  None and gameloop_channel.get_busy():
-        #     gameloop_channel=gameloop_sound.stop()
         if(total_lives==0):
+            if (gameover_channel == None):
                 gameover_channel=gameover_sound.play()
-                # if not gameover_channel.get_busy():
-                #     pygame.quit()
-                #     exit()
-
+            if not gameover_channel.get_busy():
+                pygame.quit()
+                exit()
         if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
@@ -768,6 +772,8 @@ while(True):
             l%=2
             alpha=0
             player.playerrect.left=10*unitx
+    if gameover_scrn:
+
         
     if immortal:
         if(immortaltime>=2000):immortal=False
