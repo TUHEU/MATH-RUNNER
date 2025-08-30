@@ -121,7 +121,7 @@ menu_scrn=True
 start_scrn=False
 question_scrn=False
 level_scrn=False
-option_scrn=False
+optin_scrn=False
 
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
@@ -601,9 +601,9 @@ menu=pygame.image.load("Assets/Menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
 #option
-option=pygame.image.load("Assets/option/option2.png")
-option_rect=option.get_rect(center=(x/2,y/2))
-option=pygame.transform.scale(option,(750,1000))  
+optin=pygame.image.load("Assets/option/option2.png")
+optin_rect=optin.get_rect(center=(x/2,y/2))
+optin=pygame.transform.scale(optin,(750,1000))  
 j=0
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -659,9 +659,10 @@ while(True):
                 menu_scrn=False
                 level_scrn=True
                 click_allowed=False
-            if option_scrn==True:
-                  menu_scrn=False
-                  screen.blit(option,option_rect)
+            if(button.handle_event(event,mouse)=="options"):
+                menu_scrn=False
+                optin_scrn=True
+                click_allowed=False
     if level_scrn:
         for button in level_buttons:
             button.draw(screen)
@@ -811,5 +812,7 @@ while(True):
             answer_chosen=False
             answer=''
     screen.blit(testtext,(10,10))
-
+    if optin_scrn==True:
+                  menu_scrn=False
+                  screen.blit(optin,optin_rect)
     pygame.display.update()
