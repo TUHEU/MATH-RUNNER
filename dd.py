@@ -151,7 +151,6 @@ immortaltime=0
 playerattack=False
 playerinjure=False
 
-
 #Questions variables
 questionsize=(unitx*1.2,2*unity)
 position_question=(200*unitx,600*unity)
@@ -486,11 +485,10 @@ class Animation:
         self.playerrect=playerrect
         self.vel_y = 0
     def createanimation(self, rect,onground,kpressed,playerattack):
-        global wave_interval
+        global wave_interval,walk,jump
         if not question_scrn and not  playerattack:
             if(self.index >=len(player_jump)):self.index=0
             if((kpressed[pygame.K_d] or backgrounds[k].rect.right <= x + 250 * unitx ) and not enemyattack):
-                walk_sound.play()
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -591,8 +589,8 @@ success_sound=pygame.mixer.Sound("Assets/Sounds/success.mp3")
 walk_sound=pygame.mixer.Sound("Assets/Sounds/walk.wav")
 fail_sound=pygame.mixer.Sound("Assets/Sounds/fail.mp3")
 gameover_sound=pygame.mixer.Sound("Assets/Sounds/gameover.mp3")
-
-
+gameloop_sound=pygame.mixer.Sound("Assets/Sounds/gameloop.mp3")
+gameloop_channel=None
 menu_sound.set_volume(0.3)
 
 
@@ -694,6 +692,10 @@ while(True):
 
     if start_scrn:
         menu_sound.stop()
+        if(gameloop_channel is None or not gameloop_channel.get_busy()):
+            gameloop_channel=gameloop_sound.play(-1)
+        # elif gameloop_channel is not  None and gameloop_channel.get_busy():
+        #     gameloop_channel=gameloop_sound.stop()
         if backgrounds[k].rect.right>=x:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
