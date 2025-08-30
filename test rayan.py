@@ -428,14 +428,9 @@ menu=pygame.image.load("Assets/menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
 #option
-option=pygame.image.load("Assets/option/2.png")
-option_rect=option.get_rect(topleft=(x/2,y/2))
-option=pygame.transform.scale(option,(x,y))   
-if option_scrn==True:
-    menu_scrn=False
-    screen.blit(menu,menu_rect)
-    screen.blit(menu,menu_rect)
-j=0
+option=pygame.image.load("Assets/option/option2.png")
+option_rect=option.get_rect(topleft=(x/10,y/6))
+option=pygame.transform.scale(option,(750,1000))   
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
 eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -459,10 +454,11 @@ while(True):
             pygame.quit()
             exit()
     screen.blit(menu,menu_rect)
-    screen.blit(option,option_rect)
+    
 #menu true  
     if menu_scrn:
         i=0
+        j=0
         for equ in equations:
             print(equ.isactive)
             wait=(random.randint(400,800))
@@ -488,7 +484,7 @@ while(True):
             if(button.handle_event(event,mouse)=="options"):
                    menu_scrn=False
                    option_scrn=True
-        
+            
     if(player.playerrect.bottom<ground):onground=False
     if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):question_scrn=True
     if start_scrn:
@@ -544,6 +540,8 @@ while(True):
             enemyattack=True
             question_scrn=False
     screen.blit(testtext,(10,10))
- 
+    if option_scrn==True:
+     menu_scrn=False
+     screen.blit(option,option_rect)
 
     pygame.display.update()
