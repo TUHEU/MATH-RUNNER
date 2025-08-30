@@ -490,6 +490,7 @@ class Animation:
         if not question_scrn and not  playerattack:
             if(self.index >=len(player_jump)):self.index=0
             if((kpressed[pygame.K_d] or backgrounds[k].rect.right <= x + 250 * unitx ) and not enemyattack):
+                walk_sound.play()
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
