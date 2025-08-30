@@ -188,6 +188,9 @@ onground=True
 #mouse variables
 click_allowed=True
 
+#heart variables
+sizeheart=(0,0)
+
 
 # player animations Frame class
 class Frame:
@@ -241,6 +244,22 @@ class equationC:
             self.isactive=False
         return self.isactive
 
+#heart lives class
+class Heart:
+    def __init__(self,default_path,rect_pos):
+        self.size=sizeheart
+        self.default_img=pygame.image.load(default_path).convert_alpha()
+        self.default_img=pygame.transform.scale(self.default_img,self.size)
+        self.next_img=pygame.transform.scale(self.default_img,(self.size[0]*.8,self.size[1]*.8))
+        self.rect=self.default_img.get_rect(topleft=rect_pos)
+        self.delay=0
+    def draw(self,screen):
+        self.delay+=dt
+        if(self.delay>2000):
+            self.delay=0
+        if self.delay<=1000:img=self.next_img
+        elif(self.delay>1000):img=self.default_img
+        screen.blit(img, self.rect)
 
 #button class
 class button:
@@ -291,6 +310,8 @@ floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor
 board=Frame((unitx*.8,unity*1.5),f"Assets/Questions/board.png",(150*unitx,800*unity))
 hint_active=Frame((unitx*1.16,unity*.3),f"Assets/Questions/board.png",(10*unitx,980*unity))
 hint_inactive=Frame((unitx*.3,unity*.5),f"Assets/Questions/hint.png",(10*unitx,980*unity))
+
+
 #player animations lists
 player_run=[Frame(framesize,f"Assets/Player/run/{i}.png") for i in range(1,9)]    
 player_jump=[Frame(framesize,f"Assets/Player/jump/{i}.png") for i in range(1,9)]
@@ -326,6 +347,9 @@ enemy3_idle=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle/{i}.png") for i in rang
 enemy3_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle Blink/{i}.png") for i in range(0,12)]
 enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in range(0,12)]
 
+#list of hearts
+
+lives=[Heart("Assets\Player\heart\heart.png",)]
 
 #Questions/Answers datastructures and funtion
 
