@@ -429,7 +429,7 @@ menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
 #option
 option=pygame.image.load("Assets/option/option2.png")
-option_rect=option.get_rect(topleft=(x/10,y/6))
+option_rect=option.get_rect(center=(x/2,y/2))
 option=pygame.transform.scale(option,(750,1000))   
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
