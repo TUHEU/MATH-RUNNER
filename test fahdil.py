@@ -39,10 +39,7 @@ def emotion_loop():
         # Add a small delay to prevent excessive CPU usage
         pygame.time.delay(100)
 
-# Start simulated emotion detection in background thread
-threading.Thread(target=emotion_loop, daemon=True).start()
-
-# Rest of the PyGame code remains the same until the emotion detection parts...
+# PyGame initialization
 pygame.init()
 window=pygame.display.Info()
 x=window.current_w
@@ -51,6 +48,9 @@ screen=pygame.display.set_mode((x,y))
 clock=pygame.time.Clock() 
 unitx=x/1000
 unity=y/1000
+
+# Start simulated emotion detection in background thread (after pygame.init())
+threading.Thread(target=emotion_loop, daemon=True).start()
 
 #pages booleans
 menu_scrn=True
