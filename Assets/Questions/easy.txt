@@ -1,3 +1,35 @@
+What is 7 × 8?
+A. 54
+B. 58
+C. 64
+D. 56
+Hint: Use multiplication facts for 7 or 8
+D
+
+Which of these is the same as one quarter?
+A. 1/4
+B. 1/2
+C. 1/3
+D. 4/1
+Hint: A quarter means dividing something into 4 equal parts
+A
+
+What is the perimeter of a square with each side 4 units long?
+A. 8
+B. 12
+C. 16
+D. 20
+Hint: Perimeter = sum of all sides
+C
+
+Which number is an even number?
+A. 9
+B. 13
+C. 22
+D. 17
+Hint: Even numbers can be divided by 2 with no remainder
+C
+
 What is 7 + 5?
 A. 11
 B. 14
@@ -117,3 +149,11 @@ C. 100
 D. 1000
 Hint: Division is the opposite of multiplication
 B
+
+What is 2 + 9?
+A. 10
+B. 12
+C. 11
+D. 13
+Hint: Add 2 more to 9
+c

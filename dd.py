@@ -660,7 +660,7 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} border {border} maplr{backgrounds[k].rect.left} mapre{backgrounds[k].rect.right} pla{player.playerrect.left} bad{bademotion}",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} bad{bademotion} msp{backgrounds.rec}",False,"Black")
     kpressed=pygame.key.get_pressed()
     
     for event in pygame.event.get():
@@ -697,22 +697,26 @@ while(True):
                 level_scrn=True
                 click_allowed=False
     if level_scrn:
+        changeLevel=0
         for button in level_buttons:
             button.draw(screen)
             button.handle_event(event,mouse)
             if(button.handle_event(event,mouse)=="easy"):
                 questions=load_questions("Assets\Questions\easy.txt")
                 level="easy"
+                initial_level="easy"
                 level_scrn=False
                 start_scrn=True
             if(button.handle_event(event,mouse)=="medium"):
                 questions=load_questions("Assets\Questions\medium.txt")
                 level="medium"
+                initial_level="medium"
                 level_scrn=False
                 start_scrn=True
             if(button.handle_event(event,mouse)=="high"):
                 questions=load_questions("Assets\Questions\high.txt")
                 level="high"
+                initial_level="high"
                 level_scrn=False
                 start_scrn=True
     if event.type == pygame.MOUSEBUTTONUP:
@@ -720,13 +724,16 @@ while(True):
     if(player.playerrect.bottom<ground):onground=False
     if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):
         if(not question_scrn):
-            question_num= random.randint(0,14)
+            #question_num= random.randint(0,14)
             correction_delay=0
             if level=="easy":
+                questions=load_questions("Assets\Questions\easy.txt")
                 timer=random.randrange(40,50,5)
             elif level=="medium":
+                questions=load_questions("Assets\Questions\medium.txt")
                 timer=random.randrange(40,60,10)
             elif level=="high":
+                questions=load_questions("Assets\Questions\high.txt")
                 timer=random.randrange(50,90,10)
             question, options,correct_answer,hint= random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
@@ -796,6 +803,7 @@ while(True):
                 enemy1.enemyrect.left=x+200*unitx
                 enemy2.enemyrect.left=x+500*unitx
                 enemy3.enemyrect.left=x+800*unitx
+                changeLevel=0
                 k=0
             if(button.handle_event(event,mouse)=="no"):
                 pygame.quit()
@@ -810,6 +818,10 @@ while(True):
         if player.index>=len(player_attack):
             immortal=True
             playerattack=False    
+    if changeLevel==3:
+        level="easy"
+    elif changeLevel==-3:
+        level=initial_level
     #question screen
     if question_scrn:
         second+=dt
@@ -852,7 +864,9 @@ while(True):
                 screen.blit(hint_inactive.frameF,hint_inactive.rect)
         #show correction for 2 seconds and then reset everything
         if(answer_chosen and answer.upper()==correct_answer):
-            if(correction_delay==0):success_sound.play()
+            if(correction_delay==0):
+                changeLevel-=1
+                success_sound.play()
             screen.blit(display_correct,(240*unitx,675*unity))
             correction_delay+=dt
             if(correction_delay>=2000):
@@ -868,6 +882,7 @@ while(True):
         #if wrong answer or time is up
         elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
             if(correction_delay==0):
+                changeLevel+=1
                 fail_sound.play()
             screen.blit(display_wrong,(240*unitx,670*unity))
             correction_delay+=dt
