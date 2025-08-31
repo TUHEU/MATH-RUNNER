@@ -144,6 +144,7 @@ alpha=0
 
 #emotion detector variable for descision
 bademotion=0
+changeLevel=0
 
 #player variables
 total_lives=5
@@ -809,6 +810,7 @@ while(True):
         if player.index>=len(player_attack):
             immortal=True
             playerattack=False    
+    #question screen
     if question_scrn:
         second+=dt
         if(current_emotion!="Happy" and current_emotion!="Neutral"):
@@ -824,23 +826,31 @@ while(True):
         display_timer=font3.render(f"Timer {minutes:02}:{seconds:02}",True,"White")
         screen.blit(board.frameF,board.rect)
         question_posY=230*unity
+        #display question with word wrap
         for line in wrapped_lines:
             question_surface = font5.render(line, True, "Black")
             screen.blit(question_surface,(200*unitx,question_posY))
             question_posY += font5.get_height() + 5*unity
         question_posY+=15*unity
+        #display options
         for i,option in enumerate(options):
             option_surface = font5.render(f"{option}", True, "Black")
             screen.blit(option_surface, (200*unitx, question_posY+(i*(font5.get_height()+20)*unity)))
         screen.blit(display_answer,(240*unitx,620*unity))
         screen.blit(display_timer,(500*unitx,400*unity))
         test=font2.render(f"{hint}",True,"Yellow")
+        #increment 1 to a variable changeLevel when bademotion reaches 500
+        if bademotion==500:
+            changeLevel+=1
+            bademotion+=1
+        #show hint button only when bademotion is 500 or more
         if(bademotion>=500):
             if (kpressed[pygame.K_h] and pygame.KEYDOWN):
                     screen.blit(hint_active.frameF,hint_active.rect)
                     screen.blit(test,(40*unitx,880*unity))
             else:
                 screen.blit(hint_inactive.frameF,hint_inactive.rect)
+        #show correction for 2 seconds and then reset everything
         if(answer_chosen and answer.upper()==correct_answer):
             if(correction_delay==0):success_sound.play()
             screen.blit(display_correct,(240*unitx,675*unity))
@@ -855,6 +865,7 @@ while(True):
                 bademotion=0 
                 answer_chosen=False
                 answer=''
+        #if wrong answer or time is up
         elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
             if(correction_delay==0):
                 fail_sound.play()
