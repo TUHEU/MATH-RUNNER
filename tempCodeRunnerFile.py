@@ -1,9 +1,0 @@
-    if(correction_delay>=2000):
-                player.playerrect.bottom=ground
-                player.index=0
-                correction_delay=0
-                playerattack=True
-                immortaltime=0
-                question_scrn=False 
-                answer_chosen=False
-                answer=''

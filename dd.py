@@ -164,6 +164,7 @@ timer=30
 second=0
 seconds=0
 minutes=0
+level="easy"
 
 #Enemies variables
 framesizeE=(.3*unitx,.6*unity)
@@ -652,6 +653,8 @@ incomingwave=True
 menu_sound.play()
 border=backgrounds[k].rect.left+(10*unitx)
 beginbackground=backgrounds[k].rect.left
+
+
 while(True):
     rect=player.playerrect.bottomleft
     rectE1=enemy1.enemyrect.bottomleft
@@ -660,7 +663,7 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} bad{bademotion} msp{backgrounds.rec}",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} border {border} maplr{backgrounds[k].rect.left} mapre{backgrounds[k].rect.right} pla{player.playerrect.left} bad{bademotion}",False,"Black")
     kpressed=pygame.key.get_pressed()
     
     for event in pygame.event.get():
@@ -817,11 +820,12 @@ while(True):
     if playerattack:
         if player.index>=len(player_attack):
             immortal=True
-            playerattack=False    
+            playerattack=False
+    if level!=initial_level :
+        level=initial_level    
+        changeLevel=0
     if changeLevel==3:
         level="easy"
-    elif changeLevel==-3:
-        level=initial_level
     #question screen
     if question_scrn:
         second+=dt
