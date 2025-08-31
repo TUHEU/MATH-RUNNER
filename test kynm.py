@@ -653,7 +653,7 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} maple{backgrounds[k].rect.left} mapri{backgrounds[k].rect.right} pla{player.playerrect.left}",False,"Black")
     kpressed=pygame.key.get_pressed()
     
     for event in pygame.event.get():
@@ -712,19 +712,19 @@ while(True):
         click_allowed = True
     if(player.playerrect.bottom<ground):onground=False
     if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):
-        if(not question_scrn):
-            question_num= random.randint(0,14)
-            correction_delay=0
-            if level=="easy":
-                timer=random.randrange(40,50,5)
-            elif level=="medium":
-                timer=random.randrange(40,60,10)
-            elif level=="high":
-                timer=random.randrange(50,90,10)
-            question, options,correct_answer,hint= random.choice(questions)
-            wrapped_lines = textwrap.wrap(question, width=35)
-        question_scrn=True
-        incomingwave=False
+        # if(not question_scrn):
+        #     question_num= random.randint(0,14)
+        #     correction_delay=0
+        #     if level=="easy":
+        #         timer=random.randrange(40,50,5)
+        #     elif level=="medium":
+        #         timer=random.randrange(40,60,10)
+        #     elif level=="high":
+        #         timer=random.randrange(50,90,10)
+        #     question, options,correct_answer,hint= random.choice(questions)
+        #     wrapped_lines = textwrap.wrap(question, width=35)
+        # question_scrn=True
+         incomingwave=False
 
     if start_scrn:
         menu_sound.stop()

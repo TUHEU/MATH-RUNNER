@@ -117,11 +117,11 @@ unitx=x/1000
 unity=y/1000
 
 #pages booleans
-menu_scrn=False
+menu_scrn=True
 start_scrn=False
 question_scrn=False
 level_scrn=False
-gameover_scrn=True
+gameover_scrn=False
 
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
@@ -147,7 +147,7 @@ emotionlist=[]
 bademotion=0
 
 #player variables
-total_lives=1
+total_lives=5
 framesize=(1.7*unitx,2.6*unity)
 immortal=False
 immortaltime=0
@@ -170,6 +170,8 @@ framesizeE=(.3*unitx,.6*unity)
 Enemydead=False
 enemyattack=False
 wave_interval=0
+wavesize=1
+wave=0
 
 #animation variables
 signs=['+','-','/','*']
@@ -187,6 +189,7 @@ speedfl=12*unitx
 #animation variables
 ground=y-(200*unity)
 onground=True
+border=0
 
 #mouse variables
 click_allowed=True
@@ -391,7 +394,7 @@ class Enemy:
         self.attack = False
         self.enemysuf = enemysuf
         self.key = key
-        self.wave=2
+        self.wave=wavesize
         # NEW STATES
         self.dying = False
         self.dead = False
@@ -409,7 +412,7 @@ class Enemy:
             )
 
     def createanimation(self, rectE1):
-        global playerattack, question_scrn, immortal, enemyattack,dt
+        global playerattack, question_scrn, immortal, enemyattack,dt,wave
         #If already DEAD (stay on ground, then disappear)
         if self.dead:
             self.death_timer += dt
@@ -419,6 +422,7 @@ class Enemy:
                     self.dying = False
                     self.enemyrect.bottomleft= (x + (random.randint(200, 500) * unitx), ground)  # Move off-screen
                     self.wave-=1
+                    wave-=1
                 elif(self.wave==0):
                     self.enemyrect.bottom=-100*unity
             return
@@ -646,6 +650,8 @@ enemy3=Enemy(key="enemy3")
 ground=player.playerrect.bottom
 incomingwave=True
 menu_sound.play()
+border=backgrounds[k].rect.left+(10*unitx)
+beginbackground=backgrounds[k].rect.left
 while(True):
     rect=player.playerrect.bottomleft
     rectE1=enemy1.enemyrect.bottomleft
@@ -654,7 +660,7 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} border {border} maplr{backgrounds[k].rect.left} mapre{backgrounds[k].rect.right} pla{player.playerrect.left}",False,"Black")
     kpressed=pygame.key.get_pressed()
     
     for event in pygame.event.get():
@@ -726,7 +732,8 @@ while(True):
             wrapped_lines = textwrap.wrap(question, width=35)
         question_scrn=True
         incomingwave=False
-
+    if wave==3:
+        incomingwave=True
     if start_scrn:
         menu_sound.stop()
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
@@ -734,7 +741,7 @@ while(True):
         if(total_lives==0):
             start_scrn=False
             gameover_scrn=True
-        if backgrounds[k].rect.right>=x:
+        if backgrounds[k].rect.right>=x and backgrounds[k].rect.left<=border:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
             onground=player.createanimation(rect,onground,kpressed,playerattack)
@@ -756,10 +763,12 @@ while(True):
                 screen.blit(fade_surface, (0, 0))
             if incomingwave:
                 screen.blit(font4.render("INCOMING WAVE",True,"Yellow"),(unitx*200,unity*400))
-            if wave_interval>=2000:
-                enemy1.wave=2 
-                enemy2.wave=2
-                enemy3.wave=2
+            if wave_interval>=2300*unitx:
+                enemy1.wave=wavesize 
+                enemy2.wave=wavesize
+                enemy3.wave=wavesize
+                border+=2300*unitx
+                wave=(wavesize*3)
                 wave_interval=0
         else:
             backgrounds[k].rect.bottomleft=(0,y)
@@ -769,16 +778,31 @@ while(True):
             l+=1
             k%=4
             l%=2
+            border=backgrounds[k].rect.left
             alpha=0
             player.playerrect.left=10*unitx
     if gameover_scrn:
-        screen.blit(font4.render("RESTART ?",True,"Yellow"),center=(x,y))
+        screen.blit(font4.render("RESTART",True,"Yellow"),(350*unitx,650*unity))
         screen.blit(gameover_background.frameF,gameover_background.rect)
-        for button in descions:button.draw(screen)
-        if (gameover_channel == None):
+        for button in descions:
+            button.draw(screen)
+            button.handle_event(event,mouse)
+            if(button.handle_event(event,mouse)=="yes"):
+                total_lives=5
+                gameover_channel == None
+                menu_scrn=True
+                gameover_scrn=False
+                player.playerrect.left=10*unitx
+                enemy1.enemyrect.left=x+200*unitx
+                enemy2.enemyrect.left=x+500*unitx
+                enemy3.enemyrect.left=x+800*unitx
+                k=0
+            if(button.handle_event(event,mouse)=="no"):
+                pygame.quit()
+                exit()
+
+        if (gameover_channel == None ):
                 gameover_channel=gameover_sound.play()
-        if not gameover_channel.get_busy():
-           pass
     if immortal:
         if(immortaltime>=2000):immortal=False
         immortaltime+=dt
