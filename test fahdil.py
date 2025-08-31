@@ -532,7 +532,7 @@ while(True):
             exit()
             
         # Only allow pausing when not in question screen
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_p and not question_scrn:
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_p and not question_scrn and not menu_scrn and not level_scrn:
             # Toggle pause state when 'P' is pressed
             paused = not paused
             

@@ -134,13 +134,13 @@ D. 128 cm³
 Hint: Volume of cube = side³
 C
 
-Simplify: (x²y³)(x³y²)
-A. x⁵y⁵
-B. x⁶y⁵
-C. x⁵y⁶
-D. x⁶y⁶
-Hint: Add exponents when multiplying powers with the same base
-Answer: A
+Simplify:2x+5x−3
+A. 7x−3
+B. 10x−3
+C. 7x+3
+D.  5x−3
+Hint: Combine like terms (add the coefficients of x)
+A
 
 If tan θ = 3/4, what is sin θ?
 A. 3/5

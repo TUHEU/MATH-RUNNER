@@ -122,6 +122,7 @@ start_scrn=False
 question_scrn=False
 level_scrn=False
 gameover_scrn=False
+paused = False
 
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
@@ -182,6 +183,7 @@ signs=['+','-','/','*']
 sizebk=(7000*unitx,y)
 speedbk=4*unitx
 k=0
+sound_pause=False
 
 #floor variables
 l=0
@@ -386,6 +388,10 @@ level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*
 gameover_background=Frame((unitx*1.4,unity*1.4),"Assets\Gameover\gameovertext.png",(70*unitx,700*unity))
 descions=[button("Assets/Buttons/Default/yes.png",(x/10,y/12),((unitx*300),(unity*800)),"yes"),button("Assets/Buttons/Default/no.png",(x/10,y/12),((unitx*650),(unity*800)),"no")]
 
+#
+home=button("Assets/Buttons/Default/home.png",(x/10,y/12),((unitx*900),(unity*50)),"home")
+#sound_unpause=button("Assets/Buttons/Default/sound_unpaused.png",(x/10,y/12),((unitx*800),(unity*50)),"sound_unpaused")
+sound_pause=button("Assets/Buttons/Default/sound_paused.png",(x/10,y/12),((unitx*800),(unity*50)),"sound_paused")
 #animation enemy class
 class Enemy:
     active_attacker = None  # Class-level: only one enemy can attack at once
@@ -671,6 +677,10 @@ while(True):
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
+        # Only allow pausing when not in question screen
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_p and not question_scrn:
+            # Toggle pause state when 'P' is pressed
+            paused = not paused
         if question_scrn and event.type==pygame.KEYDOWN and not answer_chosen:
             char = event.unicode
             if char.lower() in "abcd":
@@ -678,6 +688,12 @@ while(True):
             if event.key==pygame.K_RETURN and answer!='':
                     answer_chosen=True
     screen.blit(menu,menu_rect)
+    # If game is paused, display pause message and skip the rest of the loop
+    if paused:
+        pause_text = font3.render("GAME PAUSED - Press P to continue", True, "Yellow")
+        screen.blit(pause_text, (x//2 - pause_text.get_width()//2, y//2 - pause_text.get_height()//2))
+        pygame.display.update()
+        continue
 #menu true  
     if menu_scrn:
         i=0
@@ -913,6 +929,30 @@ while(True):
                 answer_chosen=False
                 bademotion=0
                 answer=''
-    screen.blit(testtext,(10,10))
+    home.draw(screen)
+    sound_pause.draw(screen)
+    if home.handle_event(event,mouse)=="home":
+        total_lives=5
+        gameover_channel == None
+        menu_scrn=True
+        level_scrn=False
+        options_scrn=False
+        start_scrn=False
+        gameover_scrn=False
+        player.playerrect.left=10*unitx
+        enemy1.enemyrect.left=x+200*unitx
+        enemy2.enemyrect.left=x+500*unitx
+        enemy3.enemyrect.left=x+800*unitx
+        changeLevel=0
+        k=0
+    if button.handle_event(event,mouse)=="sound_paused":
+        pygame.mixer.pause()
+        sound_pause.key="sound_unpaused"
+        sound_pause.default_img=pygame.image.load("Assets/Buttons/Default/sound_unpaused.png").convert_alpha()
+    if button.handle_event(event,mouse)=="sound_unpaused":
+        pygame.mixer.unpause()
+        sound_pause.key="sound_paused"
+        sound_pause.default_img=pygame.image.load("Assets/Buttons/Default/sound_paused.png").convert_alpha()
+    
 
     pygame.display.update()
