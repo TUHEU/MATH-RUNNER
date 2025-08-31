@@ -122,6 +122,8 @@ start_scrn=False
 question_scrn=False
 level_scrn=False
 optin_scrn=False
+gameover_scrn=False
+
 
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
@@ -129,6 +131,7 @@ font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
 font3=pygame.font.Font("Assets/Fonts/3.ttf",50)
 font4=pygame.font.Font("Assets/Fonts/4.ttf",80)
 font5=pygame.font.Font(None,50)
+font6=pygame.font.Font("Assets/Fonts/5.ttf",70)
 
 #physics variables
 player_vel_y = 0  
@@ -146,6 +149,7 @@ emotionlist=[]
 bademotion=0
 
 #player variables
+total_lives=5
 framesize=(1.7*unitx,2.6*unity)
 immortal=False
 immortaltime=0
@@ -168,6 +172,8 @@ framesizeE=(.3*unitx,.6*unity)
 Enemydead=False
 enemyattack=False
 wave_interval=0
+wavesize=1
+wave=0
 
 #animation variables
 signs=['+','-','/','*']
@@ -185,12 +191,13 @@ speedfl=12*unitx
 #animation variables
 ground=y-(200*unity)
 onground=True
+border=0
 
 #mouse variables
 click_allowed=True
 
 #heart variables
-sizeheart=(60*unitx,60*unity)
+sizeheart=(40*unitx,60*unity)
 
 
 # player animations Frame class
@@ -256,10 +263,10 @@ class Heart:
         self.delay=0
     def draw(self,screen):
         self.delay+=dt
-        if(self.delay>2000):
+        if(self.delay>700):
             self.delay=0
-        if self.delay<=1000:img=self.next_img
-        elif(self.delay>1000):img=self.default_img
+        if self.delay<=350:img=self.next_img
+        elif(self.delay>350):img=self.default_img
         screen.blit(img, self.rect)
 
 #button class
@@ -349,8 +356,9 @@ enemy3_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle Blink/{i}.png") fo
 enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in range(0,12)]
 
 #list of hearts
+lives=[Heart("Assets\Player\heart\heart.png",((20*unitx)+(unitx*(i*50)),unity*100)) for i in range(1,6)]
+HP=font6.render(f"HP",True,"Red")
 
-lives=[Heart("Assets\Player\heart\heart.png",((10*unitx)+(unitx*(i*75)),unity*50)) for i in range(1,11)]
 
 #Questions/Answers datastructures and funtion
 
@@ -374,6 +382,10 @@ level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*
                button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"medium"),
                button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*100)),"high")]
 
+#gameover buttons
+gameover_background=Frame((unitx*1.4,unity*1.4),"Assets\Gameover\gameovertext.png",(70*unitx,700*unity))
+descions=[button("Assets/Buttons/Default/yes.png",(x/10,y/12),((unitx*300),(unity*800)),"yes"),button("Assets/Buttons/Default/no.png",(x/10,y/12),((unitx*650),(unity*800)),"no")]
+
 #animation enemy class
 class Enemy:
     active_attacker = None  # Class-level: only one enemy can attack at once
@@ -384,7 +396,7 @@ class Enemy:
         self.attack = False
         self.enemysuf = enemysuf
         self.key = key
-        self.wave=2
+        self.wave=wavesize
         # NEW STATES
         self.dying = False
         self.dead = False
@@ -402,7 +414,7 @@ class Enemy:
             )
 
     def createanimation(self, rectE1):
-        global playerattack, question_scrn, immortal, enemyattack,dt
+        global playerattack, question_scrn, immortal, enemyattack,dt,wave
         #If already DEAD (stay on ground, then disappear)
         if self.dead:
             self.death_timer += dt
@@ -412,6 +424,7 @@ class Enemy:
                     self.dying = False
                     self.enemyrect.bottomleft= (x + (random.randint(200, 500) * unitx), ground)  # Move off-screen
                     self.wave-=1
+                    wave-=1
                 elif(self.wave==0):
                     self.enemyrect.bottom=-100*unity
             return
@@ -602,6 +615,7 @@ class Animation:
             self.playerrect=player_attack[int(self.index)].frameF.get_rect(bottomleft=rect)
 
 
+
 #sounds
 pygame.mixer.init()
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
@@ -616,7 +630,9 @@ fail_sound=pygame.mixer.Sound("Assets/Sounds/fail.mp3")
 gameover_sound=pygame.mixer.Sound("Assets/Sounds/gameover.mp3")
 gameloop_sound=pygame.mixer.Sound("Assets/Sounds/gameloop.mp3")
 jump_sound=pygame.mixer.Sound("Assets/Sounds/jump.mp3")
+gameover_channel=None
 gameloop_channel=None
+gameloop_sound.set_volume(2)
 walk_channel=None
 menu_sound.set_volume(0.3)
 
@@ -640,6 +656,8 @@ enemy3=Enemy(key="enemy3")
 ground=player.playerrect.bottom
 incomingwave=True
 menu_sound.play()
+border=backgrounds[k].rect.left+(10*unitx)
+beginbackground=backgrounds[k].rect.left
 while(True):
     rect=player.playerrect.bottomleft
     rectE1=enemy1.enemyrect.bottomleft
@@ -648,7 +666,7 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} border {border} maplr{backgrounds[k].rect.left} mapre{backgrounds[k].rect.right} pla{player.playerrect.left}",False,"Black")
     kpressed=pygame.key.get_pressed()
     
     for event in pygame.event.get():
@@ -727,14 +745,16 @@ while(True):
             wrapped_lines = textwrap.wrap(question, width=35)
         question_scrn=True
         incomingwave=False
-
+    if wave==3:
+        incomingwave=True
     if start_scrn:
         menu_sound.stop()
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
             gameloop_channel=gameloop_sound.play(-1)
-        # elif gameloop_channel is not  None and gameloop_channel.get_busy():
-        #     gameloop_channel=gameloop_sound.stop()
-        if backgrounds[k].rect.right>=x:
+        if(total_lives==0):
+            start_scrn=False
+            gameover_scrn=True
+        if backgrounds[k].rect.right>=x and backgrounds[k].rect.left<=border:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
             onground=player.createanimation(rect,onground,kpressed,playerattack)
@@ -744,7 +764,8 @@ while(True):
             screen.blit(enemy1.enemysuf,enemy1.enemyrect)
             screen.blit(enemy2.enemysuf,enemy2.enemyrect)
             screen.blit(enemy3.enemysuf,enemy3.enemyrect)
-            for heart in lives:heart.draw(screen)
+            screen.blit(HP,(10*unitx,50*unity))
+            for i in range(total_lives):lives[i].draw(screen)
             if(not immortal):
                 screen.blit(player.playersuf,player.playerrect)
             elif(immortal and dt%2==0):
@@ -755,10 +776,12 @@ while(True):
                 screen.blit(fade_surface, (0, 0))
             if incomingwave:
                 screen.blit(font4.render("INCOMING WAVE",True,"Yellow"),(unitx*200,unity*400))
-            if wave_interval>=2000:
-                enemy1.wave=2 
-                enemy2.wave=2
-                enemy3.wave=2
+            if wave_interval>=2300*unitx:
+                enemy1.wave=wavesize 
+                enemy2.wave=wavesize
+                enemy3.wave=wavesize
+                border+=2300*unitx
+                wave=(wavesize*3)
                 wave_interval=0
         else:
             backgrounds[k].rect.bottomleft=(0,y)
@@ -768,9 +791,31 @@ while(True):
             l+=1
             k%=4
             l%=2
+            border=backgrounds[k].rect.left
             alpha=0
             player.playerrect.left=10*unitx
-        
+    if gameover_scrn:
+        screen.blit(font4.render("RESTART",True,"Yellow"),(350*unitx,650*unity))
+        screen.blit(gameover_background.frameF,gameover_background.rect)
+        for button in descions:
+            button.draw(screen)
+            button.handle_event(event,mouse)
+            if(button.handle_event(event,mouse)=="yes"):
+                total_lives=5
+                gameover_channel == None
+                menu_scrn=True
+                gameover_scrn=False
+                player.playerrect.left=10*unitx
+                enemy1.enemyrect.left=x+200*unitx
+                enemy2.enemyrect.left=x+500*unitx
+                enemy3.enemyrect.left=x+800*unitx
+                k=0
+            if(button.handle_event(event,mouse)=="no"):
+                pygame.quit()
+                exit()
+
+        if (gameover_channel == None ):
+                gameover_channel=gameover_sound.play()
     if immortal:
         if(immortaltime>=2000):immortal=False
         immortaltime+=dt
@@ -831,10 +876,12 @@ while(True):
             answer_chosen=False
             answer=''
         elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
-            if(correction_delay==0):fail_sound.play()
+            if(correction_delay==0):
+                fail_sound.play()
             screen.blit(display_wrong,(240*unitx,670*unity))
             correction_delay+=dt
         if(correction_delay>=2000):
+            if(answer_chosen and answer.upper()!=correct_answer):total_lives-=1
             correction_delay=0
             enemy1.index=0
             enemy2.index=0
