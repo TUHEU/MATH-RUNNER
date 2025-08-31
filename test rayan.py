@@ -601,8 +601,8 @@ menu=pygame.image.load("Assets/Menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
 #option
-optin=pygame.image.load("Assets/option/option3.png")
-optin_rect=optin.get_rect(center=(unitx*500,unity*500))
+optin=pygame.image.load("Assets/option/option2.png")
+optin_rect=optin.get_rect(center=(x/2,unity*750))
 optin=pygame.transform.scale(optin,(552,602)) 
 j=0
 cur_equation=["","","","","","","","","","","","","",]
@@ -615,7 +615,7 @@ enemy3=Enemy(key="enemy3")
 ground=player.playerrect.bottom
 incomingwave=True
 menu_sound.play()
-while(True):
+while(True):    
     rect=player.playerrect.bottomleft
     rectE1=enemy1.enemyrect.bottomleft
     rectE2=enemy2.enemyrect.bottomleft
