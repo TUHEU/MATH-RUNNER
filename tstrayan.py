@@ -349,7 +349,7 @@ enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in rang
 
 #list of hearts
 
-lives=[Heart("Assets\Player\heart\heart.png",)]
+lives=[Heart("Assets\Player\heart\heart.png")]
 
 #Questions/Answers datastructures and funtion
 
@@ -741,7 +741,7 @@ while(True):
                 screen.blit(fade_surface, (0, 0))
             if incomingwave:
                 screen.blit(font4.render("INCOMING WAVE",True,"Yellow"),(unitx*200,unity*400))
-            if wave_interval>=2000:
+            if wave_interval>=2000:     
                 enemy1.wave=2 
                 enemy2.wave=2
                 enemy3.wave=2
