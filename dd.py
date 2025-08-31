@@ -121,6 +121,7 @@ menu_scrn=True
 start_scrn=False
 question_scrn=False
 level_scrn=False
+optin_scrn=False
 
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
@@ -624,6 +625,10 @@ menu_sound.set_volume(0.3)
 menu=pygame.image.load("Assets/Menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
+#option
+optin=pygame.image.load("Assets/option/option3.png")
+optin_rect=optin.get_rect(center=(unitx*500,unity*500))
+optin=pygame.transform.scale(optin,(552,602)) 
 j=0
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -679,6 +684,10 @@ while(True):
                 menu_scrn=False
                 level_scrn=True
                 click_allowed=False
+            if(button.handle_event(event,mouse)=="options"):
+                menu_scrn=False
+                optin_scrn=True
+                click_allowed=False
     if level_scrn:
         for button in level_buttons:
             button.draw(screen)
@@ -698,6 +707,9 @@ while(True):
                 level="high"
                 level_scrn=False
                 start_scrn=True
+            if kpressed[pygame.K_b]:
+                    level_scrn=False
+                    menu_scrn=True
     if event.type == pygame.MOUSEBUTTONUP:
         click_allowed = True
     if(player.playerrect.bottom<ground):onground=False
@@ -827,11 +839,15 @@ while(True):
             enemy1.index=0
             enemy2.index=0
             enemy3.index=0
-            immortaltime=0
             enemyattack=True
             question_scrn=False 
             answer_chosen=False
             answer=''
     screen.blit(testtext,(10,10))
-
+    if optin_scrn==True:
+                  menu_scrn=False
+                  screen.blit(optin,optin_rect)
+    if kpressed[pygame.K_b]:
+                    optin_scrn=False
+                    menu_scrn=True
     pygame.display.update()

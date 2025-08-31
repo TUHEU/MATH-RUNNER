@@ -272,9 +272,9 @@ class button:
 
 #button list
 buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"start"),
-         button("Assets\Buttons\Default\options.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*150)),"options"),
-         button("Assets\Buttons\Default\custom level.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity)),"custom level"),
-         button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*150)),"exit")]
+         button("Assets\Buttons\Default\options.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*75)),"options"),
+         button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*150)),"exit"),
+        ]
 
 #equations list
 equations=[equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC()]
@@ -601,9 +601,9 @@ menu=pygame.image.load("Assets/Menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
 #option
-optin=pygame.image.load("Assets/option/option2.png")
+optin=pygame.image.load("Assets/option/option3.png")
 optin_rect=optin.get_rect(center=(unitx*500,unity*500))
-optin=pygame.transform.scale(optin,(750,1000))  
+optin=pygame.transform.scale(optin,(552,602)) 
 j=0
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -663,6 +663,7 @@ while(True):
                 menu_scrn=False
                 optin_scrn=True
                 click_allowed=False
+                
     if level_scrn:
         for button in level_buttons:
             button.draw(screen)
@@ -682,6 +683,9 @@ while(True):
                 level="high"
                 level_scrn=False
                 start_scrn=True
+            if kpressed[pygame.K_b]:
+                    level_scrn=False
+                    menu_scrn=True
     if event.type == pygame.MOUSEBUTTONUP:
         click_allowed = True
     if(player.playerrect.bottom<ground):onground=False
@@ -815,4 +819,7 @@ while(True):
     if optin_scrn==True:
                   menu_scrn=False
                   screen.blit(optin,optin_rect)
+    if kpressed[pygame.K_b]:
+                    optin_scrn=False
+                    menu_scrn=True
     pygame.display.update()
