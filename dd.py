@@ -390,8 +390,8 @@ descions=[button("Assets/Buttons/Default/yes.png",(x/10,y/12),((unitx*300),(unit
 
 #
 home=button("Assets/Buttons/Default/home.png",(x/10,y/12),((unitx*900),(unity*50)),"home")
-#sound_unpause=button("Assets/Buttons/Default/sound_unpaused.png",(x/10,y/12),((unitx*800),(unity*50)),"sound_unpaused")
-sound_pause=button("Assets/Buttons/Default/sound_paused.png",(x/10,y/12),((unitx*800),(unity*50)),"sound_paused")
+sound_unpaused=button("Assets/Buttons/Default/sound_unpaused.png",(x/10,y/12),((unitx*800),(unity*50)),"sound_unpaused")
+sound_paused=button("Assets/Buttons/Default/sound_paused.png",(x/10,y/12),((unitx*800),(unity*50)),"sound_paused")
 #animation enemy class
 class Enemy:
     active_attacker = None  # Class-level: only one enemy can attack at once
@@ -816,7 +816,7 @@ while(True):
             button.handle_event(event,mouse)
             if(button.handle_event(event,mouse)=="yes"):
                 total_lives=5
-                gameover_channel == None
+                gameover_channel = None
                 menu_scrn=True
                 gameover_scrn=False
                 player.playerrect.left=10*unitx
@@ -930,13 +930,17 @@ while(True):
                 bademotion=0
                 answer=''
     home.draw(screen)
-    sound_pause.draw(screen)
+    if not sound_pause:
+        sound_paused.draw(screen)
+    elif sound_pause:
+        sound_unpaused.draw(screen)
     if home.handle_event(event,mouse)=="home":
         total_lives=5
-        gameover_channel == None
+        gameover_channel = None
         menu_scrn=True
         level_scrn=False
         options_scrn=False
+        question_scrn=False
         start_scrn=False
         gameover_scrn=False
         player.playerrect.left=10*unitx
@@ -945,14 +949,12 @@ while(True):
         enemy3.enemyrect.left=x+800*unitx
         changeLevel=0
         k=0
-    if button.handle_event(event,mouse)=="sound_paused":
+    if sound_paused.handle_event(event,mouse)=="sound_paused":
+        sound_pause=True
         pygame.mixer.pause()
-        sound_pause.key="sound_unpaused"
-        sound_pause.default_img=pygame.image.load("Assets/Buttons/Default/sound_unpaused.png").convert_alpha()
-    if button.handle_event(event,mouse)=="sound_unpaused":
+    if sound_unpaused.handle_event(event,mouse)=="sound_unpaused":
+        sound_pause=False
         pygame.mixer.unpause()
-        sound_pause.key="sound_paused"
-        sound_pause.default_img=pygame.image.load("Assets/Buttons/Default/sound_paused.png").convert_alpha()
     
 
     pygame.display.update()
