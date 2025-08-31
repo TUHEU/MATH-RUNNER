@@ -142,8 +142,7 @@ fade_surface.fill((0, 0, 0))
 fade_surface.set_alpha(0)
 alpha=0
 
-#emotion_list
-emotionlist=[]
+#emotion detector variable for descision
 bademotion=0
 
 #player variables
@@ -660,7 +659,7 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} border {border} maplr{backgrounds[k].rect.left} mapre{backgrounds[k].rect.right} pla{player.playerrect.left}",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} border {border} maplr{backgrounds[k].rect.left} mapre{backgrounds[k].rect.right} pla{player.playerrect.left} bad{bademotion}",False,"Black")
     kpressed=pygame.key.get_pressed()
     
     for event in pygame.event.get():
@@ -812,12 +811,9 @@ while(True):
             playerattack=False    
     if question_scrn:
         second+=dt
+        if(current_emotion!="Happy" and current_emotion!="Neutral"):
+            bademotion+=1
         if second>=1000 and timer>0:
-            if len(emotionlist)<30:
-                if(current_emotion=="Happy" or current_emotion=="Neutral"):
-                    emotionlist.append(1)
-                else:
-                    emotionlist.append(0)
             timer-=1
             second=0
             seconds=timer%60
@@ -838,46 +834,44 @@ while(True):
             screen.blit(option_surface, (200*unitx, question_posY+(i*(font5.get_height()+20)*unity)))
         screen.blit(display_answer,(240*unitx,620*unity))
         screen.blit(display_timer,(500*unitx,400*unity))
-        if(answer_chosen and answer.upper()==correct_answer):
-            if(correction_delay==0):success_sound.play()
-            screen.blit(display_correct,(240*unitx,675*unity))
-            correction_delay+=dt
-        if(len(emotionlist)>=30):
-            for emotion in emotionlist:
-                if emotion==0:
-                    bademotion+=1
-        test=font2.render(f"{hint}",True,"Black")
-        if(bademotion==0):
+        test=font2.render(f"{hint}",True,"Yellow")
+        if(bademotion>=500):
             if (kpressed[pygame.K_h] and pygame.KEYDOWN):
                     screen.blit(hint_active.frameF,hint_active.rect)
                     screen.blit(test,(40*unitx,880*unity))
             else:
                 screen.blit(hint_inactive.frameF,hint_inactive.rect)
-        if(correction_delay>=2000):
-            player.playerrect.bottom=ground
-            player.index=0
-            correction_delay=0
-            playerattack=True
-            immortaltime=0
-            question_scrn=False 
-            answer_chosen=False
-            answer=''
+        if(answer_chosen and answer.upper()==correct_answer):
+            if(correction_delay==0):success_sound.play()
+            screen.blit(display_correct,(240*unitx,675*unity))
+            correction_delay+=dt
+            if(correction_delay>=2000):
+                player.playerrect.bottom=ground
+                player.index=0
+                correction_delay=0
+                playerattack=True
+                immortaltime=0
+                question_scrn=False
+                bademotion=0 
+                answer_chosen=False
+                answer=''
         elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
             if(correction_delay==0):
                 fail_sound.play()
             screen.blit(display_wrong,(240*unitx,670*unity))
             correction_delay+=dt
-        if(correction_delay>=2000):
-            if(answer_chosen and answer.upper()!=correct_answer):total_lives-=1
-            correction_delay=0
-            enemy1.index=0
-            enemy2.index=0
-            enemy3.index=0
-            immortaltime=0
-            enemyattack=True
-            question_scrn=False 
-            answer_chosen=False
-            answer=''
+            if(correction_delay>=2000):
+                if(answer_chosen and answer.upper()!=correct_answer):total_lives-=1
+                correction_delay=0
+                enemy1.index=0
+                enemy2.index=0
+                enemy3.index=0
+                immortaltime=0
+                enemyattack=True
+                question_scrn=False 
+                answer_chosen=False
+                bademotion=0
+                answer=''
     screen.blit(testtext,(10,10))
 
     pygame.display.update()
