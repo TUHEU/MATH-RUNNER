@@ -663,6 +663,7 @@ while(True):
                 menu_scrn=False
                 optin_scrn=True
                 click_allowed=False
+            
                 
     if level_scrn:
         for button in level_buttons:
