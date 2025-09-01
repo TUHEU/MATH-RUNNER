@@ -184,6 +184,7 @@ sizebk=(7000*unitx,y)
 speedbk=4*unitx
 k=0
 sound_pause=False
+last_state=False
 
 #floor variables
 l=0
@@ -670,7 +671,7 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} ch{changeLevel}  cor{correction_delay} border {border} maplr{backgrounds[k].rect.left} mapre{backgrounds[k].rect.right} pla{player.playerrect.left} bad{bademotion}",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} ch{changeLevel} sounpa {sound_pause} clicked allowed {click_allowed} cor{correction_delay} border {border} maplr{backgrounds[k].rect.left} mapre{backgrounds[k].rect.right} pla{player.playerrect.left} bad{bademotion}",False,"Black")
     kpressed=pygame.key.get_pressed()
     
     for event in pygame.event.get():
@@ -740,11 +741,10 @@ while(True):
                 level_scrn=False
                 start_scrn=True
     if event.type == pygame.MOUSEBUTTONUP:
-        click_allowed = True
+        click_allowed=True
     if(player.playerrect.bottom<ground):onground=False
     if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):
         if(not question_scrn):
-            #question_num= random.randint(0,14)
             correction_delay=0
             if level=="easy":
                 questions=load_questions("Assets\Questions\easy.txt")
@@ -949,12 +949,15 @@ while(True):
         enemy3.enemyrect.left=x+800*unitx
         changeLevel=0
         k=0
-    if sound_paused.handle_event(event,mouse)=="sound_paused":
+    if sound_paused.handle_event(event,mouse)=="sound_paused"  and click_allowed:
         sound_pause=True
-        pygame.mixer.pause()
-    if sound_unpaused.handle_event(event,mouse)=="sound_unpaused":
+        click_allowed=False
+    if sound_unpaused.handle_event(event,mouse)=="sound_unpaused" and click_allowed:
         sound_pause=False
-        pygame.mixer.unpause()
-    
+        click_allowed=False
+    if sound_pause:pygame.mixer.pause()
+    elif not sound_pause:pygame.mixer.unpause()
+    last_state=sound_pause
+    screen.blit(testtext,(10*unitx,10*unity))   
 
     pygame.display.update()
