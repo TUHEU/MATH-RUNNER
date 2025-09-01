@@ -120,6 +120,7 @@ unity=y/1000
 menu_scrn=True
 start_scrn=False
 question_scrn=False
+options_scrn=False
 level_scrn=False
 gameover_scrn=False
 paused = False
@@ -390,9 +391,9 @@ gameover_background=Frame((unitx*1.4,unity*1.4),"Assets\Gameover\gameovertext.pn
 descions=[button("Assets/Buttons/Default/yes.png",(x/10,y/12),((unitx*300),(unity*800)),"yes"),button("Assets/Buttons/Default/no.png",(x/10,y/12),((unitx*650),(unity*800)),"no")]
 
 #
-home=button("Assets/Buttons/Default/home.png",(x/10,y/12),((unitx*900),(unity*50)),"home")
-sound_unpaused=button("Assets/Buttons/Default/sound_unpaused.png",(x/10,y/12),((unitx*800),(unity*50)),"sound_unpaused")
-sound_paused=button("Assets/Buttons/Default/sound_paused.png",(x/10,y/12),((unitx*800),(unity*50)),"sound_paused")
+home=button("Assets/Buttons/Default/home.png",(x/13,y/12),((unitx*900),(unity*50)),"home")
+sound_unpaused=button("Assets/Buttons/Default/sound_unpaused.png",(x/13,y/12),((unitx*800),(unity*50)),"sound_unpaused")
+sound_paused=button("Assets/Buttons/Default/sound_paused.png",(x/13,y/12),((unitx*800),(unity*50)),"sound_paused")
 #animation enemy class
 class Enemy:
     active_attacker = None  # Class-level: only one enemy can attack at once
@@ -648,6 +649,12 @@ menu_sound.set_volume(0.3)
 menu=pygame.image.load("Assets/Menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
+
+#option
+option=pygame.image.load("Assets/option/option.png")
+option_rect=option.get_rect(center=(unitx*500,unity*500))
+opti0n=pygame.transform.scale(option,(500*unitx,800*unity))
+
 j=0
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -658,7 +665,6 @@ enemy2=Enemy(key="enemy2")
 enemy3=Enemy(key="enemy3") 
 ground=player.playerrect.bottom
 incomingwave=True
-menu_sound.play()
 border=backgrounds[k].rect.left+(10*unitx)
 beginbackground=backgrounds[k].rect.left
 
@@ -697,6 +703,8 @@ while(True):
         continue
 #menu true  
     if menu_scrn:
+        if(gameloop_channel is None or not gameloop_channel.get_busy()):
+            gameloop_channel=menu_sound.play(-1)
         i=0
         for equ in equations:
             wait=(random.randint(400,800))
@@ -716,6 +724,10 @@ while(True):
             if(button.handle_event(event,mouse)=="start"):
                 menu_scrn=False
                 level_scrn=True
+                click_allowed=False
+            if(button.handle_event(event,mouse)=="options"):
+                menu_scrn=False
+                options_scrn=True
                 click_allowed=False
     if level_scrn:
         changeLevel=0
@@ -768,6 +780,8 @@ while(True):
         if(total_lives==0):
             start_scrn=False
             gameover_scrn=True
+            gameloop_sound.stop()
+            gameloop_channel=menu_sound.play(-1)
         if backgrounds[k].rect.right>=x and backgrounds[k].rect.left<=border:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
@@ -809,6 +823,8 @@ while(True):
             alpha=0
             player.playerrect.left=10*unitx
     if gameover_scrn:
+        if(gameloop_channel is None or not gameloop_channel.get_busy()):
+            gameloop_channel=menu_sound.play(-1)
         screen.blit(font4.render("RESTART",True,"Yellow"),(350*unitx,650*unity))
         screen.blit(gameover_background.frameF,gameover_background.rect)
         for button in descions:
@@ -816,7 +832,6 @@ while(True):
             button.handle_event(event,mouse)
             if(button.handle_event(event,mouse)=="yes"):
                 total_lives=5
-                gameover_channel = None
                 menu_scrn=True
                 gameover_scrn=False
                 player.playerrect.left=10*unitx
@@ -943,6 +958,7 @@ while(True):
         question_scrn=False
         start_scrn=False
         gameover_scrn=False
+        gameloop_sound.stop()
         player.playerrect.left=10*unitx
         enemy1.enemyrect.left=x+200*unitx
         enemy2.enemyrect.left=x+500*unitx
@@ -952,9 +968,13 @@ while(True):
     if sound_paused.handle_event(event,mouse)=="sound_paused"  and click_allowed:
         sound_pause=True
         click_allowed=False
+        sound_paused.rect.bottom=-100*unity
+        sound_unpaused.rect.top=50*unity
     if sound_unpaused.handle_event(event,mouse)=="sound_unpaused" and click_allowed:
         sound_pause=False
         click_allowed=False
+        sound_unpaused.rect.bottom=-100*unity
+        sound_paused.rect.top=50*unity
     if sound_pause:pygame.mixer.pause()
     elif not sound_pause:pygame.mixer.unpause()
     last_state=sound_pause

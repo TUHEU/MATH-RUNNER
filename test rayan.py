@@ -601,7 +601,7 @@ menu=pygame.image.load("Assets/Menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
 #option
-optin=pygame.image.load("Assets/option/option2.png")
+optin=pygame.image.load("Assets/option/option.png")
 optin_rect=optin.get_rect(center=(unitx*500,unity*500))
 optin=pygame.transform.scale(optin,(750,1000))  
 j=0
