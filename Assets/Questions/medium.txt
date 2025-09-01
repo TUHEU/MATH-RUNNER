@@ -117,3 +117,43 @@ C. x = 3y - 2
 D. y = 2x - 3
 Hint: Use the slope-intercept form y = mx + b
 B
+
+Solve for x: 2x + 9 = 23
+A. 5
+B. 6
+C. 7
+D. 8
+Hint: Subtract 9 first, then divide by 2
+B
+
+What is the volume of a cube with side length 4 cm?
+A. 16 cm³
+B. 32 cm³
+C. 64 cm³
+D. 128 cm³
+Hint: Volume of cube = side³
+C
+
+Simplify:2x+5x−3
+A. 7x−3
+B. 10x−3
+C. 7x+3
+D.  5x−3
+Hint: Combine like terms (add the coefficients of x)
+A
+
+If tan θ = 3/4, what is sin θ?
+A. 3/5
+B. 4/5
+C. 5/3
+D. 3/4
+Hint: Think of a right triangle with opposite= 3, adjacent= 4, hypotenuse= 5
+A
+
+The marks of 5 students are: 10, 12, 15, 18, 20. What is the median?
+A. 12
+B. 15
+C. 18
+D. 20
+Hint: Median is the middle value when data is ordered
+B
