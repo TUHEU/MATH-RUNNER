@@ -823,4 +823,5 @@ while(True):
     if kpressed[pygame.K_b]:
                     optin_scrn=False
                     menu_scrn=True
+                    print ("exiting")
     pygame.display.update()
