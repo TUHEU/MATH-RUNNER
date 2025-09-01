@@ -120,7 +120,10 @@ unity=y/1000
 menu_scrn=True
 start_scrn=False
 question_scrn=False
+options_scrn=False
 level_scrn=False
+gameover_scrn=False
+paused = False
 
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
@@ -128,6 +131,7 @@ font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
 font3=pygame.font.Font("Assets/Fonts/3.ttf",50)
 font4=pygame.font.Font("Assets/Fonts/4.ttf",80)
 font5=pygame.font.Font(None,50)
+font6=pygame.font.Font("Assets/Fonts/5.ttf",70)
 
 #physics variables
 player_vel_y = 0  
@@ -140,17 +144,17 @@ fade_surface.fill((0, 0, 0))
 fade_surface.set_alpha(0)
 alpha=0
 
-#emotion_list
-emotionlist=[]
+#emotion detector variable for descision
 bademotion=0
+changeLevel=0
 
 #player variables
+total_lives=5
 framesize=(1.7*unitx,2.6*unity)
 immortal=False
 immortaltime=0
 playerattack=False
 playerinjure=False
-
 
 #Questions variables
 questionsize=(unitx*1.2,2*unity)
@@ -162,12 +166,16 @@ timer=30
 second=0
 seconds=0
 minutes=0
+level="easy"
+initial_level="easy"
 
 #Enemies variables
 framesizeE=(.3*unitx,.6*unity)
 Enemydead=False
 enemyattack=False
 wave_interval=0
+wavesize=1
+wave=0
 
 #animation variables
 signs=['+','-','/','*']
@@ -176,6 +184,8 @@ signs=['+','-','/','*']
 sizebk=(7000*unitx,y)
 speedbk=4*unitx
 k=0
+sound_pause=False
+last_state=False
 
 #floor variables
 l=0
@@ -185,9 +195,13 @@ speedfl=12*unitx
 #animation variables
 ground=y-(200*unity)
 onground=True
+border=0
 
 #mouse variables
 click_allowed=True
+
+#heart variables
+sizeheart=(40*unitx,60*unity)
 
 
 # player animations Frame class
@@ -242,6 +256,22 @@ class equationC:
             self.isactive=False
         return self.isactive
 
+#heart lives class
+class Heart:
+    def __init__(self,default_path,rect_pos):
+        self.size=sizeheart
+        self.default_img=pygame.image.load(default_path).convert_alpha()
+        self.default_img=pygame.transform.scale(self.default_img,self.size)
+        self.next_img=pygame.transform.scale(self.default_img,(self.size[0]*.8,self.size[1]*.8))
+        self.rect=self.default_img.get_rect(center=rect_pos)
+        self.delay=0
+    def draw(self,screen):
+        self.delay+=dt
+        if(self.delay>700):
+            self.delay=0
+        if self.delay<=350:img=self.next_img
+        elif(self.delay>350):img=self.default_img
+        screen.blit(img, self.rect)
 
 #button class
 class button:
@@ -292,6 +322,8 @@ floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor
 board=Frame((unitx*.8,unity*1.5),f"Assets/Questions/board.png",(150*unitx,800*unity))
 hint_active=Frame((unitx*1.16,unity*.3),f"Assets/Questions/board.png",(10*unitx,980*unity))
 hint_inactive=Frame((unitx*.3,unity*.5),f"Assets/Questions/hint.png",(10*unitx,980*unity))
+
+
 #player animations lists
 player_run=[Frame(framesize,f"Assets/Player/run/{i}.png") for i in range(1,9)]    
 player_jump=[Frame(framesize,f"Assets/Player/jump/{i}.png") for i in range(1,9)]
@@ -327,6 +359,10 @@ enemy3_idle=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle/{i}.png") for i in rang
 enemy3_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle Blink/{i}.png") for i in range(0,12)]
 enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in range(0,12)]
 
+#list of hearts
+lives=[Heart("Assets\Player\heart\heart.png",((20*unitx)+(unitx*(i*50)),unity*100)) for i in range(1,6)]
+HP=font6.render(f"HP",True,"Red")
+
 
 #Questions/Answers datastructures and funtion
 
@@ -350,6 +386,14 @@ level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*
                button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"medium"),
                button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*100)),"high")]
 
+#gameover buttons
+gameover_background=Frame((unitx*1.4,unity*1.4),"Assets\Gameover\gameovertext.png",(70*unitx,700*unity))
+descions=[button("Assets/Buttons/Default/yes.png",(x/10,y/12),((unitx*300),(unity*800)),"yes"),button("Assets/Buttons/Default/no.png",(x/10,y/12),((unitx*650),(unity*800)),"no")]
+
+#
+home=button("Assets/Buttons/Default/home.png",(x/13,y/12),((unitx*900),(unity*50)),"home")
+sound_unpaused=button("Assets/Buttons/Default/sound_unpaused.png",(x/13,y/12),((unitx*800),(unity*50)),"sound_unpaused")
+sound_paused=button("Assets/Buttons/Default/sound_paused.png",(x/13,y/12),((unitx*800),(unity*50)),"sound_paused")
 #animation enemy class
 class Enemy:
     active_attacker = None  # Class-level: only one enemy can attack at once
@@ -360,7 +404,7 @@ class Enemy:
         self.attack = False
         self.enemysuf = enemysuf
         self.key = key
-        self.wave=2
+        self.wave=wavesize
         # NEW STATES
         self.dying = False
         self.dead = False
@@ -378,7 +422,7 @@ class Enemy:
             )
 
     def createanimation(self, rectE1):
-        global playerattack, question_scrn, immortal, enemyattack,dt
+        global playerattack, question_scrn, immortal, enemyattack,dt,wave
         #If already DEAD (stay on ground, then disappear)
         if self.dead:
             self.death_timer += dt
@@ -388,6 +432,7 @@ class Enemy:
                     self.dying = False
                     self.enemyrect.bottomleft= (x + (random.randint(200, 500) * unitx), ground)  # Move off-screen
                     self.wave-=1
+                    wave-=1
                 elif(self.wave==0):
                     self.enemyrect.bottom=-100*unity
             return
@@ -477,6 +522,7 @@ class Enemy:
         """Call this when the player successfully finishes an attack on this enemy"""
         self.dying = True
         self.index = 0
+
 #animation player class
 class Animation:
     def __init__(self,index=0,front=True,playersuf=player_idle[0].frameF,playerrect=player_idle[0].rect):
@@ -486,10 +532,12 @@ class Animation:
         self.playerrect=playerrect
         self.vel_y = 0
     def createanimation(self, rect,onground,kpressed,playerattack):
-        global wave_interval
+        global wave_interval,walk_channel
         if not question_scrn and not  playerattack:
             if(self.index >=len(player_jump)):self.index=0
             if((kpressed[pygame.K_d] or backgrounds[k].rect.right <= x + 250 * unitx ) and not enemyattack):
+                if(walk_channel is None or not walk_channel.get_busy()):
+                    walk_channel=walk_sound.play()
                 self.front=True
                 self.playersuf=player_run[int(self.index)].frameF
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
@@ -525,6 +573,7 @@ class Animation:
                 self.playerrect=self.playersuf.get_rect(bottomleft=rect)
                 
             if(kpressed[pygame.K_w] and onground and not enemyattack):
+                jump_sound.play()
                 self.vel_y=jump_strength
                 self.index=0
                 onground=False
@@ -574,12 +623,9 @@ class Animation:
             self.playerrect=player_attack[int(self.index)].frameF.get_rect(bottomleft=rect)
 
 
+
 #sounds
 pygame.mixer.init()
-# pygame.mixer.music.load('Assets\Sounds\touch.mp3')
-# pygame.mixer.music.play()
-# pygame.mixer.music.set_volume(0.25)
-
 touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
 click_sound=pygame.mixer.Sound("Assets/Sounds/buttonclick.mp3")
 menu_sound=pygame.mixer.Sound("Assets/Sounds/menu.mp3")
@@ -590,8 +636,12 @@ success_sound=pygame.mixer.Sound("Assets/Sounds/success.mp3")
 walk_sound=pygame.mixer.Sound("Assets/Sounds/walk.wav")
 fail_sound=pygame.mixer.Sound("Assets/Sounds/fail.mp3")
 gameover_sound=pygame.mixer.Sound("Assets/Sounds/gameover.mp3")
-
-
+gameloop_sound=pygame.mixer.Sound("Assets/Sounds/gameloop.mp3")
+jump_sound=pygame.mixer.Sound("Assets/Sounds/jump.mp3")
+gameover_channel=None
+gameloop_channel=None
+gameloop_sound.set_volume(2)
+walk_channel=None
 menu_sound.set_volume(0.3)
 
 
@@ -599,6 +649,12 @@ menu_sound.set_volume(0.3)
 menu=pygame.image.load("Assets/Menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
+
+#option
+option=pygame.image.load("Assets/option/option.png")
+option_rect=option.get_rect(topleft=(unitx*250,unity*100))
+option=pygame.transform.scale(option,(500*unitx,800*unity))
+
 j=0
 cur_equation=["","","","","","","","","","","","","",]
 eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -609,7 +665,10 @@ enemy2=Enemy(key="enemy2")
 enemy3=Enemy(key="enemy3") 
 ground=player.playerrect.bottom
 incomingwave=True
-menu_sound.play()
+border=backgrounds[k].rect.left+(10*unitx)
+beginbackground=backgrounds[k].rect.left
+
+
 while(True):
     rect=player.playerrect.bottomleft
     rectE1=enemy1.enemyrect.bottomleft
@@ -618,13 +677,17 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} cor{correction_delay} ANSWE{answer} ques {question_scrn} {enemy1.frontE} ",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} ch{changeLevel} sounpa {sound_pause} clicked allowed {click_allowed} cor{correction_delay} border {border} maplr{backgrounds[k].rect.left} mapre{backgrounds[k].rect.right} pla{player.playerrect.left} bad{bademotion}",False,"Black")
     kpressed=pygame.key.get_pressed()
     
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
+        # Only allow pausing when not in question screen
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_p and not question_scrn:
+            # Toggle pause state when 'P' is pressed
+            paused = not paused
         if question_scrn and event.type==pygame.KEYDOWN and not answer_chosen:
             char = event.unicode
             if char.lower() in "abcd":
@@ -632,8 +695,16 @@ while(True):
             if event.key==pygame.K_RETURN and answer!='':
                     answer_chosen=True
     screen.blit(menu,menu_rect)
+    # If game is paused, display pause message and skip the rest of the loop
+    if paused:
+        pause_text = font3.render("GAME PAUSED - Press P to continue", True, "Yellow")
+        screen.blit(pause_text, (x//2 - pause_text.get_width()//2, y//2 - pause_text.get_height()//2))
+        pygame.display.update()
+        continue
 #menu true  
     if menu_scrn:
+        if(gameloop_channel is None or not gameloop_channel.get_busy()):
+            gameloop_channel=menu_sound.play(-1)
         i=0
         for equ in equations:
             wait=(random.randint(400,800))
@@ -654,46 +725,67 @@ while(True):
                 menu_scrn=False
                 level_scrn=True
                 click_allowed=False
+            if(button.handle_event(event,mouse)=="options"):
+                menu_scrn=False
+                options_scrn=True
+                click_allowed=False
     if level_scrn:
+        changeLevel=0
         for button in level_buttons:
             button.draw(screen)
             button.handle_event(event,mouse)
             if(button.handle_event(event,mouse)=="easy"):
                 questions=load_questions("Assets\Questions\easy.txt")
                 level="easy"
+                initial_level="easy"
                 level_scrn=False
                 start_scrn=True
             if(button.handle_event(event,mouse)=="medium"):
                 questions=load_questions("Assets\Questions\medium.txt")
                 level="medium"
+                initial_level="medium"
                 level_scrn=False
                 start_scrn=True
             if(button.handle_event(event,mouse)=="high"):
                 questions=load_questions("Assets\Questions\high.txt")
                 level="high"
+                initial_level="high"
                 level_scrn=False
                 start_scrn=True
+    if options_scrn==True:
+                  menu_scrn=False
+                  screen.blit(option,option_rect)
     if event.type == pygame.MOUSEBUTTONUP:
-        click_allowed = True
+        click_allowed=True
     if(player.playerrect.bottom<ground):onground=False
     if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):
         if(not question_scrn):
-            question_num= random.randint(0,14)
             correction_delay=0
             if level=="easy":
+                questions=load_questions("Assets\Questions\easy.txt")
                 timer=random.randrange(40,50,5)
             elif level=="medium":
+                questions=load_questions("Assets\Questions\medium.txt")
                 timer=random.randrange(40,60,10)
             elif level=="high":
+                questions=load_questions("Assets\Questions\high.txt")
                 timer=random.randrange(50,90,10)
             question, options,correct_answer,hint= random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
         question_scrn=True
         incomingwave=False
-
+    if wave==3:
+        incomingwave=True
     if start_scrn:
         menu_sound.stop()
-        if backgrounds[k].rect.right>=x:
+        if(gameloop_channel is None or not gameloop_channel.get_busy()):
+            gameloop_channel=gameloop_sound.play(-1)
+        if(total_lives==0):
+            start_scrn=False
+            gameover_scrn=True
+            gameloop_sound.stop()
+            gameloop_channel=menu_sound.play(-1)
+        if backgrounds[k].rect.right>=x and backgrounds[k].rect.left<=border:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
             onground=player.createanimation(rect,onground,kpressed,playerattack)
@@ -703,6 +795,8 @@ while(True):
             screen.blit(enemy1.enemysuf,enemy1.enemyrect)
             screen.blit(enemy2.enemysuf,enemy2.enemyrect)
             screen.blit(enemy3.enemysuf,enemy3.enemyrect)
+            screen.blit(HP,(10*unitx,50*unity))
+            for i in range(total_lives):lives[i].draw(screen)
             if(not immortal):
                 screen.blit(player.playersuf,player.playerrect)
             elif(immortal and dt%2==0):
@@ -713,10 +807,12 @@ while(True):
                 screen.blit(fade_surface, (0, 0))
             if incomingwave:
                 screen.blit(font4.render("INCOMING WAVE",True,"Yellow"),(unitx*200,unity*400))
-            if wave_interval>=2000:
-                enemy1.wave=2 
-                enemy2.wave=2
-                enemy3.wave=2
+            if wave_interval>=2300*unitx:
+                enemy1.wave=wavesize 
+                enemy2.wave=wavesize
+                enemy3.wave=wavesize
+                border+=2300*unitx
+                wave=(wavesize*3)
                 wave_interval=0
         else:
             backgrounds[k].rect.bottomleft=(0,y)
@@ -726,24 +822,51 @@ while(True):
             l+=1
             k%=4
             l%=2
+            border=backgrounds[k].rect.left
             alpha=0
             player.playerrect.left=10*unitx
-        
+    if gameover_scrn:
+        if(gameloop_channel is None or not gameloop_channel.get_busy()):
+            gameloop_channel=menu_sound.play(-1)
+        screen.blit(font4.render("RESTART",True,"Yellow"),(350*unitx,650*unity))
+        screen.blit(gameover_background.frameF,gameover_background.rect)
+        for button in descions:
+            button.draw(screen)
+            button.handle_event(event,mouse)
+            if(button.handle_event(event,mouse)=="yes"):
+                total_lives=5
+                menu_scrn=True
+                gameover_scrn=False
+                player.playerrect.left=10*unitx
+                enemy1.enemyrect.left=x+200*unitx
+                enemy2.enemyrect.left=x+500*unitx
+                enemy3.enemyrect.left=x+800*unitx
+                changeLevel=0
+                k=0
+            if(button.handle_event(event,mouse)=="no"):
+                pygame.quit()
+                exit()
+
+        if (gameover_channel == None ):
+                gameover_channel=gameover_sound.play()
     if immortal:
         if(immortaltime>=2000):immortal=False
         immortaltime+=dt
     if playerattack:
         if player.index>=len(player_attack):
             immortal=True
-            playerattack=False    
+            playerattack=False
+    
+    #chechs if player faces 3 consecutive wrong answers and change level accordingly
+    if changeLevel==3:
+        level="easy"
+    
+    #question screen
     if question_scrn:
         second+=dt
+        if(current_emotion!="Happy" and current_emotion!="Neutral"):
+            bademotion+=1
         if second>=1000 and timer>0:
-            if len(emotionlist)<30:
-                if(current_emotion=="Happy" or current_emotion=="Neutral"):
-                    emotionlist.append(1)
-                else:
-                    emotionlist.append(0)
             timer-=1
             second=0
             seconds=timer%60
@@ -754,54 +877,113 @@ while(True):
         display_timer=font3.render(f"Timer {minutes:02}:{seconds:02}",True,"White")
         screen.blit(board.frameF,board.rect)
         question_posY=230*unity
+        
+        #display question with word wrap
         for line in wrapped_lines:
             question_surface = font5.render(line, True, "Black")
             screen.blit(question_surface,(200*unitx,question_posY))
             question_posY += font5.get_height() + 5*unity
         question_posY+=15*unity
+        
+        
+        #display options
         for i,option in enumerate(options):
             option_surface = font5.render(f"{option}", True, "Black")
             screen.blit(option_surface, (200*unitx, question_posY+(i*(font5.get_height()+20)*unity)))
         screen.blit(display_answer,(240*unitx,620*unity))
         screen.blit(display_timer,(500*unitx,400*unity))
-        if(answer_chosen and answer.upper()==correct_answer):
-            if(correction_delay==0):success_sound.play()
-            screen.blit(display_correct,(240*unitx,675*unity))
-            correction_delay+=dt
-        if(len(emotionlist)>=30):
-            for emotion in emotionlist:
-                if emotion==0:
-                    bademotion+=1
-        test=font2.render(f"{hint}",True,"Black")
-        if(bademotion==0):
+        test=font2.render(f"{hint}",True,"Yellow")
+        
+        #increment 1 to a variable changeLevel when bademotion reaches 500
+        if bademotion==500:
+            changeLevel+=1
+            bademotion+=1
+        
+        #show hint button only when bademotion is 500 or more
+        if(bademotion>=500):
             if (kpressed[pygame.K_h] and pygame.KEYDOWN):
                     screen.blit(hint_active.frameF,hint_active.rect)
                     screen.blit(test,(40*unitx,880*unity))
             else:
                 screen.blit(hint_inactive.frameF,hint_inactive.rect)
-        if(correction_delay>=2000):
-            player.playerrect.bottom=ground
-            player.index=0
-            correction_delay=0
-            playerattack=True
-            immortaltime=0
-            question_scrn=False 
-            answer_chosen=False
-            answer=''
+        
+        #show correction for 2 seconds and then reset everything
+        if(answer_chosen and answer.upper()==correct_answer):
+            if(correction_delay==0):
+                changeLevel-=1
+                if level!=initial_level:
+                    level=initial_level
+                    changeLevel=0
+                success_sound.play()
+            screen.blit(display_correct,(240*unitx,675*unity))
+            correction_delay+=dt
+            if(correction_delay>=2000):
+                player.playerrect.bottom=ground
+                player.index=0
+                correction_delay=0
+                playerattack=True
+                
+                immortaltime=0
+                question_scrn=False
+                bademotion=0 
+                answer_chosen=False
+                answer=''
+        #if wrong answer or time is up
         elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
-            if(correction_delay==0):fail_sound.play()
+            if(correction_delay==0):
+                changeLevel+=1
+                if level!=initial_level:
+                    level=initial_level
+                    changeLevel=0
+                fail_sound.play()
             screen.blit(display_wrong,(240*unitx,670*unity))
             correction_delay+=dt
-        if(correction_delay>=2000):
-            correction_delay=0
-            enemy1.index=0
-            enemy2.index=0
-            enemy3.index=0
-            immortaltime=0
-            enemyattack=True
-            question_scrn=False 
-            answer_chosen=False
-            answer=''
-    screen.blit(testtext,(10,10))
+            if(correction_delay>=2000):
+                if(answer_chosen and answer.upper()!=correct_answer):total_lives-=1
+                correction_delay=0
+                enemy1.index=0
+                enemy2.index=0
+                enemy3.index=0
+                immortaltime=0
+                enemyattack=True
+                question_scrn=False 
+                answer_chosen=False
+                bademotion=0
+                answer=''
+    home.draw(screen)
+    if not sound_pause:
+        sound_paused.draw(screen)
+    elif sound_pause:
+        sound_unpaused.draw(screen)
+    if home.handle_event(event,mouse)=="home":
+        total_lives=5
+        gameover_channel = None
+        menu_scrn=True
+        level_scrn=False
+        options_scrn=False
+        question_scrn=False
+        start_scrn=False
+        gameover_scrn=False
+        gameloop_sound.stop()
+        player.playerrect.left=10*unitx
+        enemy1.enemyrect.left=x+200*unitx
+        enemy2.enemyrect.left=x+500*unitx
+        enemy3.enemyrect.left=x+800*unitx
+        changeLevel=0
+        k=0
+    if sound_paused.handle_event(event,mouse)=="sound_paused"  and click_allowed:
+        sound_pause=True
+        click_allowed=False
+        sound_paused.rect.bottom=-100*unity
+        sound_unpaused.rect.top=50*unity
+    if sound_unpaused.handle_event(event,mouse)=="sound_unpaused" and click_allowed:
+        sound_pause=False
+        click_allowed=False
+        sound_unpaused.rect.bottom=-100*unity
+        sound_paused.rect.top=50*unity
+    if sound_pause:pygame.mixer.pause()
+    elif not sound_pause:pygame.mixer.unpause()
+    last_state=sound_pause
+    screen.blit(testtext,(10*unitx,10*unity))   
 
     pygame.display.update()
