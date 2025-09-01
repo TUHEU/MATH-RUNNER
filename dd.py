@@ -922,6 +922,7 @@ while(True):
                 player.index=0
                 correction_delay=0
                 playerattack=True
+                
                 immortaltime=0
                 question_scrn=False
                 bademotion=0 
