@@ -652,8 +652,8 @@ menu=pygame.transform.scale(menu,(x,y))
 
 #option
 option=pygame.image.load("Assets/option/option.png")
-option_rect=option.get_rect(center=(unitx*500,unity*500))
-opti0n=pygame.transform.scale(option,(500*unitx,800*unity))
+option_rect=option.get_rect(topleft=(unitx*250,unity*100))
+option=pygame.transform.scale(option,(500*unitx,800*unity))
 
 j=0
 cur_equation=["","","","","","","","","","","","","",]
@@ -752,6 +752,9 @@ while(True):
                 initial_level="high"
                 level_scrn=False
                 start_scrn=True
+    if options_scrn==True:
+                  menu_scrn=False
+                  screen.blit(option,option_rect)
     if event.type == pygame.MOUSEBUTTONUP:
         click_allowed=True
     if(player.playerrect.bottom<ground):onground=False
@@ -853,6 +856,8 @@ while(True):
         if player.index>=len(player_attack):
             immortal=True
             playerattack=False
+    
+    #chechs if player faces 3 consecutive wrong answers and change level accordingly
     if changeLevel==3:
         level="easy"
     
