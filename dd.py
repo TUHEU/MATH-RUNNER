@@ -122,8 +122,10 @@ start_scrn=False
 question_scrn=False
 options_scrn=False
 level_scrn=False
+optin_scrn=False
 gameover_scrn=False
 paused = False
+
 
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
@@ -144,9 +146,9 @@ fade_surface.fill((0, 0, 0))
 fade_surface.set_alpha(0)
 alpha=0
 
-#emotion detector variable for descision
+#emotion_list
+emotionlist=[]
 bademotion=0
-changeLevel=0
 
 #player variables
 total_lives=5
@@ -864,9 +866,12 @@ while(True):
     #question screen
     if question_scrn:
         second+=dt
-        if(current_emotion!="Happy" and current_emotion!="Neutral"):
-            bademotion+=1
         if second>=1000 and timer>0:
+            if len(emotionlist)<30:
+                if(current_emotion=="Happy" or current_emotion=="Neutral"):
+                    emotionlist.append(1)
+                else:
+                    emotionlist.append(0)
             timer-=1
             second=0
             seconds=timer%60

@@ -272,9 +272,9 @@ class button:
 
 #button list
 buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"start"),
-         button("Assets\Buttons\Default\options.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*150)),"options"),
-         button("Assets\Buttons\Default\custom level.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity)),"custom level"),
-         button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*150)),"exit")]
+         button("Assets\Buttons\Default\options.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*75)),"options"),
+         button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*150)),"exit"),
+        ]
 
 #equations list
 equations=[equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC()]
@@ -615,7 +615,7 @@ enemy3=Enemy(key="enemy3")
 ground=player.playerrect.bottom
 incomingwave=True
 menu_sound.play()
-while(True):
+while(True):    
     rect=player.playerrect.bottomleft
     rectE1=enemy1.enemyrect.bottomleft
     rectE2=enemy2.enemyrect.bottomleft
@@ -663,6 +663,8 @@ while(True):
                 menu_scrn=False
                 optin_scrn=True
                 click_allowed=False
+            
+                
     if level_scrn:
         for button in level_buttons:
             button.draw(screen)
@@ -682,6 +684,9 @@ while(True):
                 level="high"
                 level_scrn=False
                 start_scrn=True
+            if kpressed[pygame.K_b]:
+                    level_scrn=False
+                    menu_scrn=True
     if event.type == pygame.MOUSEBUTTONUP:
         click_allowed = True
     if(player.playerrect.bottom<ground):onground=False
@@ -815,4 +820,7 @@ while(True):
     if optin_scrn==True:
                   menu_scrn=False
                   screen.blit(optin,optin_rect)
+    if kpressed[pygame.K_b]:
+                    optin_scrn=False
+                    menu_scrn=True
     pygame.display.update()
