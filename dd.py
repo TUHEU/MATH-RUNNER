@@ -651,6 +651,11 @@ menu=pygame.image.load("Assets/Menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
 
+#math-runner text
+Title=pygame.image.load("Assets/Menu/title.png") 
+Title_rect=Title.get_rect(topleft=(unitx*200,unity*50))
+Title=pygame.transform.scale(Title,(600*unitx,200*unity))
+
 #option
 option=pygame.image.load("Assets/option/option.png")
 option_rect=option.get_rect(topleft=(unitx*250,unity*100))
@@ -858,6 +863,8 @@ while(True):
             immortal=True
             playerattack=False
     
+    if(menu_scrn or level_scrn or gameover_scrn):
+        screen.blit(Title,Title_rect)
     #chechs if player faces 3 consecutive wrong answers and change level accordingly
     if changeLevel==3:
         level="easy"
@@ -987,6 +994,7 @@ while(True):
     if sound_pause:pygame.mixer.pause()
     elif not sound_pause:pygame.mixer.unpause()
     last_state=sound_pause
-    screen.blit(testtext,(10*unitx,10*unity))   
+    screen.blit(testtext,(10*unitx,10*unity)) 
+  
 
     pygame.display.update()
