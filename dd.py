@@ -155,6 +155,9 @@ immortal=False
 immortaltime=0
 playerattack=False
 playerinjure=False
+score=0
+highscore=0
+
 
 #Questions variables
 questionsize=(unitx*1.2,2*unity)
