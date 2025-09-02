@@ -16,21 +16,21 @@ What is the value of log_2(32)?
 A. 4
 B. 5
 C. 6
-D. 3
+D. 7
 B
 
 If f(x) = x^3, then f''(2) equals:
 A. 3
 B. 6
 C. 12
-D. 24
+D. 32
 C
 
 Simplify: (x^2 - 9)/(x - 3)
 A. x + 3
 B. x - 3
 C. x^2 + 3
-D. x^2 - 3
+D. x^2 - 6
 A
 
 What is the area of a circle with radius r?
