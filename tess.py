@@ -168,6 +168,7 @@ seconds=0
 minutes=0
 level="easy"
 initial_level="easy"
+previous_question=0
 
 #Enemies variables
 framesizeE=(.3*unitx,.6*unity)
@@ -300,10 +301,10 @@ class button:
         return None
 
 #button list
-buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"start"),
-         button("Assets\Buttons\Default\options.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*150)),"options"),
-         button("Assets\Buttons\Default\custom level.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity)),"custom level"),
-         button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*150)),"exit")]
+buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"start"),
+         button("Assets\Buttons\Default\options.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"options"),
+         button("Assets\Buttons\Default\custom level.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*50)),"custom level"),
+         button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*200)),"exit")]
 
 #equations list
 equations=[equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC()]
@@ -382,15 +383,15 @@ def load_questions(filename):
             answer = lines[6]  # correct answer index (A–D)
             questions.append((q, options, answer,hint))
     return questions
-level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*300)),"easy"),
-               button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"medium"),
-               button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*100)),"high")]
+level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"easy"),
+               button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*50)),"medium"),
+               button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*150)),"high")]
 
 #gameover buttons
 gameover_background=Frame((unitx*1.4,unity*1.4),"Assets\Gameover\gameovertext.png",(70*unitx,700*unity))
 descions=[button("Assets/Buttons/Default/yes.png",(x/10,y/12),((unitx*300),(unity*800)),"yes"),button("Assets/Buttons/Default/no.png",(x/10,y/12),((unitx*650),(unity*800)),"no")]
 
-#
+#always onscreen buttons
 home=button("Assets/Buttons/Default/home.png",(x/13,y/12),((unitx*900),(unity*50)),"home")
 sound_unpaused=button("Assets/Buttons/Default/sound_unpaused.png",(x/13,y/12),((unitx*800),(unity*50)),"sound_unpaused")
 sound_paused=button("Assets/Buttons/Default/sound_paused.png",(x/13,y/12),((unitx*800),(unity*50)),"sound_paused")
@@ -650,6 +651,11 @@ menu=pygame.image.load("Assets/Menu/menu.jpg")
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
 
+#math-runner text
+Title=pygame.image.load("Assets/Menu/title.png") 
+Title_rect=Title.get_rect(topleft=(unitx*200,unity*50))
+Title=pygame.transform.scale(Title,(600*unitx,200*unity))
+
 #option
 option=pygame.image.load("Assets/option/option.png")
 option_rect=option.get_rect(topleft=(unitx*250,unity*100))
@@ -857,6 +863,8 @@ while(True):
             immortal=True
             playerattack=False
     
+    if(menu_scrn or level_scrn or gameover_scrn):
+        screen.blit(Title,Title_rect)
     #chechs if player faces 3 consecutive wrong answers and change level accordingly
     if changeLevel==3:
         level="easy"
@@ -922,7 +930,7 @@ while(True):
                 player.index=0
                 correction_delay=0
                 playerattack=True
-                
+                attack_player_sound.play()
                 immortaltime=0
                 question_scrn=False
                 bademotion=0 
@@ -946,6 +954,8 @@ while(True):
                 enemy3.index=0
                 immortaltime=0
                 enemyattack=True
+                attack_monster_sound.play()
+                hurt_player_sound.play()
                 question_scrn=False 
                 answer_chosen=False
                 bademotion=0
@@ -984,6 +994,7 @@ while(True):
     if sound_pause:pygame.mixer.pause()
     elif not sound_pause:pygame.mixer.unpause()
     last_state=sound_pause
-    screen.blit(testtext,(10*unitx,10*unity))   
+    screen.blit(testtext,(10*unitx,10*unity)) 
+  
 
     pygame.display.update()
