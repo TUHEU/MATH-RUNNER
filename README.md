@@ -26,6 +26,7 @@ This project was developed by a team of five students:
 - Dynamic **math equation generator**  
 - **Multiple-choice** problem-solving system  
 - Real-time **collision and obstacle mechanics**  
+- Real-time **Emotion detection** adapting questions level
 - Background animations (clouds, menu screen, equations)  
 - **Keyboard controls** for movement and answer selection  
 - Simple yet fun **educational gameplay**  
@@ -33,7 +34,4 @@ This project was developed by a team of five students:
 ---
 
 ## 🛠️ Installation & Setup
-### 1. Clone the repository
-```bash
-git clone https://github.com/your-username/math-runner.git
-cd math-runner
+.....
