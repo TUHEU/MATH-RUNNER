@@ -2,7 +2,7 @@
 
 ## 📌 Project Overview
 **MATH RUNNER** is a 2D educational adventure game developed in **Python (Pygame)**.  
-It combines **fun gameplay mechanics** with **mathematical problem-solving** to make learning engaging and interactive.  
+It combines **fun gameplay mechanics** with **mathematical problem-solving** to make learning engaging and interactive, enhanced with **face-emotion detection** to adapt question difficulty based on the player’s emotions.  
 
 Players must **run, dodge obstacles, and solve math equations** that appear dynamically. Correct answers help them progress, while mistakes or delays make the game more challenging.  
 
@@ -26,7 +26,7 @@ This project was developed by a team of five students:
 - Dynamic **math equation generator**  
 - **Multiple-choice** problem-solving system  
 - Real-time **collision and obstacle mechanics**  
-- Real-time **Emotion detection** adapting questions level
+- Real-time **facial emotion detection** to adapt question difficulty  
 - Background animations (clouds, menu screen, equations)  
 - **Keyboard controls** for movement and answer selection  
 - Simple yet fun **educational gameplay**  
@@ -34,4 +34,5 @@ This project was developed by a team of five students:
 ---
 
 ## 🛠️ Installation & Setup
-.....
+
+TO BE CONTINUED...
