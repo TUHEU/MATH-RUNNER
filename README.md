@@ -13,11 +13,11 @@ This project was created as part of our **End of Summer 2025 Exams**.
 ## 👨‍💻 Group Members
 This project was developed by a team of five students:
 
-1. **Titcheu Yamdjeu Pierre Wilfried**  
-2. **[Member 2: Add Name Here]**  
-3. **[Member 3: Add Name Here]**  
-4. **[Member 4: Add Name Here]**  
-5. **[Member 5: Add Name Here]**
+1. **Kamdeu Yamdjeuson Neil Marshall**  
+2. **Anye Darlington**  
+3. **Chijioke Emmanuel**  
+4. **Junior Rayan**  
+5. **Fahdil**
 
 ---
 
