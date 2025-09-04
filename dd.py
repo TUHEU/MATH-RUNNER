@@ -155,9 +155,6 @@ immortal=False
 immortaltime=0
 playerattack=False
 playerinjure=False
-score=0
-highscore=0
-
 
 #Questions variables
 questionsize=(unitx*1.2,2*unity)
@@ -304,10 +301,10 @@ class button:
         return None
 
 #button list
-buttons=[button("Assets/Buttons/Default/start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"start"),
-         button("Assets/Buttons/Default/options.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"options"),
-         button("Assets/Buttons/Default/custom level.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*50)),"custom level"),
-         button("Assets/Buttons/Default/exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*200)),"exit")]
+buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"start"),
+         button("Assets\Buttons\Default\options.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"options"),
+         button("Assets\Buttons\Default\custom level.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*50)),"custom level"),
+         button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*200)),"exit")]
 
 #equations list
 equations=[equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC()]
@@ -364,7 +361,7 @@ enemy3_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle Blink/{i}.png") fo
 enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in range(0,12)]
 
 #list of hearts
-lives=[Heart("Assets/Player/heart/heart.png",((20*unitx)+(unitx*(i*50)),unity*100)) for i in range(1,6)]
+lives=[Heart("Assets\Player\heart\heart.png",((20*unitx)+(unitx*(i*50)),unity*100)) for i in range(1,6)]
 HP=font6.render(f"HP",True,"Red")
 
 
@@ -374,24 +371,24 @@ HP=font6.render(f"HP",True,"Red")
 def load_questions(filename):
     questions = []
     with open(filename, "r") as f:
-        content = f.read().strip().split("/n/n")  # Questions separated by blank line
+        content = f.read().strip().split("\n\n")  # Questions separated by blank line
         for block in content:
-            lines = block.split("/n")
+            lines = block.split("\n")
             q = lines[0]
             # Wrap the question if it's longer than 55 characters
             if len(q) > 35:
-                q = "/n".join(textwrap.wrap(q, width=35))
+                q = "\n".join(textwrap.wrap(q, width=35))
             options = lines[1:5]
             hint = lines[5]  # hint
             answer = lines[6]  # correct answer index (A–D)
             questions.append((q, options, answer,hint))
     return questions
-level_buttons=[button("Assets/Buttons/Default/easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"easy"),
-               button("Assets/Buttons/Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*50)),"medium"),
-               button("Assets/Buttons/Default/high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*150)),"high")]
+level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"easy"),
+               button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*50)),"medium"),
+               button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*150)),"high")]
 
 #gameover buttons
-gameover_background=Frame((unitx*1.4,unity*1.4),"Assets/Gameover/gameovertext.png",(70*unitx,700*unity))
+gameover_background=Frame((unitx*1.4,unity*1.4),"Assets\Gameover\gameovertext.png",(70*unitx,700*unity))
 descions=[button("Assets/Buttons/Default/yes.png",(x/10,y/12),((unitx*300),(unity*800)),"yes"),button("Assets/Buttons/Default/no.png",(x/10,y/12),((unitx*650),(unity*800)),"no")]
 
 #always onscreen buttons
@@ -744,19 +741,19 @@ while(True):
             button.draw(screen)
             button.handle_event(event,mouse)
             if(button.handle_event(event,mouse)=="easy"):
-                questions=load_questions("Assets/Questions/easy.txt")
+                questions=load_questions("Assets\Questions\easy.txt")
                 level="easy"
                 initial_level="easy"
                 level_scrn=False
                 start_scrn=True
             if(button.handle_event(event,mouse)=="medium"):
-                questions=load_questions("Assets/Questions/medium.txt")
+                questions=load_questions("Assets\Questions\medium.txt")
                 level="medium"
                 initial_level="medium"
                 level_scrn=False
                 start_scrn=True
             if(button.handle_event(event,mouse)=="high"):
-                questions=load_questions("Assets/Questions/high.txt")
+                questions=load_questions("Assets\Questions\high.txt")
                 level="high"
                 initial_level="high"
                 level_scrn=False
@@ -771,13 +768,13 @@ while(True):
         if(not question_scrn):
             correction_delay=0
             if level=="easy":
-                questions=load_questions("Assets/Questions/easy.txt")
+                questions=load_questions("Assets\Questions\easy.txt")
                 timer=random.randrange(40,50,5)
             elif level=="medium":
-                questions=load_questions("Assets/Questions/medium.txt")
+                questions=load_questions("Assets\Questions\medium.txt")
                 timer=random.randrange(40,60,10)
             elif level=="high":
-                questions=load_questions("Assets/Questions/high.txt")
+                questions=load_questions("Assets\Questions\high.txt")
                 timer=random.randrange(50,90,10)
             question, options,correct_answer,hint= random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
