@@ -142,6 +142,8 @@ immortal=False
 immortaltime=0
 playerattack=False
 playerinjure=False
+score=0
+scoreincrement=0
 
 #Questions variables
 questionsize=(unitx*1.2,2*unity)
@@ -818,6 +820,9 @@ while(True):
             border=backgrounds[k].rect.left
             alpha=0
             player.playerrect.left=10*unitx
+    if level=="easy":scoreincrement=5
+    elif level=="medium":scoreincrement=10
+    elif level=="high":scoreincrement=15    
     if gameover_scrn:
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
             gameloop_channel=menu_sound.play(-1)
@@ -913,6 +918,7 @@ while(True):
             screen.blit(display_correct,(240*unitx,675*unity))
             correction_delay+=dt
             if(correction_delay>=2000):
+                score+=scoreincrement
                 player.playerrect.bottom=ground
                 player.index=0
                 correction_delay=0
