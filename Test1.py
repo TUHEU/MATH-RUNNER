@@ -291,7 +291,7 @@ class button:
 
 #button list
 buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"start"),
-         button("Assets\Buttons\Default\options.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"options"),
+         button("Assets\Buttons\Default\settings.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"options"),
          button("Assets\Buttons\Default\custom level.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*50)),"custom level"),
          button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*200)),"exit")]
 
@@ -682,7 +682,7 @@ while(True):
     kpressed=pygame.key.get_pressed()
     
     for event in pygame.event.get():
-        if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
+        if event.type==pygame.QUIT:
             pygame.quit()
             exit()
         # Only allow pausing when not in question screen
@@ -975,6 +975,7 @@ while(True):
         options_scrn=False
         question_scrn=False
         start_scrn=False
+        bademotion=0
         gameover_scrn=False
         gameloop_sound.stop()
         player.playerrect.left=10*unitx
