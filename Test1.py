@@ -292,8 +292,7 @@ class button:
 #button list
 buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"start"),
          button("Assets\Buttons\Default\settings.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"options"),
-         button("Assets\Buttons\Default\custom level.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*50)),"custom level"),
-         button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*200)),"exit")]
+         button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*50)),"exit")]
 
 #equations list
 equations=[equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC()]
@@ -353,7 +352,8 @@ enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in rang
 lives=[Heart("Assets\Player\heart\heart.png",((20*unitx)+(unitx*(i*50)),unity*100)) for i in range(1,6)]
 HP=font6.render(f"HP",True,"Red")
 
-
+with open("Assets/HighScore.txt","r") as f:
+    highscore=f.read()
 #Questions/Answers datastructures and funtion
 
 # Load questions from txt file
@@ -643,13 +643,18 @@ menu=pygame.transform.scale(menu,(x,y))
 #math-runner text
 Title=pygame.image.load("Assets/Menu/title.png") 
 Title_rect=Title.get_rect(topleft=(unitx*200,unity*50))
-Title=pygame.transform.scale(Title,(600*unitx,200*unity))
+Title=pygame.transform.scale(Title,(600*unitx,320*unity))
 
 #scoreboard
 scoreboard=pygame.image.load("Assets/Menu/scoreboard.png")
-scoreboard_rect=scoreboard.get_rect(topleft=(400*unitx,20*unity))
 scoreboard=pygame.transform.scale(scoreboard,(200*unitx,100*unity))
+scoreboard_rect=scoreboard.get_rect(topleft=(400*unitx,20*unity))
 scorefont=pygame.font.Font("Assets/Fonts/1.TTF",80)
+
+#pause text
+pausetext=pygame.image.load("Assets/Menu/pause.png")
+pausetext=pygame.transform.scale(pausetext,(800*unitx,400*unity))
+pausetext_rect=pausetext.get_rect(topleft=(100*unitx,300*unity))
 
 #option
 option=pygame.image.load("Assets/option/option.png")
@@ -678,15 +683,15 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} ply {backgrounds[k].rect.left} mapre{backgrounds[k].rect.right} pla{player.playerrect.left} bad{bademotion}",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} bad{bademotion}",False,"Black")
     kpressed=pygame.key.get_pressed()
     
     for event in pygame.event.get():
-        if event.type==pygame.QUIT:
+        if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
         # Only allow pausing when not in question screen
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_p and not question_scrn:
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_p and not menu_scrn and not question_scrn and not level_scrn and not gameover_scrn:
             # Toggle pause state when 'P' is pressed
             paused = not paused
         if question_scrn and event.type==pygame.KEYDOWN and not answer_chosen:
@@ -698,8 +703,7 @@ while(True):
     screen.blit(menu,menu_rect)
     # If game is paused, display pause message and skip the rest of the loop
     if paused:
-        pause_text = font3.render("GAME PAUSED - Press P to continue", True, "Yellow")
-        screen.blit(pause_text, (x//2 - pause_text.get_width()//2, y//2 - pause_text.get_height()//2))
+        screen.blit(pausetext,pausetext_rect)
         pygame.display.update()
         continue
 #menu true  
