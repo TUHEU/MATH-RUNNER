@@ -649,7 +649,7 @@ Title=pygame.transform.scale(Title,(600*unitx,200*unity))
 scoreboard=pygame.image.load("Assets/Menu/scoreboard.png")
 scoreboard_rect=scoreboard.get_rect(topleft=(400*unitx,20*unity))
 scoreboard=pygame.transform.scale(scoreboard,(200*unitx,100*unity))
-scorefont=pygame.font.Font("Assets/Fonts/1.TTF",100)
+scorefont=pygame.font.Font("Assets/Fonts/1.TTF",80)
 
 #option
 option=pygame.image.load("Assets/option/option.png")
@@ -861,11 +861,11 @@ while(True):
             immortal=True
             playerattack=False
     
-    if(menu_scrn or level_scrn or gameover_scrn):
+    if(menu_scrn or level_scrn):
         screen.blit(Title,Title_rect)
     if(start_scrn or gameover_scrn or question_scrn):
         screen.blit(scoreboard,scoreboard_rect)
-        screen.blit(scorefont.render(f"{score}",True,"Black"),(unitx*450,unity*20))    
+        screen.blit(scorefont.render(f"{score}",True,"Black"),(unitx*450,unity*10))    
     #chechs if player faces 3 consecutive wrong answers and change level accordingly
     if changeLevel==3:
         level="easy"
