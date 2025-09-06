@@ -353,7 +353,8 @@ lives=[Heart("Assets\Player\heart\heart.png",((20*unitx)+(unitx*(i*50)),unity*10
 HP=font6.render(f"HP",True,"Red")
 
 with open("Assets/HighScore.txt","r") as f:
-    highscore=f.read()
+    highscore=int(f.read())
+
 #Questions/Answers datastructures and funtion
 
 # Load questions from txt file
@@ -642,12 +643,12 @@ menu=pygame.transform.scale(menu,(x,y))
 
 #math-runner text
 Title=pygame.image.load("Assets/Menu/title.png") 
-Title_rect=Title.get_rect(topleft=(unitx*200,unity*50))
-Title=pygame.transform.scale(Title,(600*unitx,320*unity))
+Title_rect=Title.get_rect(topleft=(unitx*200,unity*40))
+Title=pygame.transform.scale(Title,(600*unitx,200*unity))
 
 #scoreboard
 scoreboard=pygame.image.load("Assets/Menu/scoreboard.png")
-scoreboard=pygame.transform.scale(scoreboard,(200*unitx,100*unity))
+scoreboard=pygame.transform.scale(scoreboard,(200*unitx,150*unity))
 scoreboard_rect=scoreboard.get_rect(topleft=(400*unitx,20*unity))
 scorefont=pygame.font.Font("Assets/Fonts/1.TTF",80)
 
@@ -830,9 +831,16 @@ while(True):
             border=backgrounds[k].rect.left
             alpha=0
             player.playerrect.left=10*unitx
+
+    #increase score propotionate to the difficulty level
     if level=="easy":scoreincrement=5
     elif level=="medium":scoreincrement=10
     elif level=="high":scoreincrement=15    
+
+    if score>=highscore:
+        highscore=score
+        with open("Assets/HighScore.txt","w") as f:
+            f.write(f"{highscore}")
     if gameover_scrn:
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
             gameloop_channel=menu_sound.play(-1)
@@ -865,12 +873,16 @@ while(True):
             immortal=True
             playerattack=False
     
+    #DISPLAYS TITLE "MATH RUNNER"
     if(menu_scrn or level_scrn):
         screen.blit(Title,Title_rect)
+    
+    #DISPLAYS THE SCORE BOARD
     if(start_scrn or gameover_scrn or question_scrn):
         screen.blit(scoreboard,scoreboard_rect)
-        screen.blit(scorefont.render(f"{score}",True,"Black"),(unitx*450,unity*10))    
-    #chechs if player faces 3 consecutive wrong answers and change level accordingly
+        screen.blit(scorefont.render(f"{score}",True,"Black"),(unitx*450,unity*60))    
+    
+    #checks if player faces 3 consecutive wrong answers and change level accordingly
     if changeLevel==3:
         level="easy"
     
