@@ -294,7 +294,7 @@ buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),
          button("Assets\Buttons\Default\settings.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"options"),
          button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*50)),"exit"),
          button("Assets/Buttons/Default/reset.png",(x/28,y/19),((x/2)+(unitx*54),(y/2)+(unity*256)),"reset"),
-         button("Assets/Buttons/Default/reset.png",(x/8,y/12),((x/2)+(unitx*54),(y/2)+(unity*256)),"about us")]
+         button("Assets/Buttons/Default/about us.png",(x/12,y/11),((unitx*850),(unity*850)),"about us")]
 
 #equations list
 equations=[equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC()]
