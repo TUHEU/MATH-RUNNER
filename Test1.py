@@ -293,7 +293,7 @@ class button:
 buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"start"),
          button("Assets\Buttons\Default\settings.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"options"),
          button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*50)),"exit"),
-         button("Assets/Buttons/Default/reset.png",(x/13,y/19),((x/2)-(unitx*65),(y/2)+(unity*310)),"reset")]
+         button("Assets/Buttons/Default/reset.png",(x/28,y/19),((x/2)+(unitx*54),(y/2)+(unity*256)),"reset")]
 
 #equations list
 equations=[equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC()]
@@ -714,6 +714,7 @@ while(True):
         screen.blit(pausetext,pausetext_rect)
         pygame.display.update()
         continue
+
 #menu true  
     if menu_scrn:
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
@@ -744,6 +745,10 @@ while(True):
                 menu_scrn=False
                 options_scrn=True
                 click_allowed=False 
+            if(button.handle_event(event,mouse)=="reset"):
+                highscore=0
+                with open("Assets/HighScore.txt","w") as f:
+                     f.write(f"{highscore}")
     if level_scrn:
         changeLevel=0
         for button in level_buttons:
@@ -800,6 +805,12 @@ while(True):
             gameover_scrn=True
             gameloop_sound.stop()
             gameloop_channel=menu_sound.play(-1)
+       
+        if score>=highscore:
+                highscore=score
+                with open("Assets/HighScore.txt","w") as f:
+                    f.write(f"{highscore}")
+
         if backgrounds[k].rect.right>=x and backgrounds[k].rect.left<=border:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
@@ -845,11 +856,6 @@ while(True):
     if level=="easy":scoreincrement=5
     elif level=="medium":scoreincrement=10
     elif level=="high":scoreincrement=15    
-
-    if score>=highscore:
-        highscore=score
-        with open("Assets/HighScore.txt","w") as f:
-            f.write(f"{highscore}")
     
     #GAMEOVER
     if gameover_scrn:
@@ -1003,6 +1009,7 @@ while(True):
         question_scrn=False
         start_scrn=False
         bademotion=0
+        score=0
         gameover_scrn=False
         gameloop_sound.stop()
         player.playerrect.left=10*unitx
