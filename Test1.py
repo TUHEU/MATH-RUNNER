@@ -640,42 +640,47 @@ menu_sound.set_volume(0.3)
 
 
 #menu
-menu=pygame.image.load("Assets/Menu/menu.jpg")
+menu=pygame.image.load("Assets/Menu/menu.jpg").convert_alpha()
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
 
 #math-runner text
-Title=pygame.image.load("Assets/Menu/title.png") 
+Title=pygame.image.load("Assets/Menu/title.png").convert_alpha()
 Title_rect=Title.get_rect(topleft=(unitx*200,unity*40))
 Title=pygame.transform.scale(Title,(600*unitx,200*unity))
 
 #scoreboard
-scoreboard=pygame.image.load("Assets/Menu/scoreboard.png")
+scoreboard=pygame.image.load("Assets/Menu/scoreboard.png").convert_alpha()
 scoreboard=pygame.transform.scale(scoreboard,(200*unitx,150*unity))
 scoreboard_rect=scoreboard.get_rect(topleft=(400*unitx,20*unity))
 scorefont=pygame.font.Font("Assets/Fonts/1.TTF",80)
 
 #HighScore board
-highscoreboard=pygame.image.load("Assets/Menu/highscoreboard.png")
+highscoreboard=pygame.image.load("Assets/Menu/highscoreboard.png").convert_alpha()
 highscoreboard=pygame.transform.scale(highscoreboard,(200*unitx,150*unity))
 highscoreboard_rect=highscoreboard.get_rect(topleft=(400*unitx,700*unity))
 highscorefont=pygame.font.Font("Assets/Fonts/1.TTF",60)
 
+#mouse_pointer
+mouse_pointer=pygame.image.load("Assets/Menu/pointer2.png").convert_alpha()
+mouse_pointer=pygame.transform.scale(mouse_pointer,(25*unitx,35*unity))
+pointer_rect=mouse_pointer.get_rect(topleft=(0,0))
+
 #About us
-about_us_text=pygame.image.load("Assets/Menu/about us.png")
-aboutus_board=pygame.image.load("Assets/Menu/board.png")
+about_us_text=pygame.image.load("Assets/Menu/about us.png").convert_alpha()
+aboutus_board=pygame.image.load("Assets/Menu/board.png").convert_alpha()
 aboutus_board=pygame.transform.scale(aboutus_board,(860*unitx,910*unity))
 about_us_text=pygame.transform.scale(about_us_text,(800*unitx,800*unity))
 aboutus_board_rect=aboutus_board.get_rect(topleft=(80*unitx,70*unity))
 about_us_text_rect=about_us_text.get_rect(topleft=(100*unitx,120*unity))
 
 #pause text
-pausetext=pygame.image.load("Assets/Menu/pause.png")
+pausetext=pygame.image.load("Assets/Menu/pause.png").convert_alpha()
 pausetext=pygame.transform.scale(pausetext,(800*unitx,400*unity))
 pausetext_rect=pausetext.get_rect(topleft=(100*unitx,300*unity))
 
 #option
-option=pygame.image.load("Assets/option/option.png")
+option=pygame.image.load("Assets/option/option.png").convert_alpha()
 option_rect=option.get_rect(topleft=(unitx*250,unity*100))
 option=pygame.transform.scale(option,(500*unitx,800*unity))
 
@@ -692,6 +697,8 @@ incomingwave=True
 border=backgrounds[k].rect.left+(10*unitx)
 beginbackground=backgrounds[k].rect.left
 
+#hides default cursor
+pygame.mouse.set_visible(False)
 
 while(True):
     rect=player.playerrect.bottomleft
@@ -704,6 +711,7 @@ while(True):
     testtext=font1.render(f"curemo {current_emotion} bad{bademotion}",False,"Black")
     kpressed=pygame.key.get_pressed()
     
+    pointer_rect.topleft=mouse
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
@@ -1050,6 +1058,6 @@ while(True):
     elif not sound_pause:pygame.mixer.unpause()
     last_state=sound_pause
     screen.blit(testtext,(10*unitx,10*unity)) 
-  
+    screen.blit(mouse_pointer,pointer_rect)
 
     pygame.display.update()
