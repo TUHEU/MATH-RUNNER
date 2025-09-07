@@ -111,6 +111,7 @@ options_scrn=False
 level_scrn=False
 gameover_scrn=False
 paused = False
+aboutus_scrn=False
 
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
@@ -660,6 +661,11 @@ highscoreboard=pygame.transform.scale(highscoreboard,(200*unitx,150*unity))
 highscoreboard_rect=highscoreboard.get_rect(topleft=(400*unitx,700*unity))
 highscorefont=pygame.font.Font("Assets/Fonts/1.TTF",60)
 
+#About us
+about_us_text=pygame.image.load("Assets/Menu/about us.png")
+about_us_text=pygame.transform.scale(about_us_text,(600*unitx,800*unity))
+about_us_text_rect=about_us_text.get_rect(topleft=(100*unitx,100*unity))
+
 #pause text
 pausetext=pygame.image.load("Assets/Menu/pause.png")
 pausetext=pygame.transform.scale(pausetext,(800*unitx,400*unity))
@@ -750,6 +756,12 @@ while(True):
                 highscore=0
                 with open("Assets/HighScore.txt","w") as f:
                      f.write(f"{highscore}")
+            if(button.handle_event(event,mouse)=="about us"):
+                menu_scrn=False
+                aboutus_scrn=True
+                click_allowed=False
+    if aboutus_scrn:
+        screen.blit(about_us_text,about_us_text_rect)
     if level_scrn:
         changeLevel=0
         for button in level_buttons:
@@ -1009,6 +1021,7 @@ while(True):
         options_scrn=False
         question_scrn=False
         start_scrn=False
+        aboutus_scrn=False
         bademotion=0
         score=0
         gameover_scrn=False
