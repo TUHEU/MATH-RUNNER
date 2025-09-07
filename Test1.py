@@ -663,8 +663,11 @@ highscorefont=pygame.font.Font("Assets/Fonts/1.TTF",60)
 
 #About us
 about_us_text=pygame.image.load("Assets/Menu/about us.png")
-about_us_text=pygame.transform.scale(about_us_text,(600*unitx,800*unity))
-about_us_text_rect=about_us_text.get_rect(topleft=(100*unitx,100*unity))
+aboutus_board=pygame.image.load("Assets/Menu/board.png")
+aboutus_board=pygame.transform.scale(aboutus_board,(860*unitx,910*unity))
+about_us_text=pygame.transform.scale(about_us_text,(800*unitx,800*unity))
+aboutus_board_rect=aboutus_board.get_rect(topleft=(80*unitx,70*unity))
+about_us_text_rect=about_us_text.get_rect(topleft=(100*unitx,120*unity))
 
 #pause text
 pausetext=pygame.image.load("Assets/Menu/pause.png")
@@ -761,6 +764,7 @@ while(True):
                 aboutus_scrn=True
                 click_allowed=False
     if aboutus_scrn:
+        screen.blit(aboutus_board,aboutus_board_rect)
         screen.blit(about_us_text,about_us_text_rect)
     if level_scrn:
         changeLevel=0
