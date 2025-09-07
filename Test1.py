@@ -652,6 +652,12 @@ scoreboard=pygame.transform.scale(scoreboard,(200*unitx,150*unity))
 scoreboard_rect=scoreboard.get_rect(topleft=(400*unitx,20*unity))
 scorefont=pygame.font.Font("Assets/Fonts/1.TTF",80)
 
+#HighScore board
+highscoreboard=pygame.image.load("Assets/Menu/highscoreboard.png")
+highscoreboard=pygame.transform.scale(highscoreboard,(200*unitx,150*unity))
+highscoreboard_rect=highscoreboard.get_rect(topleft=(400*unitx,700*unity))
+highscorefont=pygame.font.Font("Assets/Fonts/1.TTF",50)
+
 #pause text
 pausetext=pygame.image.load("Assets/Menu/pause.png")
 pausetext=pygame.transform.scale(pausetext,(800*unitx,400*unity))
@@ -735,6 +741,8 @@ while(True):
                 menu_scrn=False
                 options_scrn=True
                 click_allowed=False
+        screen.blit(highscoreboard,highscoreboard_rect)
+        screen.blit(highscorefont.render(f"{highscore}",True,"Black"),(unitx*450,unity*742)) 
     if level_scrn:
         changeLevel=0
         for button in level_buttons:
@@ -841,6 +849,8 @@ while(True):
         highscore=score
         with open("Assets/HighScore.txt","w") as f:
             f.write(f"{highscore}")
+    
+    #GAMEOVER
     if gameover_scrn:
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
             gameloop_channel=menu_sound.play(-1)
@@ -881,7 +891,7 @@ while(True):
     if(start_scrn or gameover_scrn or question_scrn):
         screen.blit(scoreboard,scoreboard_rect)
         screen.blit(scorefont.render(f"{score}",True,"Black"),(unitx*450,unity*60))    
-    
+
     #checks if player faces 3 consecutive wrong answers and change level accordingly
     if changeLevel==3:
         level="easy"
