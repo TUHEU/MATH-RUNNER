@@ -292,7 +292,8 @@ class button:
 #button list
 buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"start"),
          button("Assets\Buttons\Default\settings.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"options"),
-         button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*50)),"exit")]
+         button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*50)),"exit"),
+         button("Assets/Buttons/Default/reset.png",(x/13,y/19),((x/2)-(unitx*65),(y/2)+(unity*310)),"reset")]
 
 #equations list
 equations=[equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC()]
@@ -374,7 +375,7 @@ def load_questions(filename):
             questions.append((q, options, answer,hint))
     return questions
 level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"easy"),
-               button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*50)),"medium"),
+               button("Assets\Buttons\Default\medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*50)),"medium"),
                button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*150)),"high")]
 
 #gameover buttons
@@ -656,7 +657,7 @@ scorefont=pygame.font.Font("Assets/Fonts/1.TTF",80)
 highscoreboard=pygame.image.load("Assets/Menu/highscoreboard.png")
 highscoreboard=pygame.transform.scale(highscoreboard,(200*unitx,150*unity))
 highscoreboard_rect=highscoreboard.get_rect(topleft=(400*unitx,700*unity))
-highscorefont=pygame.font.Font("Assets/Fonts/1.TTF",50)
+highscorefont=pygame.font.Font("Assets/Fonts/1.TTF",60)
 
 #pause text
 pausetext=pygame.image.load("Assets/Menu/pause.png")
@@ -727,6 +728,8 @@ while(True):
                     eqn_locy[i]=(random.randint(int(unity*100),int(y-(unity*100))))
             i+=1
             j+=1
+        screen.blit(highscoreboard,highscoreboard_rect)
+        screen.blit(highscorefont.render(f"{highscore}",True,"Black"),(unitx*453,unity*735))
         for button in buttons:
             button.draw(screen)
             button.handle_event(event,mouse)
@@ -740,9 +743,7 @@ while(True):
             if(button.handle_event(event,mouse)=="options"):
                 menu_scrn=False
                 options_scrn=True
-                click_allowed=False
-        screen.blit(highscoreboard,highscoreboard_rect)
-        screen.blit(highscorefont.render(f"{highscore}",True,"Black"),(unitx*450,unity*742)) 
+                click_allowed=False 
     if level_scrn:
         changeLevel=0
         for button in level_buttons:
