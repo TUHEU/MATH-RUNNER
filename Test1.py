@@ -3,15 +3,23 @@ import random
 import textwrap
 from sys import exit
 
-import cv2 # OpenCV for computer vision tasks
-import numpy as np #to handle arrays and matrices
-from tensorflow.keras.models import load_model # Keras for loading the pre-trained model
-import threading # For running emotion detection in a separate thread (simultaneous execution)
+import cv2
+import numpy as np
+import tensorflow as tf
+import threading
 
 
-#EMOTION DETECTOR SETUP
-# Load the pre-trained emotion recognition model
-model = load_model("Assets/Emotion detection models/fer2013_mini_XCEPTION.102-0.66.hdf5", compile=False)
+# ============================
+# EMOTION DETECTOR SETUP
+# ============================
+
+# Load the TensorFlow Lite model
+interpreter = tf.lite.Interpreter(model_path="Assets/Emotion detection models/emotion_model.tflite")
+interpreter.allocate_tensors()
+
+# Get input/output details
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 
 # List of emotions in the same order as the model's output neurons
 Emotions_list = ['Angry','Disgust','Fear','Happy','Suprise','Sad','Neutral']
@@ -26,85 +34,64 @@ net = cv2.dnn.readNetFromCaffe("Assets/Emotion detection models/dat.prototxt",
 # Input size expected by the emotion model
 input_height, input_width = 64, 64
 
-# Contrast Limited Adaptive Histogram Equalization (CLAHE) for enhancing faces
+# Contrast Limited Adaptive Histogram Equalization (CLAHE)
 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
-# Shared variable for storing detected emotion (default = Neutral)
+# Shared variable for storing detected emotion
 current_emotion = "Neutral"
 
 
 def emotion_loop():
-        #Continuously reads frames from webcam,
-        #detects faces using Caffe DNN,
-        #preprocesses the face,
-    #and updates the global variable 'current_emotion'
-    #with the detected emotion.
-   
     global current_emotion
     
     while True:
-        # Capture a frame from webcam
         ret, frame = cap.read()
         if not ret: 
-            continue  # If frame not captured, skip this loop
+            continue  
 
-        # Flip horizontally (like a mirror/selfie view)
         frame = cv2.flip(frame, 1)
         (h, w) = frame.shape[:2]
 
-        # Prepare input blob for face detection
         blob = cv2.dnn.blobFromImage(
-            cv2.resize(frame, (300, 300)),  # Resize frame for face detection model
-            1.0,                            # Scale factor
-            (300, 300),                     # Target size
-            (104.0, 177.0, 123.0)           # Mean subtraction values
+            cv2.resize(frame, (300, 300)), 
+            1.0, 
+            (300, 300), 
+            (104.0, 177.0, 123.0)
         )
         net.setInput(blob)
-        detections = net.forward()  # Run face detection
+        detections = net.forward()
 
-        # Loop through detected faces
         for i in range(0, detections.shape[2]):
             confidence = detections[0, 0, i, 2]
 
-            # Only process strong detections
             if confidence > 0.3:
-                # Get bounding box coordinates
                 box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
                 (startX, startY, endX, endY) = box.astype("int")
-                
-                # Extract face region of interest (ROI)
-                face_roi = frame[startY:endY, startX:endX]
 
-                # Skip if ROI is empty
+                face_roi = frame[startY:endY, startX:endX]
                 if face_roi.size == 0: 
                     continue
 
-                # Convert to grayscale for emotion model
                 gray_face = cv2.cvtColor(face_roi, cv2.COLOR_BGR2GRAY)
-
-                # Apply CLAHE to improve contrast
                 enhanced_face = clahe.apply(gray_face)
-
-                # Resize to match model input size
                 resized = cv2.resize(enhanced_face, (input_width, input_height))
 
-                # Normalize pixel values (0-1) and reshape for model
                 normalized = resized.astype('float32') / 255.0
                 input_tensor = normalized.reshape(1, input_height, input_width, 1)
 
-                # Run emotion prediction
-                predictions = model.predict(input_tensor, verbose=0)
-                emotion_idx = np.argmax(predictions)   # Get emotion index
-                current_emotion = Emotions_list[emotion_idx]  # Map index to label
+                # Run inference with TFLite
+                interpreter.set_tensor(input_details[0]['index'], input_tensor)
+                interpreter.invoke()
+                predictions = interpreter.get_tensor(output_details[0]['index'])
 
-                # Only process first detected face (break after detection)
-                break
+                emotion_idx = np.argmax(predictions)
+                current_emotion = Emotions_list[emotion_idx]
 
-#Start emotion detection in background thread
-#Normal (non-daemon) thread → the program will wait for it to finish before exiting.
-#Daemon thread → the program will not wait for it. When the main program ends, daemon threads are killed automatically.
+                break  # only process first detected face
+
+
+# Start emotion detection in background thread
 threading.Thread(target=emotion_loop, daemon=True).start()
-
 
 
 pygame.init()
@@ -124,6 +111,7 @@ options_scrn=False
 level_scrn=False
 gameover_scrn=False
 paused = False
+aboutus_scrn=False
 
 #font
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
@@ -155,6 +143,8 @@ immortal=False
 immortaltime=0
 playerattack=False
 playerinjure=False
+score=0
+scoreincrement=0
 
 #Questions variables
 questionsize=(unitx*1.2,2*unity)
@@ -302,9 +292,10 @@ class button:
 
 #button list
 buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"start"),
-         button("Assets\Buttons\Default\options.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"options"),
-         button("Assets\Buttons\Default\custom level.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*50)),"custom level"),
-         button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*200)),"exit")]
+         button("Assets\Buttons\Default\settings.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"options"),
+         button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*50)),"exit"),
+         button("Assets/Buttons/Default/reset.png",(x/28,y/19),((x/2)+(unitx*54),(y/2)+(unity*256)),"reset"),
+         button("Assets/Buttons/Default/about us.png",(x/12,y/11),((unitx*850),(unity*850)),"about us")]
 
 #equations list
 equations=[equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC()]
@@ -364,6 +355,8 @@ enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in rang
 lives=[Heart("Assets\Player\heart\heart.png",((20*unitx)+(unitx*(i*50)),unity*100)) for i in range(1,6)]
 HP=font6.render(f"HP",True,"Red")
 
+with open("Assets/HighScore.txt","r") as f:
+    highscore=int(f.read())
 
 #Questions/Answers datastructures and funtion
 
@@ -384,7 +377,7 @@ def load_questions(filename):
             questions.append((q, options, answer,hint))
     return questions
 level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"easy"),
-               button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*50)),"medium"),
+               button("Assets\Buttons\Default\medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*50)),"medium"),
                button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*150)),"high")]
 
 #gameover buttons
@@ -647,17 +640,47 @@ menu_sound.set_volume(0.3)
 
 
 #menu
-menu=pygame.image.load("Assets/Menu/menu.jpg")
+menu=pygame.image.load("Assets/Menu/menu.jpg").convert_alpha()
 menu_rect=menu.get_rect(topleft=(0,0))
 menu=pygame.transform.scale(menu,(x,y))
 
 #math-runner text
-Title=pygame.image.load("Assets/Menu/title.png") 
-Title_rect=Title.get_rect(topleft=(unitx*200,unity*50))
+Title=pygame.image.load("Assets/Menu/title.png").convert_alpha()
+Title_rect=Title.get_rect(topleft=(unitx*200,unity*40))
 Title=pygame.transform.scale(Title,(600*unitx,200*unity))
 
+#scoreboard
+scoreboard=pygame.image.load("Assets/Menu/scoreboard.png").convert_alpha()
+scoreboard=pygame.transform.scale(scoreboard,(200*unitx,150*unity))
+scoreboard_rect=scoreboard.get_rect(topleft=(400*unitx,20*unity))
+scorefont=pygame.font.Font("Assets/Fonts/1.TTF",80)
+
+#HighScore board
+highscoreboard=pygame.image.load("Assets/Menu/highscoreboard.png").convert_alpha()
+highscoreboard=pygame.transform.scale(highscoreboard,(200*unitx,150*unity))
+highscoreboard_rect=highscoreboard.get_rect(topleft=(400*unitx,700*unity))
+highscorefont=pygame.font.Font("Assets/Fonts/1.TTF",60)
+
+#mouse_pointer
+mouse_pointer=pygame.image.load("Assets/Menu/pointer2.png").convert_alpha()
+mouse_pointer=pygame.transform.scale(mouse_pointer,(25*unitx,35*unity))
+pointer_rect=mouse_pointer.get_rect(topleft=(0,0))
+
+#About us
+about_us_text=pygame.image.load("Assets/Menu/about us.png").convert_alpha()
+aboutus_board=pygame.image.load("Assets/Menu/board.png").convert_alpha()
+aboutus_board=pygame.transform.scale(aboutus_board,(860*unitx,910*unity))
+about_us_text=pygame.transform.scale(about_us_text,(800*unitx,800*unity))
+aboutus_board_rect=aboutus_board.get_rect(topleft=(80*unitx,70*unity))
+about_us_text_rect=about_us_text.get_rect(topleft=(100*unitx,120*unity))
+
+#pause text
+pausetext=pygame.image.load("Assets/Menu/pause.png").convert_alpha()
+pausetext=pygame.transform.scale(pausetext,(800*unitx,400*unity))
+pausetext_rect=pausetext.get_rect(topleft=(100*unitx,300*unity))
+
 #option
-option=pygame.image.load("Assets/option/option.png")
+option=pygame.image.load("Assets/option/option.png").convert_alpha()
 option_rect=option.get_rect(topleft=(unitx*250,unity*100))
 option=pygame.transform.scale(option,(500*unitx,800*unity))
 
@@ -674,6 +697,8 @@ incomingwave=True
 border=backgrounds[k].rect.left+(10*unitx)
 beginbackground=backgrounds[k].rect.left
 
+#hides default cursor
+pygame.mouse.set_visible(False)
 
 while(True):
     rect=player.playerrect.bottomleft
@@ -683,15 +708,16 @@ while(True):
     
     dt=clock.tick(60)
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} ch{changeLevel} sounpa {sound_pause} clicked allowed {click_allowed} cor{correction_delay} border {border} maplr{backgrounds[k].rect.left} mapre{backgrounds[k].rect.right} pla{player.playerrect.left} bad{bademotion}",False,"Black")
+    testtext=font1.render(f"curemo {current_emotion} bad{bademotion}",False,"Black")
     kpressed=pygame.key.get_pressed()
     
+    pointer_rect.topleft=mouse
     for event in pygame.event.get():
         if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
         # Only allow pausing when not in question screen
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_p and not question_scrn:
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_p and not menu_scrn and not question_scrn and not level_scrn and not gameover_scrn:
             # Toggle pause state when 'P' is pressed
             paused = not paused
         if question_scrn and event.type==pygame.KEYDOWN and not answer_chosen:
@@ -703,10 +729,10 @@ while(True):
     screen.blit(menu,menu_rect)
     # If game is paused, display pause message and skip the rest of the loop
     if paused:
-        pause_text = font3.render("GAME PAUSED - Press P to continue", True, "Yellow")
-        screen.blit(pause_text, (x//2 - pause_text.get_width()//2, y//2 - pause_text.get_height()//2))
+        screen.blit(pausetext,pausetext_rect)
         pygame.display.update()
         continue
+
 #menu true  
     if menu_scrn:
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
@@ -721,6 +747,8 @@ while(True):
                     eqn_locy[i]=(random.randint(int(unity*100),int(y-(unity*100))))
             i+=1
             j+=1
+        screen.blit(highscoreboard,highscoreboard_rect)
+        screen.blit(highscorefont.render(f"{highscore}",True,"Black"),(unitx*453,unity*735))
         for button in buttons:
             button.draw(screen)
             button.handle_event(event,mouse)
@@ -734,7 +762,18 @@ while(True):
             if(button.handle_event(event,mouse)=="options"):
                 menu_scrn=False
                 options_scrn=True
+                click_allowed=False 
+            if(button.handle_event(event,mouse)=="reset"):
+                highscore=0
+                with open("Assets/HighScore.txt","w") as f:
+                     f.write(f"{highscore}")
+            if(button.handle_event(event,mouse)=="about us"):
+                menu_scrn=False
+                aboutus_scrn=True
                 click_allowed=False
+    if aboutus_scrn:
+        screen.blit(aboutus_board,aboutus_board_rect)
+        screen.blit(about_us_text,about_us_text_rect)
     if level_scrn:
         changeLevel=0
         for button in level_buttons:
@@ -791,6 +830,12 @@ while(True):
             gameover_scrn=True
             gameloop_sound.stop()
             gameloop_channel=menu_sound.play(-1)
+       
+        if score>=highscore:
+                highscore=score
+                with open("Assets/HighScore.txt","w") as f:
+                    f.write(f"{highscore}")
+
         if backgrounds[k].rect.right>=x and backgrounds[k].rect.left<=border:
             screen.blit(backgrounds[k].img,backgrounds[k].rect)
             screen.blit(floors[l].img,floors[l].rect)
@@ -831,6 +876,13 @@ while(True):
             border=backgrounds[k].rect.left
             alpha=0
             player.playerrect.left=10*unitx
+
+    #increase score propotionate to the difficulty level
+    if level=="easy":scoreincrement=5
+    elif level=="medium":scoreincrement=10
+    elif level=="high":scoreincrement=15    
+    
+    #GAMEOVER
     if gameover_scrn:
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
             gameloop_channel=menu_sound.play(-1)
@@ -863,9 +915,16 @@ while(True):
             immortal=True
             playerattack=False
     
-    if(menu_scrn or level_scrn or gameover_scrn):
+    #DISPLAYS TITLE "MATH RUNNER"
+    if(menu_scrn or level_scrn):
         screen.blit(Title,Title_rect)
-    #chechs if player faces 3 consecutive wrong answers and change level accordingly
+    
+    #DISPLAYS THE SCORE BOARD
+    if(start_scrn or gameover_scrn or question_scrn):
+        screen.blit(scoreboard,scoreboard_rect)
+        screen.blit(scorefont.render(f"{score}",True,"Black"),(unitx*450,unity*60))    
+
+    #checks if player faces 3 consecutive wrong answers and change level accordingly
     if changeLevel==3:
         level="easy"
     
@@ -895,8 +954,8 @@ while(True):
         
         
         #display options
-        for i,option in enumerate(options):
-            option_surface = font5.render(f"{option}", True, "Black")
+        for i,optio in enumerate(options):
+            option_surface = font5.render(f"{optio}", True, "Black")
             screen.blit(option_surface, (200*unitx, question_posY+(i*(font5.get_height()+20)*unity)))
         screen.blit(display_answer,(240*unitx,620*unity))
         screen.blit(display_timer,(500*unitx,400*unity))
@@ -926,6 +985,7 @@ while(True):
             screen.blit(display_correct,(240*unitx,675*unity))
             correction_delay+=dt
             if(correction_delay>=2000):
+                score+=scoreincrement
                 player.playerrect.bottom=ground
                 player.index=0
                 correction_delay=0
@@ -973,6 +1033,9 @@ while(True):
         options_scrn=False
         question_scrn=False
         start_scrn=False
+        aboutus_scrn=False
+        bademotion=0
+        score=0
         gameover_scrn=False
         gameloop_sound.stop()
         player.playerrect.left=10*unitx
@@ -995,6 +1058,6 @@ while(True):
     elif not sound_pause:pygame.mixer.unpause()
     last_state=sound_pause
     screen.blit(testtext,(10*unitx,10*unity)) 
-  
+    screen.blit(mouse_pointer,pointer_rect)
 
     pygame.display.update()
