@@ -18,7 +18,7 @@ def build_game():
 block_cipher = None
 
 a = Analysis(
-    ['dd.py'],
+    ['main.py'],
     pathex=[],
     binaries=[],
     datas=[],  # Empty datas list since we'll add assets manually
@@ -75,13 +75,13 @@ coll = COLLECT(
 """
     
     # Write the spec file
-    with open('game.spec', 'w') as f:
+    with open('MathRunner.spec', 'w') as f:
         f.write(spec_content)
     
     # Run PyInstaller to create one-directory package
     # Remove the --onedir flag when using a spec file
     try:
-        subprocess.check_call(['pyinstaller', 'game.spec'])
+        subprocess.check_call(['pyinstaller', 'MathRunner.spec'])
         print("Build successful! Application is in the 'dist/MathRunnerGame' folder.")
         
         # Instructions for manual asset copying
