@@ -134,63 +134,62 @@ font5=pygame.font.Font(None,50)
 font6=pygame.font.Font("Assets/Fonts/5.ttf",70)
 
 #physics variables
-player_vel_y = 0  
-gravity = 1 * unity  
-jump_strength = -30 * unity
+gravity = 1 * unity  #not understood
+jump_strength = -30 * unity   #not understood
 
 #Creating background swap animation (Fadeout) variables
-fade_surface = pygame.Surface((x,y))
-fade_surface.fill((0, 0, 0)) 
-fade_surface.set_alpha(0)
-alpha=0
+fade_surface = pygame.Surface((x,y))    #not understood
+fade_surface.fill((0, 0, 0))  #not understood
+fade_surface.set_alpha(0)  #not understood
+alpha=0 #not understood
 
 #emotion detector variable for descision
-bademotion=0
+bademotion=0      
 changeLevel=0
 
 #player variables
 total_lives=5
-framesize=(1.7*unitx,2.6*unity)
-immortal=False
-immortaltime=0
-playerattack=False
-playerinjure=False
+framesize=(1.7*unitx,2.6*unity)  #not understood
+immortal=False  
+immortaltime=0    
+playerattack=False   
+playerinjure=False    
 
 #Questions variables
-questionsize=(unitx*1.2,2*unity)
+questionsize=(unitx*1.2,2*unity)  #not understood
 position_question=(200*unitx,600*unity)
 answer=''
 answer_chosen=False
-correction_delay=0
+correction_delay=0   #not understood
 timer=30
-second=0
-seconds=0
-minutes=0
+second=0  #not understood
+seconds=0  #not understood
+minutes=0  #not understood
 level="easy"
 initial_level="easy"
 previous_question=0
 
 #Enemies variables
-framesizeE=(.3*unitx,.6*unity)
-Enemydead=False
-enemyattack=False
-wave_interval=0
-wavesize=1
-wave=0
+framesizeE=(.3*unitx,.6*unity) #not understood
+Enemydead=False  #not understood
+enemyattack=False  #not understood
+wave_interval=0  #not understood
+wavesize=1  #not understood
+wave=0  #not understood
 
 #animation variables
 signs=['+','-','/','*']
 
 #backgrounds variables
-sizebk=(7000*unitx,y)
-speedbk=4*unitx
-k=0
+sizebk=(7000*unitx,y)  #not understood
+speedbk=4*unitx  #not understood
+k=0  #not understood
 sound_pause=False
 last_state=False
 
 #floor variables
 l=0
-sizefl=(21000*unitx,200*unity)
+sizefl=(21000*unitx,200*unity)  #not understood
 speedfl=12*unitx
 
 #animation variables
@@ -202,7 +201,7 @@ border=0
 click_allowed=True
 
 #heart variables
-sizeheart=(40*unitx,60*unity)
+sizeheart=(40*unitx,60*unity)  #not understood
 
 
 # player animations Frame class
@@ -210,10 +209,10 @@ class Frame:
     def __init__(self,size,path,pos=(0,ground)):
         self.size=size
         self.path=path
-        self.frameF=pygame.image.load(path).convert_alpha()
-        self.frameF=pygame.transform.scale(self.frameF,(self.frameF.get_width()*size[0],self.frameF.get_height()*size[1]))
-        self.frameB=pygame.transform.flip(self.frameF,1,0)
-        self.rect=self.frameF.get_rect(bottomleft=pos)
+        self.frameF=pygame.image.load(path).convert_alpha()  #not understood
+        self.frameF=pygame.transform.scale(self.frameF,(self.frameF.get_width()*size[0],self.frameF.get_height()*size[1]))  #not understood
+        self.frameB=pygame.transform.flip(self.frameF,1,0)  #not understood
+        self.rect=self.frameF.get_rect(bottomleft=pos)  #not understood
 
 #class background
 class background:
@@ -361,7 +360,7 @@ enemy3_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle Blink/{i}.png") fo
 enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in range(0,12)]
 
 #list of hearts
-lives=[Heart("Assets\Player\heart\heart.png",((20*unitx)+(unitx*(i*50)),unity*100)) for i in range(1,6)]
+lives=[Heart("Assets\Player\heart\heart.png",((20*unitx)+(unitx*(i*50)),unity*100)) for i in range(1,6)]  #not understood
 HP=font6.render(f"HP",True,"Red")
 
 
@@ -369,32 +368,32 @@ HP=font6.render(f"HP",True,"Red")
 
 # Load questions from txt file
 def load_questions(filename):
-    questions = []
-    with open(filename, "r") as f:
+    questions = []  #not understood
+    with open(filename, "r") as f: #not understood
         content = f.read().strip().split("\n\n")  # Questions separated by blank line
         for block in content:
-            lines = block.split("\n")
-            q = lines[0]
+            lines = block.split("\n") #not understood
+            q = lines[0]  #not understood
             # Wrap the question if it's longer than 55 characters
             if len(q) > 35:
-                q = "\n".join(textwrap.wrap(q, width=35))
-            options = lines[1:5]
-            hint = lines[5]  # hint
-            answer = lines[6]  # correct answer index (A–D)
-            questions.append((q, options, answer,hint))
+                q = "\n".join(textwrap.wrap(q, width=35))  #not understood
+            options = lines[1:5]  #not understood
+            hint = lines[5]  # hint  #not understood
+            answer = lines[6]  # correct answer index (A–D)  #not understood
+            questions.append((q, options, answer,hint))  #not understood
     return questions
 level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"easy"),
                button("Assets\Buttons\Default/medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*50)),"medium"),
                button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*150)),"high")]
 
 #gameover buttons
-gameover_background=Frame((unitx*1.4,unity*1.4),"Assets\Gameover\gameovertext.png",(70*unitx,700*unity))
+gameover_background=Frame((unitx*1.4,unity*1.4),"Assets\Gameover\gameovertext.png",(70*unitx,700*unity)) #not understood
 descions=[button("Assets/Buttons/Default/yes.png",(x/10,y/12),((unitx*300),(unity*800)),"yes"),button("Assets/Buttons/Default/no.png",(x/10,y/12),((unitx*650),(unity*800)),"no")]
 
 #always onscreen buttons
 home=button("Assets/Buttons/Default/home.png",(x/13,y/12),((unitx*900),(unity*50)),"home")
 sound_unpaused=button("Assets/Buttons/Default/sound_unpaused.png",(x/13,y/12),((unitx*800),(unity*50)),"sound_unpaused")
-sound_paused=button("Assets/Buttons/Default/sound_paused.png",(x/13,y/12),((unitx*800),(unity*50)),"sound_paused")
+sound_paused=button("Assets/Buttons/Default/sound_paused.png",(x/13,y/12),((unitx*800),(unity*50)),"sound_paused")  #not understood
 #animation enemy class
 class Enemy:
     active_attacker = None  # Class-level: only one enemy can attack at once
