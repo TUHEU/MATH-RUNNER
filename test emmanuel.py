@@ -1,26 +1,52 @@
+# main.py
+# Math Runner Game - Initial setup
+# Commit #2: Add imports and initialize Pygame window
+
 import pygame
 import random
+import textwrap
+from sys import exit
 
-# Enemy class with type support
-class Enemy:
-    def __init__(self, enemy_type=1):
-        self.enemy_type = enemy_type
-        self.width = 50
-        self.height = 80
-        self.rect = pygame.Rect(screen_width + random.randint(50, 300),
-                                screen_height - self.height - 50,
-                                self.width, self.height)
-        self.speed = random.choice([3, 4, 5]) if enemy_type==1 else random.choice([2,3,4])
-        self.color = (255, 0, 0) if enemy_type==1 else (0, 255, 0) if enemy_type==2 else (0,0,255)
-        self.alive = True
-        self.dying = False
+# Initialize pygame
+pygame.init()
 
-    def update(self, dt):
-        self.rect.x -= self.speed
-        if self.rect.right < 0:
-            self.rect.left = screen_width + random.randint(50, 200)
-            self.speed = random.randint(2,5)
+# Get display info (full screen dimensions)
+window = pygame.display.Info()
+x = window.current_w
+y = window.current_h
 
-    def draw(self, surface):
-        pygame.draw.rect(surface, self.color, self.rect)
-# okbitmmk
+# Create main screen
+screen = pygame.display.set_mode((x, y))
+pygame.display.set_caption("Math Runner")
+
+# Create clock for FPS control
+clock = pygame.time.Clock()
+
+# Scaling units based on resolution
+unitx = x / 1000
+unity = y / 1000
+
+# Basic game loop (empty for now)
+def main():
+    running = True
+    while running:
+        # Limit to 60 FPS
+        dt = clock.tick(60)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                running = False
+
+        # Fill screen with black
+        screen.fill((0, 0, 0))
+
+        # Update display
+        pygame.display.update()
+
+    pygame.quit()
+    exit()
+
+if __name__ == "__main__":
+    main()
