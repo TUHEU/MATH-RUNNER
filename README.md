@@ -14,10 +14,10 @@ This project was created as part of our **End of Summer 2025 Exams**.
 This project was developed by a team of five students:
 
 1. **Kamdeu Yamdjeuson Neil Marshall**  
-2. **Anye Darlington**  
-3. **Chijioke Emmanuel**  
-4. **Junior Rayan**  
-5. **Fahdil**
+2. **Anye Darlington Nji**  
+3. **Chijioke Emmanuel Izuchukwu**  
+4. **Kwete Ngnouba Junior Rayan**  
+5. **Tuheu Tchoubi Pempeme Moussa Fahdil**
 
 ---
 
