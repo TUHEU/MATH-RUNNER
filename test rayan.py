@@ -134,7 +134,6 @@ font5=pygame.font.Font(None,50)
 font6=pygame.font.Font("Assets/Fonts/5.ttf",70)
 
 #physics variables
-player_vel_y = 0   #not understood
 gravity = 1 * unity  #not understood
 jump_strength = -30 * unity   #not understood
 
