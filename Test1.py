@@ -954,8 +954,8 @@ while(True):
         
         
         #display options
-        for i,option in enumerate(options):
-            option_surface = font5.render(f"{option}", True, "Black")
+        for i,optio in enumerate(options):
+            option_surface = font5.render(f"{optio}", True, "Black")
             screen.blit(option_surface, (200*unitx, question_posY+(i*(font5.get_height()+20)*unity)))
         screen.blit(display_answer,(240*unitx,620*unity))
         screen.blit(display_timer,(500*unitx,400*unity))
