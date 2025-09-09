@@ -134,14 +134,14 @@ font5=pygame.font.Font(None,50)
 font6=pygame.font.Font("Assets/Fonts/5.ttf",70)
 
 #physics variables
-gravity = 1 * unity  #not understood
-jump_strength = -30 * unity   #not understood
+gravity = 1 * unity  
+jump_strength = -30 * unity 
 
 #Creating background swap animation (Fadeout) variables
-fade_surface = pygame.Surface((x,y))    #not understood
-fade_surface.fill((0, 0, 0))  #not understood
-fade_surface.set_alpha(0)  #not understood
-alpha=0 #not understood
+fade_surface = pygame.Surface((x,y))   
+fade_surface.fill((0, 0, 0))  
+fade_surface.set_alpha(0)  
+alpha=0 
 
 #emotion detector variable for descision
 bademotion=0      
@@ -149,14 +149,14 @@ changeLevel=0
 
 #player variables
 total_lives=5
-framesize=(1.7*unitx,2.6*unity)  #not understood
+framesize=(1.7*unitx,2.6*unity)  
 immortal=False  
 immortaltime=0    
 playerattack=False   
 playerinjure=False    
 
 #Questions variables
-questionsize=(unitx*1.2,2*unity)  #not understood
+questionsize=(unitx*1.2,2*unity)
 position_question=(200*unitx,600*unity)
 answer=''
 answer_chosen=False
