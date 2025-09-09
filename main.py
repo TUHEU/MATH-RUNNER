@@ -309,7 +309,6 @@ backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
 #floor list
 floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
 
-
 #question TEXT BOXES
 board=Frame((unitx*.8,unity*1.5),f"Assets/Questions/board.png",(150*unitx,800*unity))
 hint_active=Frame((unitx*1.16,unity*.3),f"Assets/Questions/board.png",(10*unitx,980*unity))
