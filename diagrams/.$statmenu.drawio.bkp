@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.0.6 Chrome/138.0.7204.100 Electron/37.2.3 Safari/537.36" version="28.0.6">
   <diagram name="Page-1" id="HwQ1BxKvIMqFAL6QNaPP">
-    <mxGraphModel dx="1042" dy="668" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1042" dy="668" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -71,7 +71,7 @@
             <mxPoint x="360" y="910" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="8zOMjAnaPxQS6TlMqFtT-17" value="Initialise player/" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" edge="1" parent="1" target="8zOMjAnaPxQS6TlMqFtT-4">
+        <mxCell id="8zOMjAnaPxQS6TlMqFtT-17" value="Initialise player / enermy&amp;nbsp;" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" edge="1" parent="1" target="8zOMjAnaPxQS6TlMqFtT-4">
           <mxGeometry width="80" relative="1" as="geometry">
             <mxPoint x="279.5" y="960" as="sourcePoint" />
             <mxPoint x="430" y="960" as="targetPoint" />

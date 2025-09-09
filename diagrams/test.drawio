@@ -1,0 +1,21 @@
+<!-- Player chooses an answer -->
+<mxCell id="choose-answer" value="CHOOSE ANSWER" style="endArrow=block;" edge="1" parent="1" source="m2Ybo7TlFllm7xWiX2Ji-1" target="m2Ybo7TlFllm7xWiX2Ji-2" />
+
+<!-- Game Loop sends to Question System -->
+<mxCell id="send-to-qs" value="SEND ANSWER" style="endArrow=block;" edge="1" parent="1" source="m2Ybo7TlFllm7xWiX2Ji-2" target="m2Ybo7TlFllm7xWiX2Ji-3" />
+
+<!-- Question System returns result -->
+<mxCell id="correct-ans" value="CORRECT ANSWER" style="endArrow=open;dashed=1;" edge="1" parent="1" source="m2Ybo7TlFllm7xWiX2Ji-3" target="m2Ybo7TlFllm7xWiX2Ji-2" />
+<mxCell id="wrong-ans" value="ATTACK" style="endArrow=block;" edge="1" parent="1" source="m2Ybo7TlFllm7xWiX2Ji-3" target="m2Ybo7TlFllm7xWiX2Ji-4" />
+
+<!-- Enemy response -->
+<mxCell id="enemy-damage" value="DAMAGE" style="endArrow=block;" edge="1" parent="1" source="m2Ybo7TlFllm7xWiX2Ji-4" target="m2Ybo7TlFllm7xWiX2Ji-2" />
+
+<!-- Update score -->
+<mxCell id="update-score" value="UPDATE SCORE" style="endArrow=block;" edge="1" parent="1" source="m2Ybo7TlFllm7xWiX2Ji-2" target="m2Ybo7TlFllm7xWiX2Ji-4" />
+
+<!-- Next question -->
+<mxCell id="next-question" value="NEXT QUESTION" style="endArrow=block;" edge="1" parent="1" source="m2Ybo7TlFllm7xWiX2Ji-2" target="m2Ybo7TlFllm7xWiX2Ji-3" />
+
+<!-- Animation -->
+<mxCell id="play-animation" value="PLAY ANIMATION" style="endArrow=block;" edge="1" parent="1" source="m2Ybo7TlFllm7xWiX2Ji-2" target="m2Ybo7TlFllm7xWiX2Ji-5" />
