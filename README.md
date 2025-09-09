@@ -35,4 +35,6 @@ This project was developed by a team of five students:
 
 ## 🛠️ Installation & Setup
 
-TO BE CONTINUED...
+ To play the executable version, double-click MATHRUNNERSETUP.exe then follow the installation steps.
+
+**============================== Enjoy playing and keep learning! ==================================**
