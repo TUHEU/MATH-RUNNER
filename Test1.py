@@ -13,81 +13,71 @@ import threading
 # EMOTION DETECTOR SETUP
 # ============================
 
-# Load the TensorFlow Lite model
-interpreter = tf.lite.Interpreter(model_path="Assets/Emotion detection models/emotion_model.tflite")
-interpreter.allocate_tensors()
+interpreter = tf.lite.Interpreter(model_path="Assets/Emotion detection models/emotion_model.tflite")    # Load the TensorFlow Lite model for emotion detection
+interpreter.allocate_tensors()    # Allocate memory for the model’s operations
 
-# Get input/output details
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
+input_details = interpreter.get_input_details()    # Get model input details (shape, index, data type)
+output_details = interpreter.get_output_details()    # Get model output details
 
-# List of emotions in the same order as the model's output neurons
-Emotions_list = ['Angry','Disgust','Fear','Happy','Suprise','Sad','Neutral']
+Emotions_list = ['Angry','Disgust','Fear','Happy','Suprise','Sad','Neutral']    # Define emotion categories in the same order as the model’s output neurons
 
-# Initialize webcam
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0)    # Initialize the webcam (0 = default camera)
 
-# Load face detection model (Caffe-based DNN)
-net = cv2.dnn.readNetFromCaffe("Assets/Emotion detection models/dat.prototxt",
+net = cv2.dnn.readNetFromCaffe("Assets/Emotion detection models/dat.prototxt",    # Load the Caffe-based DNN face detection model
                                "Assets/Emotion detection models/caffe.caffemodel")
 
-# Input size expected by the emotion model
-input_height, input_width = 64, 64
+input_height, input_width = 64, 64    # Input size expected by the emotion detection model
 
-# Contrast Limited Adaptive Histogram Equalization (CLAHE)
-clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))    # Apply CLAHE to enhance local contrast in grayscale images
 
-# Shared variable for storing detected emotion
-current_emotion = "Neutral"
+current_emotion = "Neutral"    # Shared global variable to store the latest detected emotion
 
+def emotion_loop():    # Main emotion detection loop
+    global current_emotion    # Make sure we can update the global emotion variable
 
-def emotion_loop():
-    global current_emotion
-    
-    while True:
-        ret, frame = cap.read()
-        if not ret: 
-            continue  
+    while True:    # Continuous loop to process webcam frames
+        ret, frame = cap.read()    # Capture a frame from the webcam
+        if not ret:    # Check if frame captured correctly
+            continue    # If frame not captured properly, skip iteration
 
-        frame = cv2.flip(frame, 1)
-        (h, w) = frame.shape[:2]
+        frame = cv2.flip(frame, 1)    # Mirror the frame horizontally for natural viewing
+        (h, w) = frame.shape[:2]    # Get frame dimensions (height, width)
 
-        blob = cv2.dnn.blobFromImage(
-            cv2.resize(frame, (300, 300)), 
-            1.0, 
-            (300, 300), 
-            (104.0, 177.0, 123.0)
+        blob = cv2.dnn.blobFromImage(    # Convert the frame to a blob for DNN face detection
+            cv2.resize(frame, (300, 300)),    # Resize frame to 300x300 for model input
+            1.0,    # Scale factor
+            (300, 300),    # Target size
+            (104.0, 177.0, 123.0)    # Mean subtraction values
         )
-        net.setInput(blob)
-        detections = net.forward()
+        net.setInput(blob)    # Set blob as network input
+        detections = net.forward()    # Run forward pass to detect faces
 
-        for i in range(0, detections.shape[2]):
-            confidence = detections[0, 0, i, 2]
+        for i in range(0, detections.shape[2]):    # Loop over all detected faces
+            confidence = detections[0, 0, i, 2]    # Extract confidence score for detection
 
-            if confidence > 0.3:
-                box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+            if confidence > 0.3:    # Only consider detections above 30% confidence
+                box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])    # Extract bounding box coordinates
                 (startX, startY, endX, endY) = box.astype("int")
 
-                face_roi = frame[startY:endY, startX:endX]
-                if face_roi.size == 0: 
+                face_roi = frame[startY:endY, startX:endX]    # Extract Region of Interest (ROI) for the face
+                if face_roi.size == 0:    # Skip if ROI is empty
                     continue
 
-                gray_face = cv2.cvtColor(face_roi, cv2.COLOR_BGR2GRAY)
-                enhanced_face = clahe.apply(gray_face)
-                resized = cv2.resize(enhanced_face, (input_width, input_height))
+                gray_face = cv2.cvtColor(face_roi, cv2.COLOR_BGR2GRAY)    # Convert face to grayscale
+                enhanced_face = clahe.apply(gray_face)    # Apply CLAHE to enhance contrast
+                resized = cv2.resize(enhanced_face, (input_width, input_height))    # Resize to 64x64
 
-                normalized = resized.astype('float32') / 255.0
-                input_tensor = normalized.reshape(1, input_height, input_width, 1)
+                normalized = resized.astype('float32') / 255.0    # Normalize pixel values (0–1)
+                input_tensor = normalized.reshape(1, input_height, input_width, 1)    # Reshape to match model input
 
-                # Run inference with TFLite
-                interpreter.set_tensor(input_details[0]['index'], input_tensor)
-                interpreter.invoke()
-                predictions = interpreter.get_tensor(output_details[0]['index'])
+                interpreter.set_tensor(input_details[0]['index'], input_tensor)    # Feed data to model
+                interpreter.invoke()    # Perform prediction
+                predictions = interpreter.get_tensor(output_details[0]['index'])    # Get output predictions
 
-                emotion_idx = np.argmax(predictions)
-                current_emotion = Emotions_list[emotion_idx]
+                emotion_idx = np.argmax(predictions)    # Get the index of the highest probability emotion
+                current_emotion = Emotions_list[emotion_idx]    # Update global variable with detected emotion label
 
-                break  # only process first detected face
+                break    # Process only the first detected face to save performance
 
 
 # Start emotion detection in background thread
