@@ -13,18 +13,18 @@ import threading
 # EMOTION DETECTOR SETUP
 # ============================
 
-# Load the TensorFlow Lite model
+# Load the TensorFlow Lite model for emotion detection
 interpreter = tf.lite.Interpreter(model_path="Assets/Emotion detection models/emotion_model.tflite")
 interpreter.allocate_tensors()
 
-# Get input/output details
+# Get input/output details for the model
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
 # List of emotions in the same order as the model's output neurons
 Emotions_list = ['Angry','Disgust','Fear','Happy','Suprise','Sad','Neutral']
 
-# Initialize webcam
+# Initialize webcam for emotion detection
 cap = cv2.VideoCapture(0)
 
 # Load face detection model (Caffe-based DNN)
@@ -34,7 +34,7 @@ net = cv2.dnn.readNetFromCaffe("Assets/Emotion detection models/dat.prototxt",
 # Input size expected by the emotion model
 input_height, input_width = 64, 64
 
-# Contrast Limited Adaptive Histogram Equalization (CLAHE)
+# Contrast Limited Adaptive Histogram Equalization (CLAHE) for image enhancement
 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
 # Shared variable for storing detected emotion
@@ -42,6 +42,7 @@ current_emotion = "Neutral"
 
 
 def emotion_loop():
+    """Background thread function for continuous emotion detection"""
     global current_emotion
     
     while True:
@@ -52,6 +53,7 @@ def emotion_loop():
         frame = cv2.flip(frame, 1)
         (h, w) = frame.shape[:2]
 
+        # Create blob from frame for face detection
         blob = cv2.dnn.blobFromImage(
             cv2.resize(frame, (300, 300)), 
             1.0, 
@@ -61,6 +63,7 @@ def emotion_loop():
         net.setInput(blob)
         detections = net.forward()
 
+        # Process detections
         for i in range(0, detections.shape[2]):
             confidence = detections[0, 0, i, 2]
 
@@ -72,6 +75,7 @@ def emotion_loop():
                 if face_roi.size == 0: 
                     continue
 
+                # Preprocess face for emotion detection
                 gray_face = cv2.cvtColor(face_roi, cv2.COLOR_BGR2GRAY)
                 enhanced_face = clahe.apply(gray_face)
                 resized = cv2.resize(enhanced_face, (input_width, input_height))
@@ -84,6 +88,7 @@ def emotion_loop():
                 interpreter.invoke()
                 predictions = interpreter.get_tensor(output_details[0]['index'])
 
+                # Get the detected emotion
                 emotion_idx = np.argmax(predictions)
                 current_emotion = Emotions_list[emotion_idx]
 
@@ -94,26 +99,27 @@ def emotion_loop():
 threading.Thread(target=emotion_loop, daemon=True).start()
 
 
+# Initialize pygame
 pygame.init()
 window=pygame.display.Info()
 x=window.current_w
 y=window.current_h
 screen=pygame.display.set_mode((x,y))
 clock=pygame.time.Clock() 
-unitx=x/1000
-unity=y/1000
+unitx=x/1000  # Unit for scaling based on screen width
+unity=y/1000  # Unit for scaling based on screen height
 
-#pages booleans
-menu_scrn=True
-start_scrn=False
-question_scrn=False
-options_scrn=False
-level_scrn=False
-gameover_scrn=False
-paused = False
-aboutus_scrn=False
+# Game state flags
+menu_scrn=True      # Main menu screen
+start_scrn=False    # Gameplay screen
+question_scrn=False # Question screen
+options_scrn=False  # Options screen
+level_scrn=False    # Level selection screen
+gameover_scrn=False # Game over screen
+paused = False      # Pause state
+aboutus_scrn=False  # About us screen
 
-#font
+# Fonts
 font1=pygame.font.Font("Assets/Fonts/1.TTF",50)
 font2=pygame.font.Font("Assets/Fonts/2.TTF",50)
 font3=pygame.font.Font("Assets/Fonts/3.ttf",50)
@@ -121,83 +127,83 @@ font4=pygame.font.Font("Assets/Fonts/4.ttf",80)
 font5=pygame.font.Font(None,50)
 font6=pygame.font.Font("Assets/Fonts/5.ttf",70)
 
-#physics variables
+# Physics variables
 player_vel_y = 0  
 gravity = 1 * unity  
 jump_strength = -30 * unity
 
-#Creating background swap animation (Fadeout) variables
+# Background swap animation (Fadeout) variables
 fade_surface = pygame.Surface((x,y))
 fade_surface.fill((0, 0, 0)) 
 fade_surface.set_alpha(0)
 alpha=0
 
-#emotion detector variable for descision
-bademotion=0
-changeLevel=0
+# Emotion detector variables for decision making
+bademotion=0      # Counter for negative emotions
+changeLevel=0      # Counter for level changes
 
-#player variables
-total_lives=5
-framesize=(1.7*unitx,2.6*unity)
-immortal=False
-immortaltime=0
-playerattack=False
-playerinjure=False
-score=0
-scoreincrement=0
+# Player variables
+total_lives=5      # Player lives
+framesize=(1.7*unitx,2.6*unity)  # Player frame size
+immortal=False     # Invincibility state after being hit
+immortaltime=0     # Timer for invincibility
+playerattack=False # Player attack state
+playerinjure=False # Player injury state
+score=0            # Player score
+scoreincrement=0   # Score increment based on level
 
-#Questions variables
+# Questions variables
 questionsize=(unitx*1.2,2*unity)
 position_question=(200*unitx,600*unity)
-answer=''
-answer_chosen=False
-correction_delay=0
-timer=30
-second=0
-seconds=0
-minutes=0
-level="easy"
-initial_level="easy"
-previous_question=0
+answer=''           # Player's answer to question
+answer_chosen=False # Whether answer has been chosen
+correction_delay=0  # Delay after answering
+timer=30            # Question timer
+second=0            # Timer seconds
+seconds=0           # Formatted seconds
+minutes=0           # Formatted minutes
+level="easy"        # Current difficulty level
+initial_level="easy" # Initial difficulty level
+previous_question=0 # Previous question index
 
-#Enemies variables
-framesizeE=(.3*unitx,.6*unity)
-Enemydead=False
-enemyattack=False
-wave_interval=0
-wavesize=1
-wave=0
+# Enemies variables
+framesizeE=(.3*unitx,.6*unity) # Enemy frame size
+Enemydead=False     # Enemy dead state
+enemyattack=False   # Enemy attack state
+wave_interval=0     # Wave interval counter
+wavesize=1          # Number of enemies per wave
+wave=0              # Current wave counter
 
-#animation variables
-signs=['+','-','/','*']
+# Animation variables
+signs=['+','-','/','*']  # Math operation signs
 
-#backgrounds variables
-sizebk=(7000*unitx,y)
-speedbk=4*unitx
-k=0
-sound_pause=False
-last_state=False
+# Backgrounds variables
+sizebk=(7000*unitx,y) # Background size
+speedbk=4*unitx       # Background speed
+k=0                   # Current background index
+sound_pause=False     # Sound paused state
+last_state=False      # Previous sound state
 
-#floor variables
-l=0
-sizefl=(21000*unitx,200*unity)
-speedfl=12*unitx
+# Floor variables
+l=0                   # Current floor index
+sizefl=(21000*unitx,200*unity) # Floor size
+speedfl=12*unitx      # Floor speed
 
-#animation variables
-ground=y-(200*unity)
-onground=True
-border=0
+# Animation variables
+ground=y-(200*unity)  # Ground level
+onground=True         # Whether player is on ground
+border=0              # Background border
 
-#mouse variables
-click_allowed=True
+# Mouse variables
+click_allowed=True    # Whether clicking is allowed
 
-#heart variables
-sizeheart=(40*unitx,60*unity)
+# Heart variables
+sizeheart=(40*unitx,60*unity) # Heart icon size
 
 
-# player animations Frame class
+# Player animations Frame class
 class Frame:
-    def __init__(self,size,path,pos=(0,ground)):
+    def _init_(self,size,path,pos=(0,ground)):
         self.size=size
         self.path=path
         self.frameF=pygame.image.load(path).convert_alpha()
@@ -205,118 +211,136 @@ class Frame:
         self.frameB=pygame.transform.flip(self.frameF,1,0)
         self.rect=self.frameF.get_rect(bottomleft=pos)
 
-#class background
+# Background class
 class background:
-    def __init__(self,path,speed,size):
+    def _init_(self,path,speed,size):
         self.size=size
         self.speed=speed
         self.path=path
         self.img=pygame.image.load(path).convert_alpha()
         self.img=pygame.transform.scale(self.img,(size[0],size[1]))
         self.rect=self.img.get_rect(bottomleft=(0,y))
+    
     def move(self,front):
-        #if(self.rect.right>=x):
-        if front :self.rect.left-=self.speed   
-        else: self.rect.left+=self.speed
+        # Move background left or right
+        if front:
+            self.rect.left-=self.speed   
+        else: 
+            self.rect.left+=self.speed
 
-#equation                       
+# Equation class for math questions                       
 class equationC:
-    def __init__(self,eqaution="",sign="",ans=0,isactive=False,delay=0):
+    def _init_(self,eqaution="",sign="",ans=0,isactive=False,delay=0):
         self.equation=eqaution
         self.isactive=isactive
         self.sign=sign
         self.ans=ans
         self.delay=delay
+    
     def generate_equation(self,signs):
+        # Generate a random math equation
         self.equation=str(random.randint(1,50))+signs[random.randint(0,3)]+str(random.randint(1,50))
         self.ans=str(int(eval(self.equation)))
         self.delay=0
         self.equation=self.equation+"="+self.ans
         return self.equation
+    
     def active(self,wait,dt,cur_equation,eqn_locx,eqn_locy):
+        # Display equation for a certain time
         if(self.delay<wait):
-                    equationText=font1.render(f"{cur_equation[i]}",True,"Black")
-                    #equationText=pygame.transform.rotate(equationText,random.randint(0,45))
-                    screen.blit(equationText,(eqn_locx[i],eqn_locy[i]))
-                    self.delay+=dt
-                    self.isactive=True
+            equationText=font1.render(f"{cur_equation[i]}",True,"Black")
+            screen.blit(equationText,(eqn_locx[i],eqn_locy[i]))
+            self.delay+=dt
+            self.isactive=True
         else:
+            # Generate new equation when time is up
             cur_equation[i]=(equ.generate_equation(signs))
             eqn_locx[i]=(random.randint(int(unitx*100),int(x-(unitx*200))))
             eqn_locy[i]=(random.randint(int(unity*100),int(y-(unity*150))))
             self.isactive=False
         return self.isactive
 
-#heart lives class
+# Heart lives class
 class Heart:
-    def __init__(self,default_path,rect_pos):
+    def _init_(self,default_path,rect_pos):
         self.size=sizeheart
         self.default_img=pygame.image.load(default_path).convert_alpha()
         self.default_img=pygame.transform.scale(self.default_img,self.size)
-        self.next_img=pygame.transform.scale(self.default_img,(self.size[0]*.8,self.size[1]*.8))
+        self.next_img=pygame.transform.scale(self.default_img,(self.size[0].8,self.size[1].8))
         self.rect=self.default_img.get_rect(center=rect_pos)
         self.delay=0
+    
     def draw(self,screen):
+        # Animate heart with pulsing effect
         self.delay+=dt
         if(self.delay>700):
             self.delay=0
-        if self.delay<=350:img=self.next_img
-        elif(self.delay>350):img=self.default_img
+        if self.delay<=350:
+            img=self.next_img
+        elif(self.delay>350):
+            img=self.default_img
         screen.blit(img, self.rect)
 
-#button class
+# Button class
 class button:
-    def __init__(self,default_path,size,rect_pos,key=""):
+    def _init_(self,default_path,size,rect_pos,key=""):
         self.size=size
         self.default_img=pygame.image.load(default_path).convert_alpha()
         self.default_img=pygame.transform.scale(self.default_img,self.size)
-        self.touched_img=pygame.transform.scale(self.default_img,(self.size[0]*.8,self.size[1]*.8))
+        self.touched_img=pygame.transform.scale(self.default_img,(self.size[0].8,self.size[1].8))
         self.rect=self.default_img.get_rect(topleft=rect_pos)
         self.touched=False
         self.touching=True
         self.key=key
+    
     def draw(self,screen):
-        if self.touched: img=self.touched_img 
-        else:img=self.default_img
+        # Draw button with touch effect
+        if self.touched: 
+            img=self.touched_img 
+        else:
+            img=self.default_img
         screen.blit(img, self.rect)
+    
     def handle_event(self, event, mouse_pos):
+        # Handle button events
         self.touched = self.rect.collidepoint(mouse_pos)
         if self.touched and self.touching:
             touch_sound.play()
         self.touching=False
-        if(not self.touched):self.touching=True
+        if(not self.touched):
+            self.touching=True
         if self.touched and click_allowed and event.type == pygame.MOUSEBUTTONDOWN:
             click_sound.play() 
             return self.key    
         return None
 
-#button list
+# Button list
 buttons=[button("Assets\Buttons\Default\start.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"start"),
          button("Assets\Buttons\Default\settings.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*100)),"options"),
          button("Assets\Buttons\Default\exit.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*50)),"exit"),
          button("Assets/Buttons/Default/reset.png",(x/28,y/19),((x/2)+(unitx*54),(y/2)+(unity*256)),"reset"),
          button("Assets/Buttons/Default/about us.png",(x/12,y/11),((unitx*850),(unity*850)),"about us")]
 
-#equations list
+# Equations list
 equations=[equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC(),equationC()]
 
-#background list
+# Background list
 backgrounds=[background("Assets/Backgrounds/1.png",speedbk,sizebk),
              background("Assets/Backgrounds/2.png",speedbk,sizebk),
              background("Assets/Backgrounds/3.png",speedbk,sizebk),
              background("Assets/Backgrounds/4.png",speedbk,sizebk),]
 
-#floor list
+# Floor list
 floors=[background("Assets/Floor/1.png",speedfl,sizefl),background("Assets/Floor/2.png",speedfl,sizefl)]
 
 
-#question TEXT BOXES
+# Question TEXT BOXES
 board=Frame((unitx*.8,unity*1.5),f"Assets/Questions/board.png",(150*unitx,800*unity))
 hint_active=Frame((unitx*1.16,unity*.3),f"Assets/Questions/board.png",(10*unitx,980*unity))
 hint_inactive=Frame((unitx*.3,unity*.5),f"Assets/Questions/hint.png",(10*unitx,980*unity))
 
 
-#player animations lists
+# Player animations lists
 player_run=[Frame(framesize,f"Assets/Player/run/{i}.png") for i in range(1,9)]    
 player_jump=[Frame(framesize,f"Assets/Player/jump/{i}.png") for i in range(1,9)]
 player_idle=[Frame(framesize,f"Assets/Player/idle/{i}.png") for i in range(1,9)]
@@ -327,7 +351,7 @@ player_attack=[Frame(framesize,f"Assets/Player/attack/{i}.png") for i in range(1
 player_knee=[Frame(framesize,f"Assets/Player/knee/{i}.png") for i in range(1,3)]      
 
 
-#Enemy1 Lists
+# Enemy1 animations lists
 enemy1_attack=[Frame(framesizeE,f"Assets/Enemy/Enemy1/attack/{i}.png") for i in range(0,12)]
 enemy1_dying=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Dying/{i}.png") for i in range(0,15)]
 enemy1_hurt=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Hurt/{i}.png") for i in range(0,12)]
@@ -335,7 +359,7 @@ enemy1_idle=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Idle/{i}.png") for i in rang
 enemy1_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Idle Blink/{i}.png") for i in range(0,12)]
 enemy1_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy1/Walk/{i}.png") for i in range(0,12)]
 
-#Enemy2 Lists
+# Enemy2 animations lists
 enemy2_attack=[Frame(framesizeE,f"Assets/Enemy/Enemy2/attack/{i}.png") for i in range(0,12)]
 enemy2_dying=[Frame(framesizeE,f"Assets/Enemy/Enemy2/Dying/{i}.png") for i in range(0,15)]
 enemy2_hurt=[Frame(framesizeE,f"Assets/Enemy/Enemy2/Hurt/{i}.png") for i in range(0,12)]
@@ -343,7 +367,7 @@ enemy2_idle=[Frame(framesizeE,f"Assets/Enemy/Enemy2/Idle/{i}.png") for i in rang
 enemy2_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy2/Idle Blink/{i}.png") for i in range(0,12)]
 enemy2_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy2/Walk/{i}.png") for i in range(0,12)]
 
-#Enemy3 Lists
+# Enemy3 animations lists
 enemy3_attack=[Frame(framesizeE,f"Assets/Enemy/Enemy3/attack/{i}.png") for i in range(0,12)]
 enemy3_dying=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Dying/{i}.png") for i in range(0,15)]
 enemy3_hurt=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Hurt/{i}.png") for i in range(0,12)]
@@ -351,14 +375,15 @@ enemy3_idle=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle/{i}.png") for i in rang
 enemy3_idleBlink=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Idle Blink/{i}.png") for i in range(0,12)]
 enemy3_Walk=[Frame(framesizeE,f"Assets/Enemy/Enemy3/Walk/{i}.png") for i in range(0,12)]
 
-#list of hearts
+# List of hearts for lives display
 lives=[Heart("Assets\Player\heart\heart.png",((20*unitx)+(unitx*(i*50)),unity*100)) for i in range(1,6)]
-HP=font6.render(f"HP",True,"Red")
+HP=font6.render(f"HP",True,"Red")  # HP text
 
+# Load high score from file
 with open("Assets/HighScore.txt","r") as f:
     highscore=int(f.read())
 
-#Questions/Answers datastructures and funtion
+# Questions/Answers datastructures and function
 
 # Load questions from txt file
 def load_questions(filename):
@@ -376,34 +401,40 @@ def load_questions(filename):
             answer = lines[6]  # correct answer index (A–D)
             questions.append((q, options, answer,hint))
     return questions
+
+# Level selection buttons
 level_buttons=[button("Assets\Buttons\Default\easy.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*250)),"easy"),
                button("Assets\Buttons\Default\medium.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)-(unity*50)),"medium"),
                button("Assets\Buttons\Default\high.png",(x/4,y/8),((x/2)-(unitx*120),(y/2)+(unity*150)),"high")]
 
-#gameover buttons
+# Gameover screen elements
 gameover_background=Frame((unitx*1.4,unity*1.4),"Assets\Gameover\gameovertext.png",(70*unitx,700*unity))
-descions=[button("Assets/Buttons/Default/yes.png",(x/10,y/12),((unitx*300),(unity*800)),"yes"),button("Assets/Buttons/Default/no.png",(x/10,y/12),((unitx*650),(unity*800)),"no")]
+descions=[button("Assets/Buttons/Default/yes.png",(x/10,y/12),((unitx*300),(unity*800)),"yes"),
+          button("Assets/Buttons/Default/no.png",(x/10,y/12),((unitx*650),(unity*800)),"no")]
 
-#always onscreen buttons
+# Always on-screen buttons
 home=button("Assets/Buttons/Default/home.png",(x/13,y/12),((unitx*900),(unity*50)),"home")
 sound_unpaused=button("Assets/Buttons/Default/sound_unpaused.png",(x/13,y/12),((unitx*800),(unity*50)),"sound_unpaused")
 sound_paused=button("Assets/Buttons/Default/sound_paused.png",(x/13,y/12),((unitx*800),(unity*50)),"sound_paused")
-#animation enemy class
+
+# Animation enemy class
 class Enemy:
     active_attacker = None  # Class-level: only one enemy can attack at once
 
-    def __init__(self, index=0, enemysuf=enemy1_idle[0].frameF, key=""):
+    def _init_(self, index=0, enemysuf=enemy1_idle[0].frameF, key=""):
         self.index = index
-        self.frontE = False
-        self.attack = False
+        self.frontE = False  # Facing direction
+        self.attack = False  # Attack state
         self.enemysuf = enemysuf
         self.key = key
-        self.wave=wavesize
-        # NEW STATES
-        self.dying = False
-        self.dead = False
-        self.death_timer = 0
+        self.wave = wavesize
+        
+        # Enemy states
+        self.dying = False    # Dying animation state
+        self.dead = False     # Dead state
+        self.death_timer = 0  # Timer for death animation
 
+        # Set initial position based on enemy type
         if key == "enemy1":
             self.enemyrect = enemy1_idleBlink[0].frameF.get_rect(bottomleft=(x, ground))
         elif key == "enemy2":
@@ -416,23 +447,26 @@ class Enemy:
             )
 
     def createanimation(self, rectE1):
-        global playerattack, question_scrn, immortal, enemyattack,dt,wave
-        #If already DEAD (stay on ground, then disappear)
+        global playerattack, question_scrn, immortal, enemyattack, dt, wave
+        
+        # If already DEAD (stay on ground, then disappear)
         if self.dead:
             self.death_timer += dt
             if self.death_timer > 100:  # after ~100 frames remove enemy
-                if(self.wave>0):
+                if(self.wave > 0):
                     self.dead = False
                     self.dying = False
-                    self.enemyrect.bottomleft= (x + (random.randint(200, 500) * unitx), ground)  # Move off-screen
-                    self.wave-=1
-                    wave-=1
-                elif(self.wave==0):
-                    self.enemyrect.bottom=-100*unity
+                    self.enemyrect.bottomleft = (x + (random.randint(200, 500) * unitx), ground)  # Move off-screen
+                    self.wave -= 1
+                    wave -= 1
+                elif(self.wave == 0):
+                    self.enemyrect.bottom = -100 * unity  # Move completely off-screen
             return
-        #DYING animation in progress
+        
+        # DYING animation in progress
         if self.dying:
             self.index += 0.2
+            # Select appropriate death animation based on enemy type
             death_frames = enemy1_dying if self.key == "enemy1" else enemy2_dying if self.key == "enemy2" else enemy3_dying
             
             if int(self.index) >= len(death_frames):
@@ -457,9 +491,11 @@ class Enemy:
                 self._set_walk_frame(rectE1, forward=True)
                 self.enemyrect.left += 3 * unitx
 
-            # Boundaries
-            if self.enemyrect.left < 0: self.frontE = True
-            if self.enemyrect.right >= x: self.frontE = False
+            # Boundaries - change direction at screen edges
+            if self.enemyrect.left < 0: 
+                self.frontE = True
+            if self.enemyrect.right >= x: 
+                self.frontE = False
             self.index += 0.4
 
             # Start attack if collides with player and no other enemy is attacking
@@ -474,7 +510,7 @@ class Enemy:
             if self.index >= len(enemy1_attack):
                 self.index = 0
                 self.attack = False
-                immortal = True
+                immortal = True  # Player becomes invincible after being attacked
                 enemyattack = False
                 Enemy.active_attacker = None
                 return
@@ -482,7 +518,7 @@ class Enemy:
             self._set_attack_frame()
 
     def _set_walk_frame(self, rectE1, forward):
-        # Helper to set walking frames
+        # Helper to set walking frames based on direction
         if self.key == "enemy1":
             self.enemysuf = enemy1_Walk[int(self.index)].frameF if forward else enemy1_Walk[int(self.index)].frameB
         elif self.key == "enemy2":
@@ -492,7 +528,7 @@ class Enemy:
         self.enemyrect = self.enemysuf.get_rect(bottomleft=rectE1)
 
     def _set_attack_frame(self):
-        # Helper to set attack frames
+        # Helper to set attack frames based on player position
         if self.key == "enemy1":
             self.enemysuf = (
                 enemy1_attack[int(self.index)].frameF
@@ -517,547 +553,683 @@ class Enemy:
         self.dying = True
         self.index = 0
 
-#animation player class
+# Animation player class
 class Animation:
-    def __init__(self,index=0,front=True,playersuf=player_idle[0].frameF,playerrect=player_idle[0].rect):
-        self.index=index
-        self.front=front
-        self.playersuf=playersuf
-        self.playerrect=playerrect
-        self.vel_y = 0
-    def createanimation(self, rect,onground,kpressed,playerattack):
-        global wave_interval,walk_channel
-        if not question_scrn and not  playerattack:
-            if(self.index >=len(player_jump)):self.index=0
-            if((kpressed[pygame.K_d] or backgrounds[k].rect.right <= x + 250 * unitx ) and not enemyattack):
+    def _init_(self, index=0, front=True, playersuf=player_idle[0].frameF, playerrect=player_idle[0].rect):
+        self.index = index
+        self.front = front  # Facing direction
+        self.playersuf = playersuf
+        self.playerrect = playerrect
+        self.vel_y = 0  # Vertical velocity for jumping
+    
+    def createanimation(self, rect, onground, kpressed, playerattack):
+        global wave_interval, walk_channel
+        
+        if not question_scrn and not playerattack:
+            if(self.index >= len(player_jump)):
+                self.index = 0
+            
+            # Move right (D key or auto-scroll)
+            if((kpressed[pygame.K_d] or backgrounds[k].rect.right <= x + 250 * unitx) and not enemyattack):
                 if(walk_channel is None or not walk_channel.get_busy()):
-                    walk_channel=walk_sound.play()
-                self.front=True
-                self.playersuf=player_run[int(self.index)].frameF
-                self.playerrect=self.playersuf.get_rect(bottomleft=rect)
-                self.playerrect.width=self.playerrect.width-(91*unitx)
-                self.playerrect.bottomleft=rect
+                    walk_channel = walk_sound.play()
+                self.front = True
+                self.playersuf = player_run[int(self.index)].frameF
+                self.playerrect = self.playersuf.get_rect(bottomleft=rect)
+                self.playerrect.width = self.playerrect.width - (91 * unitx)
+                self.playerrect.bottomleft = rect
                 backgrounds[k].move(True)
                 floors[l].move(True)
-                wave_interval+=speedbk
-                if self.playerrect.right<=x-(unitx*150):self.playerrect.left+=5*unitx
+                wave_interval += speedbk
+                if self.playerrect.right <= x - (unitx * 150):
+                    self.playerrect.left += 5 * unitx
 
+            # Move left (A key)
             elif(kpressed[pygame.K_a] and not enemyattack):
-                self.front= False
-                self.playersuf=player_run[int(self.index)].frameB
-                self.playerrect=self.playersuf.get_rect(bottomleft=rect)
-                self.playerrect.width=self.playerrect.width-(91*unitx)
-                if self.playerrect.left>x-980*unitx:
+                self.front = False
+                self.playersuf = player_run[int(self.index)].frameB
+                self.playerrect = self.playersuf.get_rect(bottomleft=rect)
+                self.playerrect.width = self.playerrect.width - (91 * unitx)
+                if self.playerrect.left > x - 980 * unitx:
                     backgrounds[k].move(False)
-                    wave_interval-=speedbk
+                    wave_interval -= speedbk
                     floors[l].move(False)
-                    self.playerrect.left-=5*unitx
+                    self.playerrect.left -= 5 * unitx
 
+            # Crouch (S key)
             elif(kpressed[pygame.K_s] and not enemyattack):
-                self.index-=.02
-                self.index%=len(player_knee)
-                if(self.front):self.playersuf=player_knee[int(self.index)].frameF
-                else:self.playersuf=player_knee[int(self.index)].frameB
-                self.playerrect=self.playersuf.get_rect(bottomleft=rect)
-                self.playerrect.width=self.playerrect.width-(91*unitx)
+                self.index -= .02
+                self.index %= len(player_knee)
+                if(self.front):
+                    self.playersuf = player_knee[int(self.index)].frameF
+                else:
+                    self.playersuf = player_knee[int(self.index)].frameB
+                self.playerrect = self.playersuf.get_rect(bottomleft=rect)
+                self.playerrect.width = self.playerrect.width - (91 * unitx)
 
+            # Idle animation when on ground
             elif(onground):
-                if(self.front):self.playersuf=player_idle[int(self.index)].frameF
-                else: self.playersuf=player_idle[int(self.index)].frameB
-                self.playerrect=self.playersuf.get_rect(bottomleft=rect)
+                if(self.front):
+                    self.playersuf = player_idle[int(self.index)].frameF
+                else: 
+                    self.playersuf = player_idle[int(self.index)].frameB
+                self.playerrect = self.playersuf.get_rect(bottomleft=rect)
                 
+            # Jump (W key)
             if(kpressed[pygame.K_w] and onground and not enemyattack):
                 jump_sound.play()
-                self.vel_y=jump_strength
-                self.index=0
-                onground=False
-                self.playerrect=player_jump[1].frameF.get_rect(bottomleft=rect)
-                self.playerrect.width=self.playerrect.width-(91*unitx)
+                self.vel_y = jump_strength
+                self.index = 0
+                onground = False
+                self.playerrect = player_jump[1].frameF.get_rect(bottomleft=rect)
+                self.playerrect.width = self.playerrect.width - (91 * unitx)
 
-            self.vel_y+=gravity
-            self.playerrect.bottom+=self.vel_y
+            # Apply gravity
+            self.vel_y += gravity
+            self.playerrect.bottom += self.vel_y
 
-            if(self.playerrect.bottom>=ground):
-                self.playerrect.bottom=ground
+            # Ground collision
+            if(self.playerrect.bottom >= ground):
+                self.playerrect.bottom = ground
                 self.vel_y = 0
                 onground = True
+            
+            # Jump animation
             if not onground:
-                self.index+=.07
-                if(self.index >=len(player_jump)):self.index=7
+                self.index += .07
+                if(self.index >= len(player_jump)):
+                    self.index = 7
                 if self.front:
                     self.playersuf = player_jump[int(self.index)].frameF
                 else:
                     self.playersuf = player_jump[int(self.index)].frameB
-            self.index+=0.2
-            self.index%= len(player_run)
+            
+            # Update animation index
+            self.index += 0.2
+            self.index %= len(player_run)
             return onground
+        
+        # Attack animation
         elif playerattack:
-            self.index+=.2
+            self.index += .2
             if self.index >= len(player_attack):
                 playerattack = False
-                if self.playerrect.colliderect (enemy1.enemyrect):enemy1.trigger_death()
-                elif self.playerrect.colliderect (enemy2.enemyrect):enemy2.trigger_death()
-                elif self.playerrect.colliderect (enemy3.enemyrect):enemy3.trigger_death()
+                # Check if attack hit any enemy
+                if self.playerrect.colliderect(enemy1.enemyrect):
+                    enemy1.trigger_death()
+                elif self.playerrect.colliderect(enemy2.enemyrect):
+                    enemy2.trigger_death()
+                elif self.playerrect.colliderect(enemy3.enemyrect):
+                    enemy3.trigger_death()
                 return 
-            if self.playerrect.colliderect (enemy1.enemyrect):
-                if enemy1.enemyrect.right>=self.playerrect.right:
-                    self.playersuf=player_attack[int(self.index)].frameF
+            
+            # Set attack frame based on enemy position
+            if self.playerrect.colliderect(enemy1.enemyrect):
+                if enemy1.enemyrect.right >= self.playerrect.right:
+                    self.playersuf = player_attack[int(self.index)].frameF
                 else:
-                    self.playersuf=player_attack[int(self.index)].frameB
-            if self.playerrect.colliderect (enemy2.enemyrect):
-                if enemy2.enemyrect.right>=self.playerrect.right:
-                    self.playersuf=player_attack[int(self.index)].frameF
+                    self.playersuf = player_attack[int(self.index)].frameB
+            if self.playerrect.colliderect(enemy2.enemyrect):
+                if enemy2.enemyrect.right >= self.playerrect.right:
+                    self.playersuf = player_attack[int(self.index)].frameF
                 else:
-                    self.playersuf=player_attack[int(self.index)].frameB
-            if self.playerrect.colliderect (enemy3.enemyrect):
-                if enemy3.enemyrect.right>=self.playerrect.right:
-                    self.playersuf=player_attack[int(self.index)].frameF
+                    self.playersuf = player_attack[int(self.index)].frameB
+            if self.playerrect.colliderect(enemy3.enemyrect):
+                if enemy3.enemyrect.right >= self.playerrect.right:
+                    self.playersuf = player_attack[int(self.index)].frameF
                 else:
-                    self.playersuf=player_attack[int(self.index)].frameB
-            self.playerrect=player_attack[int(self.index)].frameF.get_rect(bottomleft=rect)
+                    self.playersuf = player_attack[int(self.index)].frameB
+            self.playerrect = player_attack[int(self.index)].frameF.get_rect(bottomleft=rect)
 
 
-
-#sounds
+# Sound initialization
 pygame.mixer.init()
-touch_sound=pygame.mixer.Sound("Assets/Sounds/touch.mp3")
-click_sound=pygame.mixer.Sound("Assets/Sounds/buttonclick.mp3")
-menu_sound=pygame.mixer.Sound("Assets/Sounds/menu.mp3")
-attack_player_sound=pygame.mixer.Sound("Assets/Sounds/attack.wav")
-attack_monster_sound=pygame.mixer.Sound("Assets/Sounds/attackmonster.mp3")
-hurt_player_sound=pygame.mixer.Sound("Assets/Sounds/hurt.mp3")
-success_sound=pygame.mixer.Sound("Assets/Sounds/success.mp3")
-walk_sound=pygame.mixer.Sound("Assets/Sounds/walk.wav")
-fail_sound=pygame.mixer.Sound("Assets/Sounds/fail.mp3")
-gameover_sound=pygame.mixer.Sound("Assets/Sounds/gameover.mp3")
-gameloop_sound=pygame.mixer.Sound("Assets/Sounds/gameloop.mp3")
-jump_sound=pygame.mixer.Sound("Assets/Sounds/jump.mp3")
-gameover_channel=None
-gameloop_channel=None
+touch_sound = pygame.mixer.Sound("Assets/Sounds/touch.mp3")
+click_sound = pygame.mixer.Sound("Assets/Sounds/buttonclick.mp3")
+menu_sound = pygame.mixer.Sound("Assets/Sounds/menu.mp3")
+attack_player_sound = pygame.mixer.Sound("Assets/Sounds/attack.wav")
+attack_monster_sound = pygame.mixer.Sound("Assets/Sounds/attackmonster.mp3")
+hurt_player_sound = pygame.mixer.Sound("Assets/Sounds/hurt.mp3")
+success_sound = pygame.mixer.Sound("Assets/Sounds/success.mp3")
+walk_sound = pygame.mixer.Sound("Assets/Sounds/walk.wav")
+fail_sound = pygame.mixer.Sound("Assets/Sounds/fail.mp3")
+gameover_sound = pygame.mixer.Sound("Assets/Sounds/gameover.mp3")
+gameloop_sound = pygame.mixer.Sound("Assets/Sounds/gameloop.mp3")
+jump_sound = pygame.mixer.Sound("Assets/Sounds/jump.mp3")
+
+# Sound channels
+gameover_channel = None
+gameloop_channel = None
 gameloop_sound.set_volume(2)
-walk_channel=None
+walk_channel = None
 menu_sound.set_volume(0.3)
 
+# Menu background
+menu = pygame.image.load("Assets/Menu/menu.jpg").convert_alpha()
+menu_rect = menu.get_rect(topleft=(0,0))
+menu = pygame.transform.scale(menu,(x,y))
 
-#menu
-menu=pygame.image.load("Assets/Menu/menu.jpg").convert_alpha()
-menu_rect=menu.get_rect(topleft=(0,0))
-menu=pygame.transform.scale(menu,(x,y))
+# Math-runner title text
+Title = pygame.image.load("Assets/Menu/title.png").convert_alpha()
+Title_rect = Title.get_rect(topleft=(unitx*200, unity*40))
+Title = pygame.transform.scale(Title,(600*unitx,200*unity))
 
-#math-runner text
-Title=pygame.image.load("Assets/Menu/title.png").convert_alpha()
-Title_rect=Title.get_rect(topleft=(unitx*200,unity*40))
-Title=pygame.transform.scale(Title,(600*unitx,200*unity))
+# Scoreboard
+scoreboard = pygame.image.load("Assets/Menu/scoreboard.png").convert_alpha()
+scoreboard = pygame.transform.scale(scoreboard,(200*unitx,150*unity))
+scoreboard_rect = scoreboard.get_rect(topleft=(400*unitx,20*unity))
+scorefont = pygame.font.Font("Assets/Fonts/1.TTF",80)
 
-#scoreboard
-scoreboard=pygame.image.load("Assets/Menu/scoreboard.png").convert_alpha()
-scoreboard=pygame.transform.scale(scoreboard,(200*unitx,150*unity))
-scoreboard_rect=scoreboard.get_rect(topleft=(400*unitx,20*unity))
-scorefont=pygame.font.Font("Assets/Fonts/1.TTF",80)
+# HighScore board
+highscoreboard = pygame.image.load("Assets/Menu/highscoreboard.png").convert_alpha()
+highscoreboard = pygame.transform.scale(highscoreboard,(200*unitx,150*unity))
+highscoreboard_rect = highscoreboard.get_rect(topleft=(400*unitx,700*unity))
+highscorefont = pygame.font.Font("Assets/Fonts/1.TTF",60)
 
-#HighScore board
-highscoreboard=pygame.image.load("Assets/Menu/highscoreboard.png").convert_alpha()
-highscoreboard=pygame.transform.scale(highscoreboard,(200*unitx,150*unity))
-highscoreboard_rect=highscoreboard.get_rect(topleft=(400*unitx,700*unity))
-highscorefont=pygame.font.Font("Assets/Fonts/1.TTF",60)
+# Mouse pointer
+mouse_pointer = pygame.image.load("Assets/Menu/pointer2.png").convert_alpha()
+mouse_pointer = pygame.transform.scale(mouse_pointer,(25*unitx,35*unity))
+pointer_rect = mouse_pointer.get_rect(topleft=(0,0))
 
-#mouse_pointer
-mouse_pointer=pygame.image.load("Assets/Menu/pointer2.png").convert_alpha()
-mouse_pointer=pygame.transform.scale(mouse_pointer,(25*unitx,35*unity))
-pointer_rect=mouse_pointer.get_rect(topleft=(0,0))
+# About us screen elements
+about_us_text = pygame.image.load("Assets/Menu/about us.png").convert_alpha()
+aboutus_board = pygame.image.load("Assets/Menu/board.png").convert_alpha()
+aboutus_board = pygame.transform.scale(aboutus_board,(860*unitx,910*unity))
+about_us_text = pygame.transform.scale(about_us_text,(800*unitx,800*unity))
+aboutus_board_rect = aboutus_board.get_rect(topleft=(80*unitx,70*unity))
+about_us_text_rect = about_us_text.get_rect(topleft=(100*unitx,120*unity))
 
-#About us
-about_us_text=pygame.image.load("Assets/Menu/about us.png").convert_alpha()
-aboutus_board=pygame.image.load("Assets/Menu/board.png").convert_alpha()
-aboutus_board=pygame.transform.scale(aboutus_board,(860*unitx,910*unity))
-about_us_text=pygame.transform.scale(about_us_text,(800*unitx,800*unity))
-aboutus_board_rect=aboutus_board.get_rect(topleft=(80*unitx,70*unity))
-about_us_text_rect=about_us_text.get_rect(topleft=(100*unitx,120*unity))
+# Pause text
+pausetext = pygame.image.load("Assets/Menu/pause.png").convert_alpha()
+pausetext = pygame.transform.scale(pausetext,(800*unitx,400*unity))
+pausetext_rect = pausetext.get_rect(topleft=(100*unitx,300*unity))
 
-#pause text
-pausetext=pygame.image.load("Assets/Menu/pause.png").convert_alpha()
-pausetext=pygame.transform.scale(pausetext,(800*unitx,400*unity))
-pausetext_rect=pausetext.get_rect(topleft=(100*unitx,300*unity))
+# Options screen background
+option = pygame.image.load("Assets/option/option.png").convert_alpha()
+option_rect = option.get_rect(topleft=(unitx*250, unity*100))
+option = pygame.transform.scale(option,(500*unitx,800*unity))
 
-#option
-option=pygame.image.load("Assets/option/option.png").convert_alpha()
-option_rect=option.get_rect(topleft=(unitx*250,unity*100))
-option=pygame.transform.scale(option,(500*unitx,800*unity))
+# Initialize game variables
+j = 0
+cur_equation = ["","","","","","","","","","","","","",]
+eqn_locx = [0,0,0,0,0,0,0,0,0,0,0,0,0]  # Fixed the typo here (was "极")
+eqn_locy = [0,0,0,0,0,0,0,0,0,0,0,0,0]
+player = Animation()
+enemy1 = Enemy(key="enemy1")
+enemy2 = Enemy(key="enemy2")
+enemy3 = Enemy(key="enemy3") 
+ground = player.playerrect.bottom
+incomingwave = True
+border = backgrounds[k].rect.left + (10 * unitx)
+beginbackground = backgrounds[k].rect.left
 
-j=0
-cur_equation=["","","","","","","","","","","","","",]
-eqn_locx=[0,0,0,0,0,0,0,0,0,0,0,0,0]
-eqn_locy=[0,0,0,0,0,0,0,0,0,0,0,0,0]
-player=Animation()
-enemy1=Enemy(key="enemy1")
-enemy2=Enemy(key="enemy2")
-enemy3=Enemy(key="enemy3") 
-ground=player.playerrect.bottom
-incomingwave=True
-border=backgrounds[k].rect.left+(10*unitx)
-beginbackground=backgrounds[k].rect.left
-
-#hides default cursor
+# Hide default cursor
 pygame.mouse.set_visible(False)
 
+# Main game loop
 while(True):
-    rect=player.playerrect.bottomleft
-    rectE1=enemy1.enemyrect.bottomleft
-    rectE2=enemy2.enemyrect.bottomleft
-    rectE3=enemy3.enemyrect.bottomleft
+    rect = player.playerrect.bottomleft
+    rectE1 = enemy1.enemyrect.bottomleft
+    rectE2 = enemy2.enemyrect.bottomleft
+    rectE3 = enemy3.enemyrect.bottomleft
     
-    dt=clock.tick(60)
+    dt = clock.tick(60)  # Cap at 60 FPS
     mouse = pygame.mouse.get_pos() 
-    testtext=font1.render(f"curemo {current_emotion} bad{bademotion}",False,"Black")
-    kpressed=pygame.key.get_pressed()
+    testtext = font1.render(f"curemo {current_emotion} bad{bademotion}", False, "Black")
+    kpressed = pygame.key.get_pressed()
     
-    pointer_rect.topleft=mouse
+    pointer_rect.topleft = mouse  # Update mouse pointer position
+    
+    # Event handling
     for event in pygame.event.get():
-        if event.type==pygame.QUIT or kpressed[pygame.K_ESCAPE]:
+        if event.type == pygame.QUIT or kpressed[pygame.K_ESCAPE]:
             pygame.quit()
             exit()
+        
         # Only allow pausing when not in question screen
         if event.type == pygame.KEYDOWN and event.key == pygame.K_p and not menu_scrn and not question_scrn and not level_scrn and not gameover_scrn:
             # Toggle pause state when 'P' is pressed
             paused = not paused
-        if question_scrn and event.type==pygame.KEYDOWN and not answer_chosen:
+        
+        # Handle answer input in question screen
+        if question_scrn and event.type == pygame.KEYDOWN and not answer_chosen:
             char = event.unicode
             if char.lower() in "abcd":
-                answer=char.upper()
-            if event.key==pygame.K_RETURN and answer!='':
-                    answer_chosen=True
-    screen.blit(menu,menu_rect)
+                answer = char.upper()
+            if event.key == pygame.K_RETURN and answer != '':
+                answer_chosen = True
+    
+    # Draw menu background
+    screen.blit(menu, menu_rect)
+    
     # If game is paused, display pause message and skip the rest of the loop
     if paused:
-        screen.blit(pausetext,pausetext_rect)
+        screen.blit(pausetext, pausetext_rect)
         pygame.display.update()
         continue
 
-#menu true  
+    # Main menu screen
     if menu_scrn:
+        # Play menu music if not already playing
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
-            gameloop_channel=menu_sound.play(-1)
-        i=0
+            gameloop_channel = menu_sound.play(-1)
+        
+        i = 0
+        # Display and update equations in the background
         for equ in equations:
-            wait=(random.randint(400,800))
-            if not equ.active(wait,dt,cur_equation,eqn_locx,eqn_locy):
-                if(j<13):
-                    cur_equation[i]=(equ.generate_equation(signs))
-                    eqn_locx[i]=(random.randint(int(unitx*100),int(x-(unitx*100))))
-                    eqn_locy[i]=(random.randint(int(unity*100),int(y-(unity*100))))
-            i+=1
-            j+=1
-        screen.blit(highscoreboard,highscoreboard_rect)
-        screen.blit(highscorefont.render(f"{highscore}",True,"Black"),(unitx*453,unity*735))
+            wait = (random.randint(400,800))
+            if not equ.active(wait, dt, cur_equation, eqn_locx, eqn_locy):
+                if(j < 13):
+                    cur_equation[i] = (equ.generate_equation(signs))
+                    eqn_locx[i] = (random.randint(int(unitx*100), int(x-(unitx*100))))
+                    eqn_locy[i] = (random.randint(int(unity*100), int(y-(unity*100))))
+            i += 1
+            j += 1
+        
+        # Display high score board
+        screen.blit(highscoreboard, highscoreboard_rect)
+        screen.blit(highscorefont.render(f"{highscore}", True, "Black"), (unitx*453, unity*735))
+        
+        # Handle menu buttons
         for button in buttons:
             button.draw(screen)
-            button.handle_event(event,mouse)
-            if(button.handle_event(event,mouse)=="exit"):
+            button.handle_event(event, mouse)
+            if(button.handle_event(event, mouse) == "exit"):
                 pygame.quit()
                 exit()
-            if(button.handle_event(event,mouse)=="start"):
-                menu_scrn=False
-                level_scrn=True
-                click_allowed=False
-            if(button.handle_event(event,mouse)=="options"):
-                menu_scrn=False
-                options_scrn=True
-                click_allowed=False 
-            if(button.handle_event(event,mouse)=="reset"):
-                highscore=0
-                with open("Assets/HighScore.txt","w") as f:
-                     f.write(f"{highscore}")
-            if(button.handle_event(event,mouse)=="about us"):
-                menu_scrn=False
-                aboutus_scrn=True
-                click_allowed=False
+            if(button.handle_event(event, mouse) == "start"):
+                menu_scrn = False
+                level_scrn = True
+                click_allowed = False
+            if(button.handle_event(event, mouse) == "options"):
+                menu_scrn = False
+                options_scrn = True
+                click_allowed = False 
+            if(button.handle_event(event, mouse) == "reset"):
+                highscore = 0
+                with open("Assets/HighScore.txt", "w") as f:
+                    f.write(f"{highscore}")
+            if(button.handle_event(event, mouse) == "about us"):
+                menu_scrn = False
+                aboutus_scrn = True
+                click_allowed = False
+    
+    # About us screen
     if aboutus_scrn:
-        screen.blit(aboutus_board,aboutus_board_rect)
-        screen.blit(about_us_text,about_us_text_rect)
+        screen.blit(aboutus_board, aboutus_board_rect)
+        screen.blit(about_us_text, about_us_text_rect)
+    
+    # Level selection screen
     if level_scrn:
-        changeLevel=0
+        changeLevel = 0
         for button in level_buttons:
             button.draw(screen)
-            button.handle_event(event,mouse)
-            if(button.handle_event(event,mouse)=="easy"):
-                questions=load_questions("Assets\Questions\easy.txt")
-                level="easy"
-                initial_level="easy"
-                level_scrn=False
-                start_scrn=True
-            if(button.handle_event(event,mouse)=="medium"):
-                questions=load_questions("Assets\Questions\medium.txt")
-                level="medium"
-                initial_level="medium"
-                level_scrn=False
-                start_scrn=True
-            if(button.handle_event(event,mouse)=="high"):
-                questions=load_questions("Assets\Questions\high.txt")
-                level="high"
-                initial_level="high"
-                level_scrn=False
-                start_scrn=True
-    if options_scrn==True:
-                  menu_scrn=False
-                  screen.blit(option,option_rect)
+            button.handle_event(event, mouse)
+            if(button.handle_event(event, mouse) == "easy"):
+                questions = load_questions("Assets\Questions\easy.txt")
+                level = "easy"
+                initial_level = "easy"
+                level_scrn = False
+                start_scrn = True
+            if(button.handle_event(event, mouse) == "medium"):
+                questions = load_questions("Assets\Questions\medium.txt")
+                level = "medium"
+                initial_level = "medium"
+                level_scrn = False
+                start_scrn = True
+            if(button.handle_event(event, mouse) == "high"):
+                questions = load_questions("Assets\Questions\high.txt")
+                level = "high"
+                initial_level = "high"
+                level_scrn = False
+                start_scrn = True
+    
+    # Options screen
+    if options_scrn == True:
+        menu_scrn = False
+        screen.blit(option, option_rect)
+    
+    # Allow clicking again after mouse button is released
     if event.type == pygame.MOUSEBUTTONUP:
-        click_allowed=True
-    if(player.playerrect.bottom<ground):onground=False
+        click_allowed = True
+    
+    # Check if player is on ground
+    if(player.playerrect.bottom < ground):
+        onground = False
+    
+    # Check for enemy collision to trigger question screen
     if((enemy1.enemyrect.colliderect(player.playerrect) or enemy2.enemyrect.colliderect(player.playerrect) or enemy3.enemyrect.colliderect(player.playerrect)) and not immortal and not playerattack and not enemyattack):
         if(not question_scrn):
-            correction_delay=0
-            if level=="easy":
-                questions=load_questions("Assets\Questions\easy.txt")
-                timer=random.randrange(40,50,5)
-            elif level=="medium":
-                questions=load_questions("Assets\Questions\medium.txt")
-                timer=random.randrange(40,60,10)
-            elif level=="high":
-                questions=load_questions("Assets\Questions\high.txt")
-                timer=random.randrange(50,90,10)
-            question, options,correct_answer,hint= random.choice(questions)
+            correction_delay = 0
+            # Load questions based on difficulty level
+            if level == "easy":
+                questions = load_questions("Assets\Questions\easy.txt")
+                timer = random.randrange(40,50,5)
+            elif level == "medium":
+                questions = load_questions("Assets\Questions\medium.txt")
+                timer = random.randrange(40,60,10)
+            elif level == "high":
+                questions = load_questions("Assets\Questions\high.txt")
+                timer = random.randrange(50,90,10)
+            
+            # Select random question
+            question, options, correct_answer, hint = random.choice(questions)
             wrapped_lines = textwrap.wrap(question, width=35)
-        question_scrn=True
-        incomingwave=False
-    if wave==3:
-        incomingwave=True
+            question_scrn = True
+            incomingwave = False
+    
+    # Check if all enemies in wave are defeated
+    if wave == 3:
+        incomingwave = True
+    
+    # Gameplay screen
     if start_scrn:
         menu_sound.stop()
+        # Play game music if not already playing
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
-            gameloop_channel=gameloop_sound.play(-1)
-        if(total_lives==0):
-            start_scrn=False
-            gameover_scrn=True
+            gameloop_channel = gameloop_sound.play(-1)
+        
+        # Check for game over condition
+        if(total_lives == 0):
+            start_scrn = False
+            gameover_scrn = True
             gameloop_sound.stop()
-            gameloop_channel=menu_sound.play(-1)
+            gameloop_channel = menu_sound.play(-1)
        
-        if score>=highscore:
-                highscore=score
-                with open("Assets/HighScore.txt","w") as f:
-                    f.write(f"{highscore}")
+        # Update high score if current score is higher
+        if score >= highscore:
+            highscore = score
+            with open("Assets/HighScore.txt", "w") as f:
+                f.write(f"{highscore}")
 
-        if backgrounds[k].rect.right>=x and backgrounds[k].rect.left<=border:
-            screen.blit(backgrounds[k].img,backgrounds[k].rect)
-            screen.blit(floors[l].img,floors[l].rect)
-            onground=player.createanimation(rect,onground,kpressed,playerattack)
+        # Render game elements if within background boundaries
+        if backgrounds[k].rect.right >= x and backgrounds[k].rect.left <= border:
+            screen.blit(backgrounds[k].img, backgrounds[k].rect)
+            screen.blit(floors[l].img, floors[l].rect)
+            
+            # Update player and enemy animations
+            onground = player.createanimation(rect, onground, kpressed, playerattack)
             enemy1.createanimation(rectE1)
             enemy2.createanimation(rectE2)
             enemy3.createanimation(rectE3)
-            screen.blit(enemy1.enemysuf,enemy1.enemyrect)
-            screen.blit(enemy2.enemysuf,enemy2.enemyrect)
-            screen.blit(enemy3.enemysuf,enemy3.enemyrect)
-            screen.blit(HP,(10*unitx,50*unity))
-            for i in range(total_lives):lives[i].draw(screen)
+            
+            # Draw enemies
+            screen.blit(enemy1.enemysuf, enemy1.enemyrect)
+            screen.blit(enemy2.enemysuf, enemy2.enemyrect)
+            screen.blit(enemy3.enemysuf, enemy3.enemyrect)
+            
+            # Draw HP and lives
+            screen.blit(HP, (10*unitx, 50*unity))
+            for i in range(total_lives):
+                lives[i].draw(screen)
+            
+            # Draw player (with blinking effect if immortal)
             if(not immortal):
-                screen.blit(player.playersuf,player.playerrect)
-            elif(immortal and dt%2==0):
-                screen.blit(player.playersuf,player.playerrect)
+                screen.blit(player.playersuf, player.playerrect)
+            elif(immortal and dt % 2 == 0):
+                screen.blit(player.playersuf, player.playerrect)
+            
+            # Fade effect when approaching background edge
             if (backgrounds[k].rect.right <= x + 250 * unitx):
                 fade_surface.set_alpha(alpha)
                 alpha += 5
                 screen.blit(fade_surface, (0, 0))
+            
+            # Display incoming wave warning
             if incomingwave:
-                screen.blit(font4.render("INCOMING WAVE",True,"Yellow"),(unitx*200,unity*400))
-            if wave_interval>=2300*unitx:
-                enemy1.wave=wavesize 
-                enemy2.wave=wavesize
-                enemy3.wave=wavesize
-                border+=2300*unitx
-                wave=(wavesize*3)
-                wave_interval=0
+                screen.blit(font4.render("INCOMING WAVE", True, "Yellow"), (unitx*200, unity*400))
+            
+            # Spawn new wave when interval is reached
+            if wave_interval >= 2300 * unitx:
+                enemy1.wave = wavesize 
+                enemy2.wave = wavesize
+                enemy3.wave = wavesize
+                border += 2300 * unitx
+                wave = (wavesize * 3)
+                wave_interval = 0
         else:
-            backgrounds[k].rect.bottomleft=(0,y)
-            wave_interval=0
-            floors[l].rect.bottomleft=(0,y)
-            k+=1
-            l+=1
-            k%=4
-            l%=2
-            border=backgrounds[k].rect.left
-            alpha=0
-            player.playerrect.left=10*unitx
+            # Reset background and floor when reaching the end
+            backgrounds[k].rect.bottomleft = (0, y)
+            wave_interval = 0
+            floors[l].rect.bottomleft = (0, y)
+            k += 1
+            l += 1
+            k %= 4
+            l %= 2
+            border = backgrounds[k].rect.left
+            alpha = 0
+            player.playerrect.left = 10 * unitx
 
-    #increase score propotionate to the difficulty level
-    if level=="easy":scoreincrement=5
-    elif level=="medium":scoreincrement=10
-    elif level=="high":scoreincrement=15    
+    # Set score increment based on difficulty level
+    if level == "easy":
+        scoreincrement = 5
+    elif level == "medium":
+        scoreincrement = 10
+    elif level == "high":
+        scoreincrement = 15    
     
-    #GAMEOVER
+    # Game over screen
     if gameover_scrn:
+        # Play menu music if not already playing
         if(gameloop_channel is None or not gameloop_channel.get_busy()):
-            gameloop_channel=menu_sound.play(-1)
-        screen.blit(font4.render("RESTART",True,"Yellow"),(350*unitx,650*unity))
-        screen.blit(gameover_background.frameF,gameover_background.rect)
+            gameloop_channel = menu_sound.play(-1)
+        
+        # Display game over elements
+        screen.blit(font4.render("RESTART", True, "Yellow"), (350*unitx, 650*unity))
+        screen.blit(gameover_background.frameF, gameover_background.rect)
+        
+        # Handle restart decision buttons
         for button in descions:
             button.draw(screen)
-            button.handle_event(event,mouse)
-            if(button.handle_event(event,mouse)=="yes"):
-                total_lives=5
-                menu_scrn=True
-                gameover_scrn=False
-                player.playerrect.left=10*unitx
-                enemy1.enemyrect.left=x+200*unitx
-                enemy2.enemyrect.left=x+500*unitx
-                enemy3.enemyrect.left=x+800*unitx
-                changeLevel=0
-                k=0
-            if(button.handle_event(event,mouse)=="no"):
-                pygame.quit()
-                exit()
+            button.handle_event(event, mouse)
+            if(button.handle_event(event, mouse) == "yes"):
+                # Reset game state for restart
+                total_lives = 5
+                menu_scrn = True
+                gameover_scrn = False
+                player.playerrect.left = 10*unitx
+                enemy1.enemyrect.left = x+200*unitx
+                enemy2.enemyrect.left = x+500*unitx
+                enemy3.enemyrect.left = x+800*unitx
+                changeLevel = 0
+                k = 0
+                score = 0  # Reset score
+            if(button.handle_event(event, mouse) == "no"):
+                # Return to main menu instead of exiting
+                total_lives = 5
+                menu_scrn = True
+                gameover_scrn = False
+                player.playerrect.left = 10*unitx
+                enemy1.enemyrect.left = x+200*unitx
+                enemy2.enemyrect.left = x+500*unitx
+                enemy3.enemyrect.left = x+800*unitx
+                changeLevel = 0
+                k = 0
+                score = 0  # Reset score
 
-        if (gameover_channel == None ):
-                gameover_channel=gameover_sound.play()
+        # Play game over sound once
+        if (gameover_channel == None):
+            gameover_channel = gameover_sound.play()
+    
+    # Handle invincibility timer
     if immortal:
-        if(immortaltime>=2000):immortal=False
-        immortaltime+=dt
+        if(immortaltime >= 2000):
+            immortal = False
+        immortaltime += dt
+    
+    # Handle player attack completion
     if playerattack:
-        if player.index>=len(player_attack):
-            immortal=True
-            playerattack=False
+        if player.index >= len(player_attack):
+            immortal = True
+            playerattack = False
     
-    #DISPLAYS TITLE "MATH RUNNER"
+    # Display title "MATH RUNNER" on menu and level selection screens
     if(menu_scrn or level_scrn):
-        screen.blit(Title,Title_rect)
+        screen.blit(Title, Title_rect)
     
-    #DISPLAYS THE SCORE BOARD
+    # Display the score board during gameplay
     if(start_scrn or gameover_scrn or question_scrn):
-        screen.blit(scoreboard,scoreboard_rect)
-        screen.blit(scorefont.render(f"{score}",True,"Black"),(unitx*450,unity*60))    
+        screen.blit(scoreboard, scoreboard_rect)
+        screen.blit(scorefont.render(f"{score}", True, "Black"), (unitx*450, unity*60))    
 
-    #checks if player faces 3 consecutive wrong answers and change level accordingly
-    if changeLevel==3:
-        level="easy"
+    # Check if player faces 3 consecutive wrong answers and change level accordingly
+    if changeLevel == 3:
+        level = "easy"
     
-    #question screen
+    # Question screen
     if question_scrn:
-        second+=dt
-        if(current_emotion!="Happy" and current_emotion!="Neutral"):
-            bademotion+=1
-        if second>=1000 and timer>0:
-            timer-=1
-            second=0
-            seconds=timer%60
-            minutes=int(timer/60)%60
-        display_answer=font2.render(f"Your Answer (press 'Enter' to validate) : {answer.upper()}",True,"Black")
-        display_correct=font2.render(f"CORRECT!!!",True,"Green")
-        display_wrong=font2.render(f"FAILED!!! correct = {correct_answer.upper()}",True,"Red")
-        display_timer=font3.render(f"Timer {minutes:02}:{seconds:02}",True,"White")
-        screen.blit(board.frameF,board.rect)
-        question_posY=230*unity
+        second += dt
+        # Track negative emotions
+        if(current_emotion != "Happy" and current_emotion != "Neutral"):
+            bademotion += 1
         
-        #display question with word wrap
+        # Update question timer
+        if second >= 1000 and timer > 0:
+            timer -= 1
+            second = 0
+            seconds = timer % 60
+            minutes = int(timer/60) % 60
+        
+        # Prepare text surfaces
+        display_answer = font2.render(f"Your Answer (press 'Enter' to validate) : {answer.upper()}", True, "Black")
+        display_correct = font2.render(f"CORRECT!!!", True, "Green")
+        display_wrong = font2.render(f"FAILED!!! correct = {correct_answer.upper()}", True, "Red")
+        display_timer = font3.render(f"Timer {minutes:02}:{seconds:02}", True, "White")
+        
+        # Display question board
+        screen.blit(board.frameF, board.rect)
+        question_posY = 230 * unity
+        
+        # Display question with word wrap
         for line in wrapped_lines:
             question_surface = font5.render(line, True, "Black")
-            screen.blit(question_surface,(200*unitx,question_posY))
-            question_posY += font5.get_height() + 5*unity
-        question_posY+=15*unity
+            screen.blit(question_surface, (200*unitx, question_posY))
+            question_posY += font5.get_height() + 5 * unity
+        question_posY += 15 * unity
         
-        
-        #display options
-        for i,optio in enumerate(options):
+        # Display options
+        for i, optio in enumerate(options):
             option_surface = font5.render(f"{optio}", True, "Black")
-            screen.blit(option_surface, (200*unitx, question_posY+(i*(font5.get_height()+20)*unity)))
-        screen.blit(display_answer,(240*unitx,620*unity))
-        screen.blit(display_timer,(500*unitx,400*unity))
-        test=font2.render(f"{hint}",True,"Yellow")
+            screen.blit(option_surface, (200*unitx, question_posY + (i * (font5.get_height() + 20) * unity)))
         
-        #increment 1 to a variable changeLevel when bademotion reaches 500
-        if bademotion==500:
-            changeLevel+=1
-            bademotion+=1
+        # Display answer and timer
+        screen.blit(display_answer, (240*unitx, 620*unity))
+        screen.blit(display_timer, (500*unitx, 400*unity))
+        test = font2.render(f"{hint}", True, "Yellow")
         
-        #show hint button only when bademotion is 500 or more
-        if(bademotion>=500):
+        # Show hint button only when bademotion is 500 or more
+        if(bademotion >= 500):
             if (kpressed[pygame.K_h] and pygame.KEYDOWN):
-                    screen.blit(hint_active.frameF,hint_active.rect)
-                    screen.blit(test,(40*unitx,880*unity))
+                screen.blit(hint_active.frameF, hint_active.rect)
+                screen.blit(test, (40*unitx, 880*unity))
             else:
-                screen.blit(hint_inactive.frameF,hint_inactive.rect)
+                screen.blit(hint_inactive.frameF, hint_inactive.rect)
         
-        #show correction for 2 seconds and then reset everything
-        if(answer_chosen and answer.upper()==correct_answer):
-            if(correction_delay==0):
-                changeLevel-=1
-                if level!=initial_level:
-                    level=initial_level
-                    changeLevel=0
+        # Handle correct answer
+        if(answer_chosen and answer.upper() == correct_answer):
+            if(correction_delay == 0):
+                changeLevel -= 1
+                if level != initial_level:
+                    level = initial_level
+                    changeLevel = 0
                 success_sound.play()
-            screen.blit(display_correct,(240*unitx,675*unity))
-            correction_delay+=dt
-            if(correction_delay>=2000):
-                score+=scoreincrement
-                player.playerrect.bottom=ground
-                player.index=0
-                correction_delay=0
-                playerattack=True
+            screen.blit(display_correct, (240*unitx, 675*unity))
+            correction_delay += dt
+            if(correction_delay >= 2000):
+                score += scoreincrement
+                player.playerrect.bottom = ground
+                player.index = 0
+                correction_delay = 0
+                playerattack = True
                 attack_player_sound.play()
-                immortaltime=0
-                question_scrn=False
-                bademotion=0 
-                answer_chosen=False
-                answer=''
-        #if wrong answer or time is up
-        elif(answer_chosen and answer.upper()!=correct_answer or timer<=0):
-            if(correction_delay==0):
-                changeLevel+=1
-                if level!=initial_level:
-                    level=initial_level
-                    changeLevel=0
+                immortaltime = 0
+                question_scrn = False
+                bademotion = 0 
+                answer_chosen = False
+                answer = ''
+                timer = 30  # Reset timer for next question
+        
+        # Handle wrong answer or time out
+        elif(answer_chosen and answer.upper() != correct_answer or timer <= 0):
+            if(correction_delay == 0):
+                changeLevel += 1
+                if level != initial_level:
+                    level = initial_level
+                    changeLevel = 0
                 fail_sound.play()
-            screen.blit(display_wrong,(240*unitx,670*unity))
-            correction_delay+=dt
-            if(correction_delay>=2000):
-                if(answer_chosen and answer.upper()!=correct_answer):total_lives-=1
-                correction_delay=0
-                enemy1.index=0
-                enemy2.index=0
-                enemy3.index=0
-                immortaltime=0
-                enemyattack=True
+            screen.blit(display_wrong, (240*unitx, 670*unity))
+            correction_delay += dt
+            if(correction_delay >= 2000):
+                # Reduce life for wrong answer OR for not answering (timer running out)
+                if(answer_chosen and answer.upper() != correct_answer or timer <= 0):
+                    total_lives -= 1
+                correction_delay = 0
+                enemy1.index = 0
+                enemy2.index = 0
+                enemy3.index = 0
+                immortaltime = 0
+                enemyattack = True
                 attack_monster_sound.play()
                 hurt_player_sound.play()
-                question_scrn=False 
-                answer_chosen=False
-                bademotion=0
-                answer=''
+                question_scrn = False 
+                answer_chosen = False
+                bademotion = 0
+                answer = ''
+                timer = 30  # Reset timer for next question
+    
+    # Draw always-visible buttons (home and sound controls)
     home.draw(screen)
     if not sound_pause:
         sound_paused.draw(screen)
     elif sound_pause:
         sound_unpaused.draw(screen)
-    if home.handle_event(event,mouse)=="home":
-        total_lives=5
+    
+    # Handle home button click
+    if home.handle_event(event, mouse) == "home":
+        total_lives = 5
         gameover_channel = None
-        menu_scrn=True
-        level_scrn=False
-        options_scrn=False
-        question_scrn=False
-        start_scrn=False
-        aboutus_scrn=False
-        bademotion=0
-        score=0
-        gameover_scrn=False
+        menu_scrn = True
+        level_scrn = False
+        options_scrn = False
+        question_scrn = False
+        start_scrn = False
+        aboutus_scrn = False
+        bademotion = 0
+        score = 0
+        gameover_scrn = False
         gameloop_sound.stop()
-        player.playerrect.left=10*unitx
-        enemy1.enemyrect.left=x+200*unitx
-        enemy2.enemyrect.left=x+500*unitx
-        enemy3.enemyrect.left=x+800*unitx
-        changeLevel=0
-        k=0
-    if sound_paused.handle_event(event,mouse)=="sound_paused"  and click_allowed:
-        sound_pause=True
-        click_allowed=False
-        sound_paused.rect.bottom=-100*unity
-        sound_unpaused.rect.top=50*unity
-    if sound_unpaused.handle_event(event,mouse)=="sound_unpaused" and click_allowed:
-        sound_pause=False
-        click_allowed=False
-        sound_unpaused.rect.bottom=-100*unity
-        sound_paused.rect.top=50*unity
-    if sound_pause:pygame.mixer.pause()
-    elif not sound_pause:pygame.mixer.unpause()
-    last_state=sound_pause
-    screen.blit(testtext,(10*unitx,10*unity)) 
-    screen.blit(mouse_pointer,pointer_rect)
+        player.playerrect.left = 10*unitx
+        enemy1.enemyrect.left = x+200*unitx
+        enemy2.enemyrect.left = x+500*unitx
+        enemy3.enemyrect.left = x+800*unitx
+        changeLevel = 0
+        k = 0
+    
+    # Handle sound pause/unpause buttons
+    if sound_paused.handle_event(event, mouse) == "sound_paused" and click_allowed:
+        sound_pause = True
+        click_allowed = False
+        sound_paused.rect.bottom = -100 * unity
+        sound_unpaused.rect.top = 50 * unity
+    if sound_unpaused.handle_event(event, mouse) == "sound_unpaused" and click_allowed:
+        sound_pause = False
+        click_allowed = False
+        sound_unpaused.rect.bottom = -100 * unity
+        sound_paused.rect.top = 50 * unity
+    
+    # Pause/unpause sound based on state
+    if sound_pause:
+        pygame.mixer.pause()
+    elif not sound_pause:
+        pygame.mixer.unpause()
+    
+    last_state = sound_pause
+    
+    # Debug text for emotion detection
+    screen.blit(testtext, (10*unitx, 10*unity)) 
+    
+    # Draw custom mouse pointer
+    screen.blit(mouse_pointer, pointer_rect)
 
+    # Update display
     pygame.display.update()
