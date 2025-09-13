@@ -266,7 +266,7 @@ class Heart:
         self.size=sizeheart
         self.default_img=pygame.image.load(default_path).convert_alpha()
         self.default_img=pygame.transform.scale(self.default_img,self.size)
-        self.next_img=pygame.transform.scale(self.default_img,(self.size[0].8,self.size[1].8))
+        self.next_img=pygame.transform.scale(self.default_img,(self.size[0]*.8,self.size[1]*.8))
         self.rect=self.default_img.get_rect(center=rect_pos)
         self.delay=0
     
@@ -287,7 +287,7 @@ class button:
         self.size=size
         self.default_img=pygame.image.load(default_path).convert_alpha()
         self.default_img=pygame.transform.scale(self.default_img,self.size)
-        self.touched_img=pygame.transform.scale(self.default_img,(self.size[0].8,self.size[1].8))
+        self.touched_img=pygame.transform.scale(self.default_img,(self.size[0]*.8,self.size[1]*.8))
         self.rect=self.default_img.get_rect(topleft=rect_pos)
         self.touched=False
         self.touching=True
