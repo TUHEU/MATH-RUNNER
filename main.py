@@ -5,37 +5,12 @@ from sys import exit
 
 import cv2
 import numpy as np
-import tensorflow as tf
 import threading
 
 
 # ============================
-# EMOTION DETECTOR SETUP
+# EMOTION DETECTOR SETUP - REMOVED
 # ============================
-
-# Load the TensorFlow Lite model
-interpreter = tf.lite.Interpreter(model_path="Assets/Emotion detection models/emotion_model.tflite")
-interpreter.allocate_tensors()
-
-# Get input/output details
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
-
-# List of emotions in the same order as the model's output neurons
-Emotions_list = ['Angry','Disgust','Fear','Happy','Suprise','Sad','Neutral']
-
-# Initialize webcam
-cap = cv2.VideoCapture(0)
-
-# Load face detection model (Caffe-based DNN)
-net = cv2.dnn.readNetFromCaffe("Assets/Emotion detection models/dat.prototxt",
-                               "Assets/Emotion detection models/caffe.caffemodel")
-
-# Input size expected by the emotion model
-input_height, input_width = 64, 64
-
-# Contrast Limited Adaptive Histogram Equalization (CLAHE)
-clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
 # Shared variable for storing detected emotion
 current_emotion = "Neutral"
@@ -45,49 +20,9 @@ def emotion_loop():
     global current_emotion
     
     while True:
-        ret, frame = cap.read()
-        if not ret: 
-            continue  
-
-        frame = cv2.flip(frame, 1)
-        (h, w) = frame.shape[:2]
-
-        blob = cv2.dnn.blobFromImage(
-            cv2.resize(frame, (300, 300)), 
-            1.0, 
-            (300, 300), 
-            (104.0, 177.0, 123.0)
-        )
-        net.setInput(blob)
-        detections = net.forward()
-
-        for i in range(0, detections.shape[2]):
-            confidence = detections[0, 0, i, 2]
-
-            if confidence > 0.3:
-                box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-                (startX, startY, endX, endY) = box.astype("int")
-
-                face_roi = frame[startY:endY, startX:endX]
-                if face_roi.size == 0: 
-                    continue
-
-                gray_face = cv2.cvtColor(face_roi, cv2.COLOR_BGR2GRAY)
-                enhanced_face = clahe.apply(gray_face)
-                resized = cv2.resize(enhanced_face, (input_width, input_height))
-
-                normalized = resized.astype('float32') / 255.0
-                input_tensor = normalized.reshape(1, input_height, input_width, 1)
-
-                # Run inference with TFLite
-                interpreter.set_tensor(input_details[0]['index'], input_tensor)
-                interpreter.invoke()
-                predictions = interpreter.get_tensor(output_details[0]['index'])
-
-                emotion_idx = np.argmax(predictions)
-                current_emotion = Emotions_list[emotion_idx]
-
-                break  # only process first detected face
+        # Emotion detection functionality removed
+        # This function now just maintains the default emotion
+        pygame.time.delay(100)  # Small delay to prevent excessive CPU usage
 
 
 # Start emotion detection in background thread
@@ -901,8 +836,17 @@ while(True):
                 changeLevel=0
                 k=0
             if(button.handle_event(event,mouse)=="no"):
-                pygame.quit()
-                exit()
+                # Return to main menu instead of quitting
+                total_lives=5
+                menu_scrn=True
+                gameover_scrn=False
+                player.playerrect.left=10*unitx
+                enemy1.enemyrect.left=x+200*unitx
+                enemy2.enemyrect.left=x+500*unitx
+                enemy3.enemyrect.left=x+800*unitx
+                changeLevel=0
+                k=0
+                score=0  # Reset score when returning to menu
 
         if (gameover_channel == None ):
                 gameover_channel=gameover_sound.play()
